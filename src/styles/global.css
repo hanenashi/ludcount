@@ -145,6 +145,65 @@ textarea:focus-visible {
   margin-left: 248px;
 }
 
+.data-state-panel {
+  display: grid;
+  min-height: 100vh;
+  align-content: center;
+  justify-items: center;
+  padding: 40px 24px;
+  text-align: center;
+}
+
+.data-state-panel h1 {
+  margin: 20px 0 8px;
+  color: var(--ink);
+  font-family: "Source Serif 4", Georgia, serif;
+  font-size: clamp(28px, 4vw, 40px);
+}
+
+.data-state-panel p {
+  max-width: 560px;
+  margin: 0 0 24px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.state-icon {
+  width: 36px;
+  height: 36px;
+}
+
+.state-icon-error {
+  color: var(--coral);
+}
+
+.state-icon-spin {
+  color: var(--sage);
+  animation: state-spin 1.2s linear infinite;
+}
+
+.connection-banner {
+  position: sticky;
+  z-index: 8;
+  top: 0;
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 9px 22px;
+  color: #663b00;
+  font-size: 13px;
+  background: #fff4d6;
+  border-bottom: 1px solid #efd598;
+}
+
+@keyframes state-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .mobile-header,
 .mobile-navigation,
 .mobile-add-button {
@@ -600,9 +659,15 @@ textarea:focus-visible {
 
 .form-actions {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
   gap: 12px;
   margin-top: 30px;
+}
+
+.form-actions > .form-notice {
+  width: 100%;
+  flex-basis: 100%;
 }
 
 .dialog-backdrop {
@@ -640,6 +705,12 @@ textarea:focus-visible {
   gap: 32px;
   padding: 26px 0;
   border-top: 1px solid var(--line);
+}
+
+.settings-inline-error {
+  grid-column: 1 / -1;
+  color: var(--danger) !important;
+  font-size: 14px;
 }
 
 .settings-section h2 {
@@ -807,6 +878,16 @@ textarea:focus-visible {
 
   .app-main {
     margin-left: 0;
+  }
+
+  .data-state-panel {
+    min-height: calc(100vh - 146px);
+  }
+
+  .connection-banner {
+    top: 68px;
+    align-items: flex-start;
+    justify-content: flex-start;
   }
 
   .mobile-header {

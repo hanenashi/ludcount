@@ -3,11 +3,11 @@
 Ludcount is a small household income and expense journal. The interface defaults
 to Czech and can be switched to English in Settings.
 
-This repository currently implements the Phase 1 local vertical slice from
-[`battleplan.md`](./battleplan.md), plus the explicitly requested Firebase
-Authentication and Cloud Firestore client configuration. Transaction data is
-kept in memory during Phase 1 and resets when the page reloads. Production
-Firestore remains locked by deny-all security rules.
+This repository currently implements Phase 2 from
+[`battleplan.md`](./battleplan.md). Firebase Authentication creates or loads a
+personal household, and transactions and user preferences are synchronized
+through Cloud Firestore. Production Firestore remains locked by deny-all
+security rules until Phase 3.
 
 ## Requirements
 
@@ -63,9 +63,11 @@ Console under **Authentication → Sign-in method**:
 Choose a project support email for Google sign-in and add every intended
 production hostname under **Authentication → Settings → Authorized domains**.
 
-Do not create Firestore collections manually. The committed
+Do not create Firestore collections manually. The committed production
 [`firestore.rules`](./firestore.rules) file is the source of truth and currently
-denies every read and write.
+denies every read and write. A signed-in production client therefore shows an
+explicit permission-denied state until Phase 3 rules are implemented and
+tested.
 
 ## Firebase emulators
 
@@ -75,10 +77,22 @@ Start the Authentication and Firestore emulators in one terminal:
 npm run emulators
 ```
 
+This command intentionally uses `firebase.emulators.json` and
+`firestore.emulator.rules`. Those development-only rules allow authenticated
+emulator traffic so Phase 2 persistence can be exercised without changing
+production `firestore.rules`.
+
 Start the Vite app against the emulators in a second terminal:
 
 ```bash
 VITE_USE_FIREBASE_EMULATORS=true npm run dev
+```
+
+The emulator-backed browser suite also expects these emulators to remain
+running:
+
+```bash
+npm run test:browser
 ```
 
 Default local endpoints:
@@ -100,6 +114,9 @@ npm test
 npm run build
 ```
 
+Run `npm run test:browser` separately while the emulators are active, as shown
+above.
+
 No deployment command is configured in this phase.
 
 ## Money and dates
@@ -111,22 +128,25 @@ No deployment command is configured in this phase.
 - User-selected dates use local `YYYY-MM-DD` date keys and `YYYY-MM` month keys.
 - The documented maximum transaction amount is `1,000,000,000` minor units.
 
-## Phase 1 boundaries
+## Phase 2 boundaries
 
 Included:
 
-- Firebase email/password and Google authentication
-- password reset and sign-out
+- automatic personal household creation after first sign-in
+- typed Firestore converters and focused household/transaction repositories
+- persistent transactions, active household preference, and user locale
+- explicit loading, offline, permission-denied, and write-failure states
+- Firebase email/password and Google authentication, password reset, and
+  sign-out
 - Czech-first UI with persistent English selection
 - responsive overview, transaction list, and settings screens
-- local transaction creation, editing, deletion, totals, and categories
+- transaction creation, editing, deletion, totals, and localized categories
 - Firebase Auth and Firestore emulator configuration
 - validated Firebase client initialization
 
 Deferred:
 
-- Firestore transaction persistence and automatic household creation
-- production Firestore security rules beyond deny-all
+- production Firestore security rules beyond deny-all and their allow/deny tests
 - category management, filtering, duplicate, and CSV export
 - deployment and hosting
 - Cloud Functions, Storage, Analytics, App Check, and billing-dependent features

@@ -20,11 +20,11 @@ export function TransactionFormPage() {
       <TransactionForm
         transaction={transaction}
         onCancel={() => navigate(-1)}
-        onSubmit={(draft) => {
+        onSubmit={async (draft) => {
           if (transaction) {
-            updateTransaction(transaction.id, draft);
+            await updateTransaction(transaction.id, draft);
           } else {
-            createTransaction(draft);
+            await createTransaction(draft);
           }
           navigate("/app/transactions");
         }}

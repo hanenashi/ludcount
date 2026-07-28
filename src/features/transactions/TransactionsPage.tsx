@@ -2,6 +2,11 @@ import { Plus } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { MonthNavigator } from "../../components/MonthNavigator";
+import { DataWriteError } from "../../components/DataState";
+import {
+  normalizeDataError,
+  type DataOperationError,
+} from "../../firebase/errors";
 import { useI18n } from "../../i18n";
 import { monthKeyFromDate } from "../../lib/dates";
 import type { Transaction } from "./model";
@@ -13,14 +18,26 @@ export function TransactionsPage() {
   const { transactions, deleteTransaction } = useTransactions();
   const [monthKey, setMonthKey] = useState(monthKeyFromDate(new Date()));
   const [pendingDelete, setPendingDelete] = useState<Transaction | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<DataOperationError | null>(
+    null,
+  );
   const visibleTransactions = transactions.filter(
     (transaction) => transaction.monthKey === monthKey,
   );
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (pendingDelete) {
-      deleteTransaction(pendingDelete.id);
-      setPendingDelete(null);
+      setDeleting(true);
+      setDeleteError(null);
+      try {
+        await deleteTransaction(pendingDelete.id);
+        setPendingDelete(null);
+      } catch (error) {
+        setDeleteError(normalizeDataError(error, "write-failure"));
+      } finally {
+        setDeleting(false);
+      }
     }
   };
 
@@ -52,18 +69,24 @@ export function TransactionsPage() {
           >
             <h2 id="delete-title">{t("transaction.deleteTitle")}</h2>
             <p id="delete-description">{t("transaction.deleteDescription")}</p>
+            <DataWriteError error={deleteError} />
             <div className="form-actions">
               <button
                 className="button button-secondary"
                 type="button"
-                onClick={() => setPendingDelete(null)}
+                disabled={deleting}
+                onClick={() => {
+                  setPendingDelete(null);
+                  setDeleteError(null);
+                }}
               >
                 {t("common.cancel")}
               </button>
               <button
                 className="button button-danger"
                 type="button"
-                onClick={confirmDelete}
+                disabled={deleting}
+                onClick={() => void confirmDelete()}
               >
                 {t("common.delete")}
               </button>

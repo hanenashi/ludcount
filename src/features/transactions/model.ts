@@ -9,9 +9,11 @@ export interface Transaction {
   amountMinor: MoneyAmount;
   currency: "CZK";
   categoryId: string;
+  categoryLabelSnapshot: string;
   dateKey: string;
   monthKey: string;
   note: string;
+  createdBy: string;
   createdAt: number;
   updatedAt: number;
 }

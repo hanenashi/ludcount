@@ -26,6 +26,8 @@ export function createMemoryTransactionRepository(
         ...draft,
         id: crypto.randomUUID(),
         currency: "CZK",
+        categoryLabelSnapshot: draft.categoryId,
+        createdBy: "memory",
         createdAt: now,
         updatedAt: now,
       };

@@ -1,5 +1,6 @@
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -30,10 +31,10 @@ function getInitialLocale(): Locale {
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>(getInitialLocale);
 
-  const setLocale = (nextLocale: Locale) => {
+  const setLocale = useCallback((nextLocale: Locale) => {
     window.localStorage.setItem(LOCALE_STORAGE_KEY, nextLocale);
     setLocaleState(nextLocale);
-  };
+  }, []);
 
   useEffect(() => {
     document.documentElement.lang = locale;
@@ -45,7 +46,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
       setLocale,
       t: (key) => dictionaries[locale][key],
     }),
-    [locale],
+    [locale, setLocale],
   );
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;

@@ -3,62 +3,91 @@
 ## What was completed
 
 - Read and followed `battleplan.md`.
-- Implemented and committed the Phase 1 local vertical slice in commit
-  `42729a3` (`feat: implement Phase 1 local vertical slice`).
-- Created a React, TypeScript, and Vite application.
-- Added a Czech-first UI with a persistent English option in Settings.
-- Added Firebase client initialization with required environment validation.
-- Added email/password authentication, Google authentication, password reset,
-  and sign-out.
-- Added Firebase Authentication and Firestore emulator configuration.
-- Kept production Firestore locked with deny-all `firestore.rules`.
-- Added in-memory transaction creation, editing, deletion, monthly totals,
-  localized default categories, and responsive desktop/mobile layouts.
-- Added integer-minor-unit money helpers and local calendar date helpers.
-- Added formatting, linting, TypeScript, Vitest, Playwright, and production-build
-  tooling.
-- Created the local `.env`, confirmed it is ignored, and committed an empty
-  `.env.example`.
-- No deployment or production Firestore data creation was performed.
+- Phase 1 remains available in commit `42729a3`.
+- Implemented Phase 2:
+  - automatically creates a personal household, owner membership, and user
+    profile in one Firestore transaction after first sign-in
+  - loads the existing active household on subsequent sign-ins
+  - persists user locale and active household preference in the user profile
+  - replaces application-level in-memory transaction storage with a focused
+    Firestore repository and realtime subscription
+  - adds typed converters with runtime validation for profiles, households,
+    members, and transactions
+  - preserves positive integer minor-unit amounts and local `YYYY-MM-DD` /
+    `YYYY-MM` date keys
+  - adds explicit loading, offline, permission-denied, pending-write, and
+    write-failure UI states in Czech and English
+- Added a separate `firebase.emulators.json` and
+  `firestore.emulator.rules` for Phase 2 development. These emulator-only rules
+  allow authenticated traffic.
+- Kept the production `firestore.rules` file unchanged and deny-all.
+- Added the required Firestore composite index as version-controlled code.
+- Added unit coverage for converters, error normalization, data states, money,
+  dates, totals, repositories, and transaction form failure behavior.
+- Added emulator-backed Playwright coverage for first sign-in bootstrap,
+  transaction create/reload/edit/delete, Firestore-backed locale hydration,
+  Czech-first authentication, responsive desktop/mobile layouts, and browser
+  console errors.
+- Updated `README.md` with the Phase 2 architecture, emulator workflow, quality
+  commands, and boundaries.
+- No deployment, production Firestore writes, manual collection creation, or
+  production rule relaxation was performed.
 
-## Current status
+## Verification
 
 - `npm run format:check`: passing
 - `npm run lint`: passing
 - `npm run typecheck`: passing
-- `npm test`: 12 tests passing
+- `npm test`: 21 tests passing across 8 files
+- `npm run test:browser`: 4 Playwright tests passing across desktop and mobile
+  Chromium against local Auth and Firestore emulators
 - `npm run build`: passing
-- Playwright desktop and mobile workflow: passing with no console errors
-- Authentication emulator: verified
-- Full Firestore emulator startup requires Java 21; the current workspace has
-  Java 17.
+- Desktop and mobile screenshots were visually checked with no layout issue
+  found.
 
-Transactions are intentionally stored in memory and reset after a page reload.
+The installed Java is Temurin OpenJDK 17.0.19. The committed Firebase CLI
+version (`firebase-tools` 15.24.0) requires Java 21, so `npm run emulators`
+cannot currently start with the installed Java. Full local emulator and browser
+verification was completed without changing system Java by temporarily invoking
+Firebase CLI 14.27.0. Install or select Java 21 before using the committed
+Firebase CLI normally.
 
-## Manual Firebase Console work
+## Current data model
 
-- Enable Email/Password authentication.
-- Enable Google authentication and select a project support email.
-- Add intended production hostnames to Authentication authorized domains.
-- Do not manually create Firestore collections.
+- `users/{uid}` stores display name, email, locale, and `activeHouseholdId`.
+- `households/{householdId}` stores the personal household and CZK currency.
+- `households/{householdId}/members/{uid}` stores the owner membership.
+- `households/{householdId}/transactions/{transactionId}` stores transactions
+  with positive integer `amountMinor`, `currency: "CZK"`, local date/month keys,
+  category snapshot, creator, and timestamps.
+
+The application does not use the Phase 1 in-memory repository for persistence.
+That small repository remains only as a unit-test utility.
+
+## Firebase Console status
+
+Email/Password and Google authentication are already enabled.
+
+Before a future production release:
+
+- add intended production hostnames to Authentication authorized domains
+- do not manually create Firestore collections
+- do not enable Cloud Functions, Storage, Analytics, App Check, or
+  billing-dependent features unless a later phase explicitly requires them
 
 ## What to do next
 
-Proceed with Phase 2 from `battleplan.md`:
+Proceed with Phase 3 from `battleplan.md`:
 
-1. Install or select Java 21 and verify the complete Auth + Firestore Emulator
-   Suite.
-2. Add automatic personal household creation after first sign-in.
-3. Replace the in-memory transaction repository with focused Firestore
-   repositories and converters.
-4. Persist user locale and active household preferences.
-5. Add loading, offline, permission, and write-error states.
-6. Keep production Firestore deny-all until Phase 3 rules and emulator-based
-   allow/deny tests are implemented.
-7. Run formatting, lint, TypeScript, tests, the production build, and responsive
-   browser QA again.
-
-Do not deploy yet unless the user explicitly changes the scope.
+1. Install or select Java 21.
+2. Replace the emulator-only broad authenticated rule with production household
+   membership and field-validation rules in `firestore.rules`.
+3. Add explicit allow/deny emulator tests for owners, members, non-members,
+   unauthenticated users, immutable ownership fields, integer money, valid local
+   dates, and permitted user preference updates.
+4. Keep deny-all production rules in place until those tests pass and deployment
+   is explicitly authorized.
+5. Do not deploy unless the user explicitly requests it.
 
 ## Local commands
 
@@ -67,14 +96,20 @@ npm install
 npm run dev
 ```
 
-With Java 21:
+With Java 21, start Auth and Firestore emulators:
 
 ```bash
 npm run emulators
 ```
 
-In another terminal:
+In another terminal, run the app against them:
 
 ```bash
 VITE_USE_FIREBASE_EMULATORS=true npm run dev
+```
+
+With the emulators still running, execute browser tests:
+
+```bash
+npm run test:browser
 ```

@@ -1,12 +1,31 @@
 import { LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
+import { useHousehold } from "../household/HouseholdProvider";
 import { useI18n } from "../../i18n";
+import { useState } from "react";
 
 export function SettingsPage() {
   const { locale, setLocale, t } = useI18n();
   const { user, signOutUser } = useAuth();
+  const { saveLocale, preferenceError } = useHousehold();
+  const [savingLocale, setSavingLocale] = useState<"cs" | "en" | null>(null);
   const navigate = useNavigate();
+
+  const changeLocale = async (nextLocale: "cs" | "en") => {
+    if (nextLocale === locale || savingLocale) {
+      return;
+    }
+    setSavingLocale(nextLocale);
+    try {
+      await saveLocale(nextLocale);
+      setLocale(nextLocale);
+    } catch {
+      // The provider exposes the localized write state below.
+    } finally {
+      setSavingLocale(null);
+    }
+  };
 
   return (
     <div className="page settings-page">
@@ -29,7 +48,8 @@ export function SettingsPage() {
                 : "language-button"
             }
             type="button"
-            onClick={() => setLocale("cs")}
+            disabled={savingLocale !== null}
+            onClick={() => void changeLocale("cs")}
           >
             {t("settings.czech")}
           </button>
@@ -40,11 +60,17 @@ export function SettingsPage() {
                 : "language-button"
             }
             type="button"
-            onClick={() => setLocale("en")}
+            disabled={savingLocale !== null}
+            onClick={() => void changeLocale("en")}
           >
             {t("settings.english")}
           </button>
         </div>
+        {preferenceError ? (
+          <p className="settings-inline-error" role="alert">
+            {t("settings.languageSaveError")}
+          </p>
+        ) : null}
       </section>
 
       <section className="settings-section">

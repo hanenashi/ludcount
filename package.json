@@ -9,10 +9,11 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "test:browser": "playwright test",
     "test:watch": "vitest",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "emulators": "firebase emulators:start --only auth,firestore"
+    "emulators": "firebase emulators:start --config firebase.emulators.json --only auth,firestore"
   },
   "dependencies": {
     "firebase": "12.16.0",

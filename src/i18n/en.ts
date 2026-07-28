@@ -3,6 +3,7 @@ export const en = {
   "nav.transactions": "Transactions",
   "nav.settings": "Settings",
   "nav.signOut": "Sign out",
+  "nav.primary": "Primary navigation",
   "auth.heading": "Your household money, kept simple.",
   "auth.description":
     "Record income and expenses without turning home finances into accounting software.",
@@ -33,6 +34,26 @@ export const en = {
   "common.close": "Close",
   "common.previousMonth": "Previous month",
   "common.nextMonth": "Next month",
+  "data.loadingTitle": "Loading your household",
+  "data.loadingDescription": "Connecting to your saved Ludcount data…",
+  "data.offlineTitle": "You are offline",
+  "data.offlineDescription":
+    "Saved data may be shown, but changes require a connection.",
+  "data.permissionTitle": "Firestore access is locked",
+  "data.permissionDescription":
+    "This environment does not allow access to household data. Use the Firebase emulators during Phase 2.",
+  "data.invalidTitle": "Stored data could not be read",
+  "data.invalidDescription":
+    "Ludcount found data that does not match the expected format.",
+  "data.errorTitle": "Household data is unavailable",
+  "data.errorDescription":
+    "Ludcount could not load your saved data. Please try again.",
+  "data.retry": "Try again",
+  "data.pending": "Waiting for saved changes to sync.",
+  "data.writeOffline": "Connect to the internet before saving this change.",
+  "data.writePermission":
+    "Firestore denied this change. Check the active environment and rules.",
+  "data.writeFailure": "The change could not be saved. Please try again.",
   "overview.income": "Income",
   "overview.expenses": "Expenses",
   "overview.balance": "Remaining",
@@ -73,10 +94,13 @@ export const en = {
   "settings.english": "English",
   "settings.dataHeading": "Data for this phase",
   "settings.dataDescription":
-    "Transactions are stored in memory and reset when the page reloads. Firestore persistence comes in a later phase.",
+    "Transactions and preferences are synchronized through Cloud Firestore.",
+  "settings.languageSaveError":
+    "The language preference could not be saved to your account.",
   "settings.account": "Account",
   "settings.signedInAs": "Signed in as",
   "settings.version": "Version",
+  "household.defaultName": "My household",
   "category.expense.groceries": "Groceries",
   "category.expense.housing": "Housing",
   "category.expense.utilities": "Utilities",

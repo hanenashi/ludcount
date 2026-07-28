@@ -1,4 +1,9 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { DataWriteError } from "../../components/DataState";
+import {
+  normalizeDataError,
+  type DataOperationError,
+} from "../../firebase/errors";
 import { useI18n } from "../../i18n";
 import { isValidDateKey, toDateKey, toMonthKey } from "../../lib/dates";
 import { parseMoneyInput } from "../../lib/money";
@@ -6,7 +11,7 @@ import { categories, type Transaction, type TransactionDraft } from "./model";
 
 interface TransactionFormProps {
   transaction?: Transaction;
-  onSubmit: (draft: TransactionDraft) => void;
+  onSubmit: (draft: TransactionDraft) => Promise<void>;
   onCancel: () => void;
 }
 
@@ -38,6 +43,10 @@ export function TransactionForm({
     amount?: string;
     date?: string;
   }>({});
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<DataOperationError | null>(
+    null,
+  );
   const amountRef = useRef<HTMLInputElement>(null);
 
   const visibleCategories = useMemo(
@@ -56,7 +65,7 @@ export function TransactionForm({
     );
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const amountMinor = parseMoneyInput(amount, locale);
     const nextErrors = {
@@ -69,14 +78,22 @@ export function TransactionForm({
       return;
     }
 
-    onSubmit({
-      type,
-      amountMinor,
-      categoryId,
-      dateKey,
-      monthKey: toMonthKey(dateKey),
-      note: note.trim(),
-    });
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      await onSubmit({
+        type,
+        amountMinor,
+        categoryId,
+        dateKey,
+        monthKey: toMonthKey(dateKey),
+        note: note.trim(),
+      });
+    } catch (error) {
+      setSubmitError(normalizeDataError(error, "write-failure"));
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const heading = transaction
@@ -88,7 +105,12 @@ export function TransactionForm({
       : t("transaction.newIncome");
 
   return (
-    <form className="transaction-form" onSubmit={handleSubmit} noValidate>
+    <form
+      className="transaction-form"
+      onSubmit={(event) => void handleSubmit(event)}
+      noValidate
+      aria-busy={submitting}
+    >
       <h1>{heading}</h1>
 
       <fieldset className="type-switch">
@@ -185,14 +207,20 @@ export function TransactionForm({
       </div>
 
       <div className="form-actions">
+        <DataWriteError error={submitError} />
         <button
           className="button button-secondary"
           type="button"
+          disabled={submitting}
           onClick={onCancel}
         >
           {t("common.cancel")}
         </button>
-        <button className="button button-primary" type="submit">
+        <button
+          className="button button-primary"
+          type="submit"
+          disabled={submitting}
+        >
           {transaction
             ? t("transaction.update")
             : type === "expense"

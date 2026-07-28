@@ -5,6 +5,7 @@ export const cs = {
   "nav.transactions": "Záznamy",
   "nav.settings": "Nastavení",
   "nav.signOut": "Odhlásit se",
+  "nav.primary": "Hlavní navigace",
   "auth.heading": "Domácí peníze jednoduše.",
   "auth.description":
     "Zapisujte příjmy a výdaje bez toho, aby se z domácích financí stalo účetnictví.",
@@ -37,6 +38,26 @@ export const cs = {
   "common.close": "Zavřít",
   "common.previousMonth": "Předchozí měsíc",
   "common.nextMonth": "Následující měsíc",
+  "data.loadingTitle": "Načítáme vaši domácnost",
+  "data.loadingDescription": "Připojujeme uložená data z Ludcount…",
+  "data.offlineTitle": "Jste offline",
+  "data.offlineDescription":
+    "Uložená data mohou být dostupná, ale změny vyžadují připojení.",
+  "data.permissionTitle": "Přístup k Firestore je uzamčený",
+  "data.permissionDescription":
+    "Toto prostředí nepovoluje přístup k datům domácnosti. Ve fázi 2 použijte emulátory Firebase.",
+  "data.invalidTitle": "Uložená data nelze přečíst",
+  "data.invalidDescription":
+    "Ludcount našel data, která neodpovídají očekávanému formátu.",
+  "data.errorTitle": "Data domácnosti nejsou dostupná",
+  "data.errorDescription":
+    "Ludcount nemohl načíst uložená data. Zkuste to prosím znovu.",
+  "data.retry": "Zkusit znovu",
+  "data.pending": "Čekáme na synchronizaci uložených změn.",
+  "data.writeOffline": "Před uložením této změny se připojte k internetu.",
+  "data.writePermission":
+    "Firestore tuto změnu zamítl. Zkontrolujte aktivní prostředí a pravidla.",
+  "data.writeFailure": "Změnu se nepodařilo uložit. Zkuste to prosím znovu.",
   "overview.income": "Příjmy",
   "overview.expenses": "Výdaje",
   "overview.balance": "Zbývá",
@@ -77,10 +98,13 @@ export const cs = {
   "settings.english": "Angličtina",
   "settings.dataHeading": "Data v této fázi",
   "settings.dataDescription":
-    "Záznamy jsou uložené v paměti a po obnovení stránky se smažou. Trvalé ukládání do Firestore přijde v další fázi.",
+    "Záznamy a nastavení se synchronizují přes Cloud Firestore.",
+  "settings.languageSaveError":
+    "Nastavení jazyka se nepodařilo uložit k vašemu účtu.",
   "settings.account": "Účet",
   "settings.signedInAs": "Přihlášený účet",
   "settings.version": "Verze",
+  "household.defaultName": "Moje domácnost",
   "category.expense.groceries": "Potraviny",
   "category.expense.housing": "Bydlení",
   "category.expense.utilities": "Energie",
