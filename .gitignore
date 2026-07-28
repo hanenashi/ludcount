@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Builds and test output
+dist/
+coverage/
+playwright-report/
+test-results/
+
+# Local environment configuration
+.env
+.env.local
+.env.*.local
+
+# Firebase local state and logs
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+
+# Editors and operating systems
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
