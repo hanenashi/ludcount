@@ -130,7 +130,7 @@ test("filters, searches, duplicates, and exports transactions", async ({
   await page.getByRole("button", { name: "Uložit výdaj" }).click();
   await expect(page.getByText("Týdenní nákup")).toHaveCount(2);
 
-  await page.getByText("Filtry a hledání").click();
+  await page.locator(".transaction-filters summary").click();
   await page.getByLabel("Typ záznamu").selectOption("income");
   await expect(page.getByText("Výsledky: 1")).toBeVisible();
   const downloadPromise = page.waitForEvent("download");

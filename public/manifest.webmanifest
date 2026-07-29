@@ -1,0 +1,19 @@
+{
+  "name": "Ludcount",
+  "short_name": "Ludcount",
+  "description": "Jednoduchý přehled příjmů a výdajů domácnosti.",
+  "lang": "cs",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#071c36",
+  "icons": [
+    {
+      "src": "/app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

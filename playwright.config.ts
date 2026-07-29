@@ -23,6 +23,22 @@ export default defineConfig({
         browserName: "chromium",
       },
     },
+    {
+      name: "narrow-mobile-chromium",
+      use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 320, height: 568 },
+        hasTouch: true,
+        isMobile: true,
+      },
+    },
+    {
+      name: "mobile-landscape-chromium",
+      use: {
+        ...devices["iPhone 13 landscape"],
+        browserName: "chromium",
+      },
+    },
   ],
   webServer: {
     command: "VITE_USE_FIREBASE_EMULATORS=true npm run dev -- --host 127.0.0.1",

@@ -1,15 +1,17 @@
 import { LogOut } from "lucide-react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useI18n } from "../../i18n";
 import { useAuth } from "../auth/AuthProvider";
 import { useHousehold } from "../household/HouseholdProvider";
-import { useI18n } from "../../i18n";
-import { useState } from "react";
 
 export function SettingsPage() {
   const { locale, setLocale, t } = useI18n();
   const { user, signOutUser } = useAuth();
   const { saveLocale, preferenceError } = useHousehold();
   const [savingLocale, setSavingLocale] = useState<"cs" | "en" | null>(null);
+  const [signingOut, setSigningOut] = useState(false);
+  const [signOutError, setSignOutError] = useState(false);
   const navigate = useNavigate();
 
   const changeLocale = async (nextLocale: "cs" | "en") => {
@@ -48,6 +50,7 @@ export function SettingsPage() {
                 : "language-button"
             }
             type="button"
+            aria-pressed={locale === "cs"}
             disabled={savingLocale !== null}
             onClick={() => void changeLocale("cs")}
           >
@@ -60,6 +63,7 @@ export function SettingsPage() {
                 : "language-button"
             }
             type="button"
+            aria-pressed={locale === "en"}
             disabled={savingLocale !== null}
             onClick={() => void changeLocale("en")}
           >
@@ -69,6 +73,11 @@ export function SettingsPage() {
         {preferenceError ? (
           <p className="settings-inline-error" role="alert">
             {t("settings.languageSaveError")}
+          </p>
+        ) : null}
+        {savingLocale ? (
+          <p className="sr-only" role="status" aria-live="polite">
+            {t("settings.savingLanguage")}
           </p>
         ) : null}
       </section>
@@ -90,14 +99,24 @@ export function SettingsPage() {
         <button
           className="button button-secondary"
           type="button"
-          onClick={async () => {
-            await signOutUser();
-            navigate("/sign-in");
+          disabled={signingOut}
+          onClick={() => {
+            setSigningOut(true);
+            setSignOutError(false);
+            void signOutUser()
+              .then(() => navigate("/sign-in"))
+              .catch(() => setSignOutError(true))
+              .finally(() => setSigningOut(false));
           }}
         >
           <LogOut size={18} aria-hidden="true" />
-          {t("nav.signOut")}
+          {signingOut ? t("common.working") : t("nav.signOut")}
         </button>
+        {signOutError ? (
+          <p className="settings-inline-error" role="alert">
+            {t("settings.signOutError")}
+          </p>
+        ) : null}
       </section>
 
       <p className="version-copy">{t("settings.version")} 0.1.0</p>

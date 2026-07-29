@@ -6,8 +6,37 @@
 - Phase 2: Firebase persistence in commit `8af4299`
 - Phase 3: production Firestore Security Rules and emulator-backed allow/deny
   coverage in commit `9a7cf0b`
-- Phase 4: filters, note search, transaction duplication, and CSV export in the
-  current Phase 4 commit
+- Phase 4: filters, note search, transaction duplication, and CSV export in
+  commit `56075ec`
+- Phase 5: pre-deployment accessibility, responsive, error, Hosting, and
+  metadata polish in the current Phase 5 commit
+
+## Phase 5 pre-deployment result
+
+- Added skip links and SPA route focus/scroll management.
+- Added solid high-contrast focus indicators and adjusted the primary red so
+  normal-size status text and white-on-red controls meet WCAG AA contrast.
+- Added semantic filter grouping, transaction lists/action groups, contextual
+  localized action names, pressed states, and live regions for loading,
+  connectivity, results, empty states, saving, errors, and validation.
+- Added a keyboard-safe delete dialog with initial focus, Tab/Shift+Tab
+  containment, Escape dismissal, and trigger focus restoration.
+- Validation now focuses the first invalid transaction field and exposes
+  associated live error messages.
+- Expanded safe authentication error mapping and separated Firestore timeouts
+  from offline failures. Raw Firebase messages remain internal.
+- Added safe sign-out and locale-saving failure states.
+- Increased touch targets and polished transaction forms, filters, settings,
+  authentication, 320px mobile, and mobile-landscape layouts.
+- Added Firebase Hosting configuration for `dist` with an SPA rewrite.
+- Added Czech-first title/description/theme metadata, a favicon, app icon, and
+  web app manifest. No service worker or offline caching claim was added.
+- Documented the current built-in category behavior and exact future
+  custom/archive schema and rule changes in `docs/category-management.md`.
+- Documented authorized domains and the exact future index, rules, Hosting, and
+  smoke-test order in `docs/production-release.md`.
+- Did not deploy, modify Firebase Console, access production Firestore, create
+  collections, or change Firestore rules/indexes.
 
 ## Phase 4 result
 
@@ -120,10 +149,11 @@
 - `npm run format:check`: passing
 - `npm run lint`: passing
 - `npm run typecheck`: passing
-- `npm test`: 31 tests passing
+- `npm test`: 39 tests passing
 - `npm run test:rules`: 32 tests passing against local Firestore only
-- `npm run test:browser`: 6 tests passing on desktop and mobile Chromium against
-  local Authentication and Firestore emulators
+- `npm run test:browser`: 16 tests passing across desktop, standard mobile,
+  320px narrow mobile, and mobile landscape Chromium against local
+  Authentication and Firestore emulators
 - `npm run build`: passing
 
 Temurin OpenJDK 21.0.12 is active. The normal Firebase CLI 15.24.0 emulator
@@ -139,23 +169,22 @@ workflow works.
 
 Before a safe production deployment:
 
-1. review the strict rules and test evidence
-2. add intended production hostnames to Authentication authorized domains
-3. confirm any existing production documents match the exact field contracts
-4. explicitly authorize deployment of Firestore rules and indexes
-5. smoke-test production with separate owner and non-member accounts
+1. obtain explicit deployment authorization
+2. verify intended Authentication authorized domains
+3. run the clean-checkout preflight in `docs/production-release.md`
+4. deploy indexes and wait for readiness
+5. deploy the reviewed rules, then Hosting
+6. perform the documented owner and non-member production smoke tests
 
 ## What to do next
 
-Phase 5 is next in `battleplan.md`, but deployment still requires separate,
-explicit authorization. Before any deployment work:
+The requested Phase 5 pre-deployment polish is complete. Remaining work:
 
-1. complete the remaining accessibility and responsive polish
-2. review production error handling and any required indexes
-3. decide when to implement the Phase 3 category-management and
-   archived-category work that remained outside the strict rules request
-4. prepare deployment documentation and hosting configuration without
-   deploying unless explicitly authorized
+1. decide and explicitly authorize whether to implement the deferred custom and
+   archived-category slice
+2. review the release runbook and authorize a production release separately
+3. add the final production/custom domains to Authentication when known
+4. deploy and run live smoke tests only under that future authorization
 
 Production Firestore must remain on its currently deployed deny-all rules until
 an explicitly authorized, reviewed rules/index deployment.

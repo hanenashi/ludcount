@@ -31,15 +31,18 @@ export function TransactionFilters({
         <ListFilter size={18} aria-hidden="true" />
         <span>{t("transaction.filters")}</span>
         {activeCount > 0 ? (
-          <span
-            className="filter-count"
-            aria-label={t("transaction.activeFilters")}
-          >
+          <span className="filter-count" aria-hidden="true">
             {activeCount}
           </span>
         ) : null}
+        {activeCount > 0 ? (
+          <span className="sr-only">
+            {t("transaction.activeFilters")}: {activeCount}
+          </span>
+        ) : null}
       </summary>
-      <div className="filter-controls">
+      <fieldset className="filter-controls">
+        <legend className="sr-only">{t("transaction.filters")}</legend>
         <label>
           <span>{t("transaction.filterType")}</span>
           <select
@@ -86,7 +89,7 @@ export function TransactionFilters({
         >
           {t("transaction.resetFilters")}
         </button>
-      </div>
+      </fieldset>
     </details>
   );
 }

@@ -11,7 +11,11 @@ export function MonthNavigator({ monthKey, onChange }: MonthNavigatorProps) {
   const { locale, t } = useI18n();
 
   return (
-    <div className="month-navigator">
+    <div
+      className="month-navigator"
+      role="group"
+      aria-label={t("common.monthNavigation")}
+    >
       <button
         className="icon-button"
         type="button"
@@ -20,7 +24,9 @@ export function MonthNavigator({ monthKey, onChange }: MonthNavigatorProps) {
       >
         <ChevronLeft size={21} aria-hidden="true" />
       </button>
-      <h1>{formatMonthKey(monthKey, locale)}</h1>
+      <h1 aria-live="polite" aria-atomic="true">
+        {formatMonthKey(monthKey, locale)}
+      </h1>
       <button
         className="icon-button"
         type="button"

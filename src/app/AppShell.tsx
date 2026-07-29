@@ -1,6 +1,8 @@
 import { Home, List, LogOut, Plus, Settings, WalletCards } from "lucide-react";
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { DataStatePanel, OfflineBanner } from "../components/DataState";
+import { SkipLink } from "../components/SkipLink";
 import { useAuth } from "../features/auth/AuthProvider";
 import { useHousehold } from "../features/household/HouseholdProvider";
 import { useTransactions } from "../features/transactions/TransactionProvider";
@@ -13,6 +15,36 @@ const navigation = [
   { to: "/app/settings", key: "nav.settings", icon: Settings },
 ] as const;
 
+function RouteAccessibility() {
+  const { pathname } = useLocation();
+  const previousPath = useRef(pathname);
+
+  useEffect(() => {
+    const routeChanged = previousPath.current !== pathname;
+    previousPath.current = pathname;
+    window.scrollTo(0, 0);
+
+    if (
+      !routeChanged ||
+      pathname === "/app/transactions/new" ||
+      pathname.endsWith("/edit")
+    ) {
+      return;
+    }
+
+    const frame = window.requestAnimationFrame(() => {
+      const heading = document.querySelector<HTMLElement>(".app-main h1");
+      if (heading) {
+        heading.tabIndex = -1;
+        heading.focus({ preventScroll: true });
+      }
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [pathname]);
+
+  return null;
+}
+
 export function AppShell() {
   const { t } = useI18n();
   const { user, signOutUser } = useAuth();
@@ -20,6 +52,7 @@ export function AppShell() {
   const transactionState = useTransactions();
   const isOnline = useOnlineStatus();
   const navigate = useNavigate();
+  const [signOutError, setSignOutError] = useState(false);
   const loading =
     household.status === "loading" ||
     (household.status === "ready" && transactionState.status === "loading");
@@ -33,12 +66,19 @@ export function AppShell() {
   const offline = !isOnline || transactionState.status === "offline";
 
   const handleSignOut = async () => {
-    await signOutUser();
-    navigate("/sign-in");
+    setSignOutError(false);
+    try {
+      await signOutUser();
+      navigate("/sign-in");
+    } catch {
+      setSignOutError(true);
+    }
   };
 
   return (
     <div className="app-shell">
+      <SkipLink targetId="main-content" />
+      <RouteAccessibility />
       <aside className="sidebar">
         <div className="brand">
           <span className="brand-mark" aria-hidden="true">
@@ -68,6 +108,11 @@ export function AppShell() {
           <LogOut size={20} aria-hidden="true" />
           {t("nav.signOut")}
         </button>
+        {signOutError ? (
+          <p className="sidebar-error" role="alert">
+            {t("auth.error.signOut")}
+          </p>
+        ) : null}
       </aside>
 
       <div className="mobile-header">
@@ -82,7 +127,7 @@ export function AppShell() {
         </span>
       </div>
 
-      <main className="app-main">
+      <main className="app-main" id="main-content" tabIndex={-1}>
         {loading ? (
           <DataStatePanel
             loading

@@ -76,7 +76,7 @@ export function OverviewPage() {
             <Link to="/app/transactions">{t("overview.viewAll")}</Link>
           </div>
           {monthlyTransactions.length === 0 ? (
-            <div className="empty-state">
+            <div className="empty-state" role="status" aria-live="polite">
               <p>{t("overview.empty")}</p>
               <Link className="text-link" to="/app/transactions/new">
                 {t("overview.emptyAction")}
@@ -93,7 +93,9 @@ export function OverviewPage() {
         <section className="content-section category-section">
           <h2>{t("overview.byCategory")}</h2>
           {expenseByCategory.length === 0 ? (
-            <p className="empty-copy">{t("overview.empty")}</p>
+            <p className="empty-copy" role="status" aria-live="polite">
+              {t("overview.empty")}
+            </p>
           ) : (
             <div className="category-totals">
               {expenseByCategory.map(([categoryId, amount]) => {

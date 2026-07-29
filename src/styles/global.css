@@ -8,8 +8,8 @@
   text-rendering: optimizeLegibility;
   --ink: #071c36;
   --ink-raised: #102b49;
-  --coral: #f0443b;
-  --coral-dark: #d72e27;
+  --coral: #d72e27;
+  --coral-dark: #b42318;
   --sage: #32844f;
   --text: #101827;
   --muted: #687284;
@@ -32,6 +32,12 @@ body {
   background: var(--white);
 }
 
+main,
+section,
+form {
+  min-width: 0;
+}
+
 button,
 input,
 select,
@@ -52,9 +58,33 @@ button:focus-visible,
 a:focus-visible,
 input:focus-visible,
 select:focus-visible,
-textarea:focus-visible {
-  outline: 3px solid rgb(240 68 59 / 28%);
+textarea:focus-visible,
+summary:focus-visible {
+  outline: 3px solid #0b63ce;
   outline-offset: 2px;
+  box-shadow: 0 0 0 5px var(--white);
+}
+
+.skip-link {
+  position: fixed;
+  z-index: 100;
+  top: 10px;
+  left: 10px;
+  padding: 11px 15px;
+  color: var(--white);
+  font-weight: 700;
+  text-decoration: none;
+  border-radius: 8px;
+  background: var(--ink);
+  transform: translateY(-180%);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+.app-main h1[tabindex="-1"]:focus {
+  outline: none;
 }
 
 .sr-only {
@@ -138,6 +168,13 @@ textarea:focus-visible {
 
 .sign-out-button {
   margin-top: auto;
+}
+
+.sidebar-error {
+  margin: 10px 15px 0;
+  color: #ffd2cf;
+  font-size: 13px;
+  line-height: 1.4;
 }
 
 .app-main {
@@ -236,8 +273,8 @@ textarea:focus-visible {
 
 .icon-button {
   display: inline-grid;
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
   flex: 0 0 auto;
   color: var(--muted);
   text-decoration: none;
@@ -523,6 +560,12 @@ textarea:focus-visible {
   cursor: pointer;
 }
 
+.text-button {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+}
+
 .page-add-button {
   flex: 0 0 auto;
 }
@@ -590,6 +633,8 @@ textarea:focus-visible {
   align-items: end;
   gap: 13px;
   padding: 3px 15px 15px;
+  margin: 0;
+  border: 0;
 }
 
 .filter-controls label {
@@ -615,7 +660,6 @@ textarea:focus-visible {
 .filter-controls input:focus,
 .filter-controls select:focus {
   border-color: var(--coral);
-  outline: 2px solid transparent;
 }
 
 .filter-reset {
@@ -655,7 +699,7 @@ textarea:focus-visible {
 }
 
 .type-option {
-  min-height: 42px;
+  min-height: 44px;
   color: var(--muted);
   font-weight: 700;
   border: 0;
@@ -724,7 +768,6 @@ textarea:focus-visible {
 .money-input input {
   min-width: 0;
   border: 0;
-  outline: 0;
 }
 
 .money-input > span {
@@ -766,6 +809,7 @@ textarea:focus-visible {
   z-index: 50;
   inset: 0;
   display: grid;
+  overflow-y: auto;
   padding: 20px;
   background: rgb(7 28 54 / 58%);
   place-items: center;
@@ -773,6 +817,8 @@ textarea:focus-visible {
 
 .confirm-dialog {
   width: min(420px, 100%);
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
   padding: 30px;
   border-radius: var(--radius);
   background: var(--white);
@@ -826,7 +872,7 @@ textarea:focus-visible {
 }
 
 .language-button {
-  min-height: 40px;
+  min-height: 44px;
   padding: 0 15px;
   color: var(--muted);
   font-size: 14px;
@@ -1135,6 +1181,7 @@ textarea:focus-visible {
 
   .history-heading {
     align-items: flex-end;
+    flex-wrap: wrap;
   }
 
   .history-heading .button {
@@ -1197,6 +1244,7 @@ textarea:focus-visible {
     position: sticky;
     bottom: 86px;
     padding: 12px 0;
+    border-top: 1px solid var(--line);
     background: var(--white);
   }
 
@@ -1216,6 +1264,71 @@ textarea:focus-visible {
 
   .language-button {
     flex: 1;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 600px) and (min-width: 640px) and (max-width: 920px) {
+  .mobile-header {
+    height: 56px;
+  }
+
+  .connection-banner {
+    top: 56px;
+  }
+
+  .page {
+    min-height: calc(100vh - 56px);
+    padding: 20px 24px 90px;
+  }
+
+  .mobile-navigation {
+    height: 64px;
+  }
+
+  .mobile-nav-link {
+    flex-direction: row;
+    padding-top: 0;
+    font-size: 12px;
+  }
+
+  .mobile-add-button {
+    right: 18px;
+    bottom: 70px;
+    width: 50px;
+    height: 50px;
+    border-radius: 14px;
+  }
+
+  .auth-page {
+    grid-template-columns: minmax(270px, 0.85fr) minmax(360px, 1.15fr);
+  }
+
+  .auth-intro {
+    min-height: 100vh;
+    padding: 24px 30px 32px;
+  }
+
+  .auth-intro h1 {
+    margin-top: 28px;
+    font-size: 38px;
+  }
+
+  .auth-intro p {
+    display: block;
+    margin-top: 16px;
+    font-size: 15px;
+  }
+
+  .auth-panel {
+    padding: 24px 30px 40px;
+  }
+
+  .transaction-form {
+    padding-block: 28px 90px;
+  }
+
+  .form-actions {
+    bottom: 70px;
   }
 }
 

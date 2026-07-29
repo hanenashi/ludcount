@@ -51,6 +51,7 @@ export function TransactionForm({
     null,
   );
   const amountRef = useRef<HTMLInputElement>(null);
+  const dateRef = useRef<HTMLInputElement>(null);
 
   const visibleCategories = useMemo(
     () => categories.filter((category) => category.type === type),
@@ -78,6 +79,11 @@ export function TransactionForm({
     setErrors(nextErrors);
 
     if (!amountMinor || nextErrors.date) {
+      if (!amountMinor) {
+        amountRef.current?.focus();
+      } else {
+        dateRef.current?.focus();
+      }
       return;
     }
 
@@ -129,6 +135,7 @@ export function TransactionForm({
               : "type-option"
           }
           type="button"
+          aria-pressed={type === "expense"}
           onClick={() => changeType("expense")}
         >
           {t("transaction.type.expense")}
@@ -138,6 +145,7 @@ export function TransactionForm({
             type === "income" ? "type-option type-option-active" : "type-option"
           }
           type="button"
+          aria-pressed={type === "income"}
           onClick={() => changeType("income")}
         >
           {t("transaction.type.income")}
@@ -152,16 +160,18 @@ export function TransactionForm({
           <input
             id="transaction-amount"
             ref={amountRef}
+            required
             inputMode="decimal"
             value={amount}
             onChange={(event) => setAmount(event.target.value)}
             aria-invalid={Boolean(errors.amount)}
             aria-describedby={errors.amount ? "amount-error" : undefined}
+            aria-errormessage={errors.amount ? "amount-error" : undefined}
           />
           <span>Kč</span>
         </div>
         {errors.amount ? (
-          <small className="error-message" id="amount-error">
+          <small className="error-message" id="amount-error" role="alert">
             {errors.amount}
           </small>
         ) : null}
@@ -173,6 +183,7 @@ export function TransactionForm({
         </label>
         <select
           id="transaction-category"
+          required
           value={categoryId}
           onChange={(event) => setCategoryId(event.target.value)}
         >
@@ -188,14 +199,17 @@ export function TransactionForm({
         <label htmlFor="transaction-date">{t("transaction.date")}</label>
         <input
           id="transaction-date"
+          ref={dateRef}
           type="date"
+          required
           value={dateKey}
           onChange={(event) => setDateKey(event.target.value)}
           aria-invalid={Boolean(errors.date)}
           aria-describedby={errors.date ? "date-error" : undefined}
+          aria-errormessage={errors.date ? "date-error" : undefined}
         />
         {errors.date ? (
-          <small className="error-message" id="date-error">
+          <small className="error-message" id="date-error" role="alert">
             {errors.date}
           </small>
         ) : null}
@@ -207,13 +221,21 @@ export function TransactionForm({
           id="transaction-note"
           value={note}
           maxLength={120}
+          aria-describedby="transaction-note-count"
           placeholder={t("transaction.notePlaceholder")}
           onChange={(event) => setNote(event.target.value)}
         />
-        <small className="character-count">{note.length} / 120</small>
+        <small className="character-count" id="transaction-note-count">
+          {note.length} / 120
+        </small>
       </div>
 
       <div className="form-actions">
+        {submitting ? (
+          <span className="sr-only" role="status" aria-live="polite">
+            {t("common.saving")}
+          </span>
+        ) : null}
         <DataWriteError error={submitError} />
         <button
           className="button button-secondary"
@@ -228,11 +250,13 @@ export function TransactionForm({
           type="submit"
           disabled={submitting}
         >
-          {transaction
-            ? t("transaction.update")
-            : type === "expense"
-              ? t("transaction.saveExpense")
-              : t("transaction.saveIncome")}
+          {submitting
+            ? t("common.saving")
+            : transaction
+              ? t("transaction.update")
+              : type === "expense"
+                ? t("transaction.saveExpense")
+                : t("transaction.saveIncome")}
         </button>
       </div>
     </form>

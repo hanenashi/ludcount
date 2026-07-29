@@ -20,6 +20,10 @@ describe("TransactionForm", () => {
     expect(
       screen.getByText("Zadejte částku větší než nula."),
     ).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Zadejte částku větší než nula.",
+    );
+    expect(amount).toHaveFocus();
     expect(amount).toHaveValue("abc");
     expect(onSubmit).not.toHaveBeenCalled();
 

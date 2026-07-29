@@ -2,6 +2,7 @@ import { FirebaseError } from "firebase/app";
 
 export type DataErrorKind =
   | "offline"
+  | "timeout"
   | "permission-denied"
   | "write-failure"
   | "invalid-data"
@@ -36,9 +37,16 @@ export function normalizeDataError(
       );
     }
 
+    if (error.code === "deadline-exceeded") {
+      return new DataOperationError(
+        "timeout",
+        "The data request exceeded its deadline.",
+        error,
+      );
+    }
+
     if (
       error.code === "unavailable" ||
-      error.code === "deadline-exceeded" ||
       error.code === "network-request-failed"
     ) {
       return new DataOperationError(

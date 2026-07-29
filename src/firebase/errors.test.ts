@@ -10,6 +10,9 @@ describe("Firestore error mapping", () => {
     expect(
       normalizeDataError(new FirebaseError("unavailable", "offline")).kind,
     ).toBe("offline");
+    expect(
+      normalizeDataError(new FirebaseError("deadline-exceeded", "slow")).kind,
+    ).toBe("timeout");
   });
 
   it("preserves existing operation errors", () => {

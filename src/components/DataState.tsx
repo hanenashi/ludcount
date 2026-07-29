@@ -17,7 +17,12 @@ export function DataStatePanel({
 
   if (loading) {
     return (
-      <section className="data-state-panel" role="status">
+      <section
+        className="data-state-panel"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
         <RefreshCw className="state-icon state-icon-spin" aria-hidden="true" />
         <h1>{t("data.loadingTitle")}</h1>
         <p>{t("data.loadingDescription")}</p>
@@ -26,6 +31,7 @@ export function DataStatePanel({
   }
 
   const permissionDenied = error?.kind === "permission-denied";
+  const timeout = error?.kind === "timeout";
   const invalidData = error?.kind === "invalid-data";
   const Icon = permissionDenied ? ShieldAlert : TriangleAlert;
 
@@ -35,16 +41,20 @@ export function DataStatePanel({
       <h1>
         {permissionDenied
           ? t("data.permissionTitle")
-          : invalidData
-            ? t("data.invalidTitle")
-            : t("data.errorTitle")}
+          : timeout
+            ? t("data.timeoutTitle")
+            : invalidData
+              ? t("data.invalidTitle")
+              : t("data.errorTitle")}
       </h1>
       <p>
         {permissionDenied
           ? t("data.permissionDescription")
-          : invalidData
-            ? t("data.invalidDescription")
-            : t("data.errorDescription")}
+          : timeout
+            ? t("data.timeoutDescription")
+            : invalidData
+              ? t("data.invalidDescription")
+              : t("data.errorDescription")}
       </p>
       <button
         className="button button-secondary"
@@ -61,7 +71,12 @@ export function DataStatePanel({
 export function OfflineBanner({ pending = false }: { pending?: boolean }) {
   const { t } = useI18n();
   return (
-    <div className="connection-banner" role="status">
+    <div
+      className="connection-banner"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+    >
       <CloudOff size={18} aria-hidden="true" />
       <span>
         <strong>{t("data.offlineTitle")}</strong>{" "}
@@ -85,9 +100,11 @@ export function DataWriteError({
     <p className="form-notice form-notice-error" role="alert">
       {error.kind === "offline"
         ? t("data.writeOffline")
-        : error.kind === "permission-denied"
-          ? t("data.writePermission")
-          : t("data.writeFailure")}
+        : error.kind === "timeout"
+          ? t("data.writeTimeout")
+          : error.kind === "permission-denied"
+            ? t("data.writePermission")
+            : t("data.writeFailure")}
     </p>
   );
 }

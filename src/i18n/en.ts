@@ -26,7 +26,22 @@ export const en = {
   "auth.error.emailInUse": "An account already uses this email address.",
   "auth.error.weakPassword": "Use a password with at least six characters.",
   "auth.error.popupClosed": "Google sign-in was closed before it finished.",
+  "auth.error.popupBlocked":
+    "Your browser blocked the Google sign-in window. Allow pop-ups and try again.",
+  "auth.error.invalidEmail": "Enter a valid email address.",
+  "auth.error.userDisabled": "This account has been disabled.",
+  "auth.error.tooManyRequests":
+    "Too many attempts were made. Wait a moment and try again.",
+  "auth.error.network":
+    "Authentication is temporarily unavailable. Check your connection and try again.",
+  "auth.error.unavailable":
+    "This sign-in method is not currently available. Try another method.",
+  "auth.error.signOut": "Sign-out failed. Please try again.",
   "common.loading": "Loading…",
+  "common.working": "Please wait…",
+  "common.saving": "Saving…",
+  "common.deleting": "Deleting…",
+  "common.skipToContent": "Skip to main content",
   "common.cancel": "Cancel",
   "common.save": "Save",
   "common.delete": "Delete",
@@ -34,6 +49,7 @@ export const en = {
   "common.close": "Close",
   "common.previousMonth": "Previous month",
   "common.nextMonth": "Next month",
+  "common.monthNavigation": "Month selection",
   "data.loadingTitle": "Loading your household",
   "data.loadingDescription": "Connecting to your saved Ludcount data…",
   "data.offlineTitle": "You are offline",
@@ -41,7 +57,10 @@ export const en = {
     "Saved data may be shown, but changes require a connection.",
   "data.permissionTitle": "Firestore access is locked",
   "data.permissionDescription":
-    "This environment does not allow access to household data. Use the Firebase emulators during Phase 2.",
+    "Your account does not have permission to access this household data.",
+  "data.timeoutTitle": "The data request timed out",
+  "data.timeoutDescription":
+    "Ludcount did not receive a response in time. Check your connection and try again.",
   "data.invalidTitle": "Stored data could not be read",
   "data.invalidDescription":
     "Ludcount found data that does not match the expected format.",
@@ -52,7 +71,9 @@ export const en = {
   "data.pending": "Waiting for saved changes to sync.",
   "data.writeOffline": "Connect to the internet before saving this change.",
   "data.writePermission":
-    "Firestore denied this change. Check the active environment and rules.",
+    "Your account does not have permission to save this change.",
+  "data.writeTimeout":
+    "Saving took too long. Check your connection and try again.",
   "data.writeFailure": "The change could not be saved. Please try again.",
   "overview.income": "Income",
   "overview.expenses": "Expenses",
@@ -99,6 +120,7 @@ export const en = {
   "transaction.resetFilters": "Reset filters",
   "transaction.results": "Results",
   "transaction.exportCsv": "Export CSV",
+  "transaction.actions": "Transaction actions",
   "transaction.created": "Transaction saved.",
   "transaction.updated": "Changes saved.",
   "transaction.deleted": "Transaction deleted.",
@@ -118,6 +140,8 @@ export const en = {
     "Transactions and preferences are synchronized through Cloud Firestore.",
   "settings.languageSaveError":
     "The language preference could not be saved to your account.",
+  "settings.savingLanguage": "Saving language preference…",
+  "settings.signOutError": "Sign-out failed. Please try again.",
   "settings.account": "Account",
   "settings.signedInAs": "Signed in as",
   "settings.version": "Version",

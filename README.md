@@ -3,13 +3,15 @@
 Ludcount is a small household income and expense journal. The interface defaults
 to Czech and can be switched to English in Settings.
 
-This repository currently implements Phase 4 from
+This repository currently implements Phase 5 pre-deployment polish from
 [`battleplan.md`](./battleplan.md). Firebase Authentication creates or loads a
 personal household, and transactions and user preferences are synchronized
 through Cloud Firestore. Production Firestore access is defined by strict,
 emulator-tested membership and field-validation rules. Transaction history now
 supports combined filters, note search, explicit-save duplication, and
-localized client-side CSV export.
+localized client-side CSV export. Accessibility, narrow and landscape layouts,
+localized failure states, Hosting configuration, and application metadata are
+prepared without deploying anything.
 
 ## Requirements
 
@@ -64,6 +66,9 @@ Console under **Authentication → Sign-in method**:
 
 Choose a project support email for Google sign-in and add every intended
 production hostname under **Authentication → Settings → Authorized domains**.
+The expected Firebase Hosting domains are
+`ludcount-hanenashi.firebaseapp.com` and `ludcount-hanenashi.web.app`; every
+future custom hostname must be added exactly as served.
 
 Do not create Firestore collections manually. The committed production
 [`firestore.rules`](./firestore.rules) file is the source of truth. It has not
@@ -158,7 +163,8 @@ npm run build
 Run `npm run test:browser` separately while the emulators are active, as shown
 above.
 
-No deployment command is configured in this phase.
+Deployment commands are documented for future authorized use, but they must not
+be run as part of local development.
 
 ## Money and dates
 
@@ -183,7 +189,38 @@ No deployment command is configured in this phase.
   delimiters, localized headers and category/type labels, and deterministic
   `ludcount-YYYY-MM.csv` filenames.
 
-## Phase 4 boundaries
+## Accessibility and responsive behavior
+
+- A skip link, route heading focus, visible high-contrast focus indicators, and
+  localized names support keyboard and screen-reader navigation.
+- Loading, offline, timeout, permission, save, validation, result, error, and
+  empty states use appropriate live-region semantics.
+- The delete dialog traps focus, closes with Escape, and restores focus to its
+  trigger when the trigger remains available.
+- Interactive touch targets are at least 44 CSS pixels where practical.
+- Desktop, standard mobile, 320px mobile, and mobile landscape Chromium
+  viewports are covered by Playwright without horizontal overflow.
+
+## Categories
+
+Categories remain the built-in, localized catalog defined in source. Stable IDs
+such as `expense.groceries` are stored with a label snapshot on transactions.
+No category collection has been created.
+
+The exact schema, repository, index, security-rule, migration, and test changes
+required for custom and archived categories are documented in
+[`docs/category-management.md`](./docs/category-management.md).
+
+## Hosting and application metadata
+
+- Firebase Hosting is configured to serve `dist`.
+- Unknown paths rewrite to `index.html` for the Vite React SPA.
+- The app includes Czech-first description metadata, a favicon, SVG app icon,
+  web app manifest, application name, and theme colors.
+- There is intentionally no service worker. Firestore caching does not make the
+  complete authentication and write workflow available offline.
+
+## Phase 5 pre-deployment boundaries
 
 Included:
 
@@ -199,6 +236,11 @@ Included:
 - combined transaction filters and case-insensitive note search
 - explicit-save transaction duplication with today's local date
 - Czech/English client-side CSV export of the filtered result set
+- keyboard navigation, dialog focus management, accessible validation, and
+  live status announcements
+- narrow-mobile and landscape responsive polish
+- localized authentication, permission, offline, timeout, and fallback errors
+- Firebase Hosting SPA configuration and application metadata
 - Firebase Auth and Firestore emulator configuration
 - validated Firebase client initialization
 - production Firestore rules for profiles, households, memberships, and
@@ -209,20 +251,15 @@ Included:
 Deferred:
 
 - category management and archived-category handling
-- Phase 5 accessibility and production-polish work
-- deployment and hosting
+- service-worker caching and full offline support
+- production deployment and live smoke testing
 - Cloud Functions, Storage, Analytics, App Check, and billing-dependent features
 
 ## Before production deployment
 
-No Firebase deployment has been performed. Before deploying safely:
-
-1. review the committed rules and passing rules-test output
-2. confirm intended production hostnames are authorized for Authentication
-3. confirm any existing production documents conform to the exact Phase 3 field
-   contracts
-4. explicitly authorize and perform a rules/index deployment
-5. run a production smoke test with separate owner and non-member accounts
+No Firebase deployment has been performed. The exact future preflight, required
+authorized domains, and ordered index → rules → Hosting → smoke-test commands
+are in [`docs/production-release.md`](./docs/production-release.md).
 
 Keep the currently deployed deny-all policy in place until those checks and
 deployment authorization are complete.

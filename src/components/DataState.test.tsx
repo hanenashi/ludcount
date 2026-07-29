@@ -31,4 +31,25 @@ describe("data state UI", () => {
     );
     expect(screen.getByText("Jste offline")).toBeInTheDocument();
   });
+
+  it("renders a localized timeout with an explicit retry action", () => {
+    render(
+      <I18nProvider>
+        <DataStatePanel
+          error={new DataOperationError("timeout", "raw timeout detail")}
+          onRetry={vi.fn()}
+        />
+      </I18nProvider>,
+    );
+
+    expect(
+      screen.getByRole("heading", {
+        name: "Načítání trvalo příliš dlouho",
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Zkusit znovu" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("raw timeout detail")).not.toBeInTheDocument();
+  });
 });

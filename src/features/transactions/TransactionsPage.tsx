@@ -1,8 +1,9 @@
 import { Download, Plus } from "lucide-react";
-import { useDeferredValue, useMemo, useState } from "react";
+import { useCallback, useDeferredValue, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { MonthNavigator } from "../../components/MonthNavigator";
 import { DataWriteError } from "../../components/DataState";
+import { ModalDialog } from "../../components/ModalDialog";
 import {
   normalizeDataError,
   type DataOperationError,
@@ -68,6 +69,11 @@ export function TransactionsPage() {
     setNoteQuery("");
   };
 
+  const closeDeleteDialog = useCallback(() => {
+    setPendingDelete(null);
+    setDeleteError(null);
+  }, []);
+
   const exportTransactions = () => {
     const csv = createTransactionsCsv(visibleTransactions, locale, {
       date: t("csv.header.date"),
@@ -116,7 +122,12 @@ export function TransactionsPage() {
         <div className="history-heading">
           <div>
             <h2>{t("transaction.listHeading")}</h2>
-            <span className="result-count">
+            <span
+              className="result-count"
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
+            >
               {t("transaction.results")}: {visibleTransactions.length}
             </span>
           </div>
@@ -150,40 +161,34 @@ export function TransactionsPage() {
       </section>
 
       {pendingDelete ? (
-        <div className="dialog-backdrop" role="presentation">
-          <div
-            className="confirm-dialog"
-            role="alertdialog"
-            aria-modal="true"
-            aria-labelledby="delete-title"
-            aria-describedby="delete-description"
-          >
-            <h2 id="delete-title">{t("transaction.deleteTitle")}</h2>
-            <p id="delete-description">{t("transaction.deleteDescription")}</p>
-            <DataWriteError error={deleteError} />
-            <div className="form-actions">
-              <button
-                className="button button-secondary"
-                type="button"
-                disabled={deleting}
-                onClick={() => {
-                  setPendingDelete(null);
-                  setDeleteError(null);
-                }}
-              >
-                {t("common.cancel")}
-              </button>
-              <button
-                className="button button-danger"
-                type="button"
-                disabled={deleting}
-                onClick={() => void confirmDelete()}
-              >
-                {t("common.delete")}
-              </button>
-            </div>
+        <ModalDialog
+          labelledBy="delete-title"
+          describedBy="delete-description"
+          onDismiss={closeDeleteDialog}
+        >
+          <h2 id="delete-title">{t("transaction.deleteTitle")}</h2>
+          <p id="delete-description">{t("transaction.deleteDescription")}</p>
+          <DataWriteError error={deleteError} />
+          <div className="form-actions">
+            <button
+              className="button button-secondary"
+              type="button"
+              disabled={deleting}
+              data-dialog-initial-focus
+              onClick={closeDeleteDialog}
+            >
+              {t("common.cancel")}
+            </button>
+            <button
+              className="button button-danger"
+              type="button"
+              disabled={deleting}
+              onClick={() => void confirmDelete()}
+            >
+              {deleting ? t("common.deleting") : t("common.delete")}
+            </button>
           </div>
-        </div>
+        </ModalDialog>
       ) : null}
     </div>
   );

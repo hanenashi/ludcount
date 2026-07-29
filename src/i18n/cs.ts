@@ -30,7 +30,22 @@ export const cs = {
   "auth.error.weakPassword": "Použijte heslo o délce alespoň šest znaků.",
   "auth.error.popupClosed":
     "Přihlášení přes Google bylo zavřeno před dokončením.",
+  "auth.error.popupBlocked":
+    "Prohlížeč zablokoval okno pro přihlášení přes Google. Povolte vyskakovací okna a zkuste to znovu.",
+  "auth.error.invalidEmail": "Zadejte platnou e-mailovou adresu.",
+  "auth.error.userDisabled": "Tento účet byl deaktivován.",
+  "auth.error.tooManyRequests":
+    "Proběhlo příliš mnoho pokusů. Chvíli počkejte a zkuste to znovu.",
+  "auth.error.network":
+    "Přihlášení je dočasně nedostupné. Zkontrolujte připojení a zkuste to znovu.",
+  "auth.error.unavailable":
+    "Tento způsob přihlášení teď není dostupný. Zkuste jinou možnost.",
+  "auth.error.signOut": "Odhlášení se nepodařilo. Zkuste to prosím znovu.",
   "common.loading": "Načítání…",
+  "common.working": "Čekejte prosím…",
+  "common.saving": "Ukládání…",
+  "common.deleting": "Mazání…",
+  "common.skipToContent": "Přeskočit na hlavní obsah",
   "common.cancel": "Zrušit",
   "common.save": "Uložit",
   "common.delete": "Smazat",
@@ -38,6 +53,7 @@ export const cs = {
   "common.close": "Zavřít",
   "common.previousMonth": "Předchozí měsíc",
   "common.nextMonth": "Následující měsíc",
+  "common.monthNavigation": "Výběr měsíce",
   "data.loadingTitle": "Načítáme vaši domácnost",
   "data.loadingDescription": "Připojujeme uložená data z Ludcount…",
   "data.offlineTitle": "Jste offline",
@@ -45,7 +61,10 @@ export const cs = {
     "Uložená data mohou být dostupná, ale změny vyžadují připojení.",
   "data.permissionTitle": "Přístup k Firestore je uzamčený",
   "data.permissionDescription":
-    "Toto prostředí nepovoluje přístup k datům domácnosti. Ve fázi 2 použijte emulátory Firebase.",
+    "Váš účet nemá oprávnění k datům této domácnosti.",
+  "data.timeoutTitle": "Načítání trvalo příliš dlouho",
+  "data.timeoutDescription":
+    "Ludcount nedostal odpověď včas. Zkontrolujte připojení a zkuste to znovu.",
   "data.invalidTitle": "Uložená data nelze přečíst",
   "data.invalidDescription":
     "Ludcount našel data, která neodpovídají očekávanému formátu.",
@@ -55,8 +74,9 @@ export const cs = {
   "data.retry": "Zkusit znovu",
   "data.pending": "Čekáme na synchronizaci uložených změn.",
   "data.writeOffline": "Před uložením této změny se připojte k internetu.",
-  "data.writePermission":
-    "Firestore tuto změnu zamítl. Zkontrolujte aktivní prostředí a pravidla.",
+  "data.writePermission": "Váš účet nemá oprávnění tuto změnu uložit.",
+  "data.writeTimeout":
+    "Ukládání trvalo příliš dlouho. Zkontrolujte připojení a zkuste to znovu.",
   "data.writeFailure": "Změnu se nepodařilo uložit. Zkuste to prosím znovu.",
   "overview.income": "Příjmy",
   "overview.expenses": "Výdaje",
@@ -103,6 +123,7 @@ export const cs = {
   "transaction.resetFilters": "Obnovit filtry",
   "transaction.results": "Výsledky",
   "transaction.exportCsv": "Exportovat CSV",
+  "transaction.actions": "Akce záznamu",
   "transaction.created": "Záznam byl uložen.",
   "transaction.updated": "Změny byly uloženy.",
   "transaction.deleted": "Záznam byl smazán.",
@@ -122,6 +143,8 @@ export const cs = {
     "Záznamy a nastavení se synchronizují přes Cloud Firestore.",
   "settings.languageSaveError":
     "Nastavení jazyka se nepodařilo uložit k vašemu účtu.",
+  "settings.savingLanguage": "Ukládání nastavení jazyka…",
+  "settings.signOutError": "Odhlášení se nepodařilo. Zkuste to prosím znovu.",
   "settings.account": "Účet",
   "settings.signedInAs": "Přihlášený účet",
   "settings.version": "Verze",

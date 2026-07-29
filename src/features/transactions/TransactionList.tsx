@@ -22,18 +22,38 @@ export function TransactionList({
 
   if (transactions.length === 0) {
     return (
-      <p className="empty-copy">{emptyMessage ?? t("transaction.empty")}</p>
+      <p
+        className="empty-copy"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {emptyMessage ?? t("transaction.empty")}
+      </p>
     );
   }
 
   return (
-    <div className="transaction-list">
+    <div
+      className="transaction-list"
+      role="list"
+      aria-label={t("transaction.listHeading")}
+    >
       {transactions.map((transaction) => {
         const category = getCategory(transaction.categoryId);
+        const categoryName = category
+          ? t(category.labelKey)
+          : transaction.categoryLabelSnapshot;
+        const date = formatDateKey(transaction.dateKey, locale);
         const amount = formatMoney(transaction.amountMinor, locale);
+        const actionContext = `${categoryName}, ${date}, ${amount}`;
 
         return (
-          <article className="transaction-row" key={transaction.id}>
+          <article
+            className="transaction-row"
+            key={transaction.id}
+            role="listitem"
+          >
             <div
               className={`transaction-symbol transaction-symbol-${transaction.type}`}
               aria-hidden="true"
@@ -41,11 +61,9 @@ export function TransactionList({
               {transaction.type === "income" ? "+" : "−"}
             </div>
             <div className="transaction-copy">
-              <strong>
-                {category ? t(category.labelKey) : transaction.categoryId}
-              </strong>
+              <strong>{categoryName}</strong>
               <span>
-                {formatDateKey(transaction.dateKey, locale)}
+                {date}
                 {transaction.note ? ` · ${transaction.note}` : ""}
               </span>
             </div>
@@ -57,23 +75,27 @@ export function TransactionList({
               <Link
                 className="row-link"
                 to={`/app/transactions/${transaction.id}/edit`}
-                aria-label={`${t("common.edit")} ${category ? t(category.labelKey) : ""}`}
+                aria-label={`${t("common.edit")} – ${actionContext}`}
               >
                 <ChevronRight size={22} aria-hidden="true" />
               </Link>
             ) : (
-              <div className="row-actions">
+              <div
+                className="row-actions"
+                role="group"
+                aria-label={`${t("transaction.actions")} – ${actionContext}`}
+              >
                 <Link
                   className="icon-button"
                   to={`/app/transactions/new?duplicate=${encodeURIComponent(transaction.id)}`}
-                  aria-label={t("transaction.duplicate")}
+                  aria-label={`${t("transaction.duplicate")} – ${actionContext}`}
                 >
                   <Copy size={18} aria-hidden="true" />
                 </Link>
                 <Link
                   className="icon-button"
                   to={`/app/transactions/${transaction.id}/edit`}
-                  aria-label={t("common.edit")}
+                  aria-label={`${t("common.edit")} – ${actionContext}`}
                 >
                   <Pencil size={18} aria-hidden="true" />
                 </Link>
@@ -82,7 +104,7 @@ export function TransactionList({
                     className="icon-button icon-button-danger"
                     type="button"
                     onClick={() => onDelete(transaction)}
-                    aria-label={t("common.delete")}
+                    aria-label={`${t("common.delete")} – ${actionContext}`}
                   >
                     <Trash2 size={18} aria-hidden="true" />
                   </button>

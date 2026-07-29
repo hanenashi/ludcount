@@ -14,7 +14,12 @@ function ProtectedApp() {
 
   if (loading) {
     return (
-      <div className="loading-screen" role="status">
+      <div
+        className="loading-screen"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
         {t("common.loading")}
       </div>
     );

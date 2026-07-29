@@ -13,6 +13,13 @@ test("renders the Czech-first authentication flow without production access", as
   await page.goto("/sign-in");
 
   await expect(page).toHaveTitle("Ludcount");
+  await expect(page.locator('link[rel="manifest"]')).toHaveAttribute(
+    "href",
+    "/manifest.webmanifest",
+  );
+  const manifest = await page.request.get("/manifest.webmanifest");
+  expect(manifest.ok()).toBe(true);
+  expect((await manifest.json()).name).toBe("Ludcount");
   await expect(
     page.getByRole("heading", { name: "Domácí peníze jednoduše." }),
   ).toBeVisible();
