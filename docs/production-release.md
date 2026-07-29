@@ -1,9 +1,10 @@
 # Production Release Runbook
 
-This runbook was used for the first production release on 2026-07-29. It does
-not authorize another deployment. Production currently serves application
-commit `11a1ecf2051749d02d299be40ad1ff54821d2c07` with the repository's tested
-Firestore rules and required index.
+This runbook was used for the first production release and the invitation-only
+follow-up on 2026-07-29. It does not authorize another deployment. Production
+currently serves application commit
+`5e12b0c1d93e0af949a111a110f1bb766be71c1d` with the repository's tested
+Firestore rules and required index. End-user account creation is disabled.
 
 ## Authentication domains
 

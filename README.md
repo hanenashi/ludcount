@@ -9,10 +9,9 @@ personal household, and transactions and user preferences are synchronized
 through Cloud Firestore. Production Firestore access is protected by strict,
 emulator-tested membership and field-validation rules. Transaction history
 supports combined filters, note search, explicit-save duplication, and
-localized client-side CSV export. The invitation-aware source also includes a
-fully local public demo at `/demo`. The currently deployed MVP is available on
-Firebase Hosting at `https://ludcount-hanenashi.web.app`; source changes are not
-live until a separately authorized deployment.
+localized client-side CSV export. The invitation-only production application
+also includes a fully local public demo at `/demo` and is available on Firebase
+Hosting at `https://ludcount-hanenashi.web.app`.
 
 ## Requirements
 
@@ -287,22 +286,20 @@ Deferred:
 
 ## Production status and future releases
 
-The first production MVP release was deployed on 2026-07-29 from commit
-`11a1ecf2051749d02d299be40ad1ff54821d2c07`.
-
-Post-release invitation/demo hardening is prepared in source but must not be
-described as live until a later deployment is explicitly authorized. Firebase
-Console self-service account creation has not been disabled by this repository
-change.
+The invitation-only production release was deployed on 2026-07-29 from
+application commit `5e12b0c1d93e0af949a111a110f1bb766be71c1d`. End-user account
+creation is disabled in Firebase Authentication.
 
 - Hosting: `https://ludcount-hanenashi.web.app`
 - Alternate default domain: `https://ludcount-hanenashi.firebaseapp.com`
 - Firestore rules: the exact emulator-tested repository source
 - Firestore indexes: the required transactions index is ready
 
-Email/password authentication and the production data workflow passed live
-smoke tests. Google sign-in reaches the official Google account flow; completing
-the account chooser remains a manual credentialed verification.
+Existing email/password and Google users passed credentialed live sign-in
+checks. The production signup endpoint rejects unknown email/password
+enrollment with `ADMIN_ONLY_OPERATION`, unknown Google enrollment was manually
+verified not to bootstrap a household, and the deployed demo completes with
+zero Firebase requests.
 
 Use [`docs/production-release.md`](./docs/production-release.md) for every
 future controlled release. Preserve its index → readiness → rules → Hosting →

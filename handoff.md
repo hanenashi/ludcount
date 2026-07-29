@@ -2,8 +2,10 @@
 
 ## Post-release invitation and public-demo hardening
 
-The repository now prepares a separately deployable invitation-aware release.
-It has not been deployed, and no Firebase Console setting was changed.
+The invitation-only release was deployed to Firebase Hosting on 2026-07-29
+from application commit `5e12b0c1d93e0af949a111a110f1bb766be71c1d`.
+End-user account creation was then disabled under Firebase Authentication
+Settings after the Hosting build and existing-provider sign-ins were verified.
 
 - Public email/password registration UI and client signup code were removed.
 - Existing email/password and Google users retain sign-in; password reset
@@ -42,17 +44,24 @@ Final local verification:
 - `npm run build`: passing (with the existing Firebase vendor chunk-size
   advisory)
 
-Before this build can safely become the invitation-only production release:
+Production verification after disabling end-user account creation:
 
-1. configure a real `VITE_ACCESS_REQUEST_URL`
-2. explicitly authorize and deploy the tested Hosting build
-3. verify existing-user sign-in and the local demo on the deployed origin
-4. explicitly authorize the manual Console action at **Authentication →
-   Settings → User actions → disable end-user account creation**
-5. re-test existing providers and rejected new-user enrollment
-
-The current production site continues to serve the earlier application commit
-until a later deployment is authorized.
+- Existing email/password sign-in reached the existing overview.
+- The user manually verified an approved existing Google account reached the
+  overview.
+- A direct unknown email/password signup returned
+  `ADMIN_ONLY_OPERATION`. A follow-up Auth export retained five accounts and
+  confirmed the rejected address was absent, so no household bootstrap was
+  possible.
+- The user manually verified unknown Google enrollment was rejected without a
+  household bootstrap.
+- The deployed `/demo` create/duplicate/reload workflow made zero requests to
+  Firebase Authentication, Firestore, token, Installations, or App Check
+  endpoints.
+- The configured access-request action uses the reviewed public `mailto:` URL.
+- App Check enforcement remains off.
+- Only Hosting was deployed for this follow-up. Firestore rules and indexes
+  were not redeployed or modified.
 
 ## First production release
 
@@ -79,9 +88,8 @@ application commit `11a1ecf2051749d02d299be40ad1ff54821d2c07`.
 - Desktop Chromium, 390x844 mobile, 320x700 mobile, and 844x390 mobile
   landscape passed without horizontal overflow. Forms, filters, settings, and
   transaction controls remained reachable.
-- Google sign-in opens the official `accounts.google.com` flow from the
-  deployed hostname. Completing the account chooser remains a manual
-  credentialed smoke check and must not be reported as completed yet.
+- Google sign-in completion was later manually verified with an approved
+  existing account on the invitation-only Hosting release.
 - The Authentication authorized-domain list already contains `localhost`,
   `ludcount-hanenashi.firebaseapp.com`, and
   `ludcount-hanenashi.web.app`. No authorized-domain Console change is
@@ -260,22 +268,22 @@ workflow works.
   domains.
 - Production contains only the three dedicated smoke user workspaces described
   above, with zero smoke transactions remaining.
-- No Firebase Console settings were changed.
+- End-user account creation is disabled in Firebase Authentication. App Check
+  enforcement remains off, and no other Firebase Console setting was changed
+  during invitation-only verification.
 - Indexes, rules, and Hosting were deployed in that order. Emulator-only rules
   and configuration were not deployed.
 
 ## What to do next
 
-The MVP is live. Remaining release follow-up:
+The invitation-only MVP is live. Remaining release follow-up:
 
-1. manually complete Google sign-in on
-   `https://ludcount-hanenashi.web.app` with an authorized Google account
-2. decide whether the three dedicated smoke Authentication users and their
+1. decide whether the three dedicated smoke Authentication users and their
    empty personal workspaces should be retained or removed in a separately
    authorized cleanup
-3. add any future custom domain to Authentication authorized domains before
+2. add any future custom domain to Authentication authorized domains before
    serving sign-in there
-4. keep custom and archived categories deferred until their documented schema
+3. keep custom and archived categories deferred until their documented schema
    and rule work is explicitly authorized
 
 ## Commands
