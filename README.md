@@ -3,15 +3,14 @@
 Ludcount is a small household income and expense journal. The interface defaults
 to Czech and can be switched to English in Settings.
 
-This repository currently implements Phase 5 pre-deployment polish from
+This repository implements the Phase 1-5 MVP from
 [`battleplan.md`](./battleplan.md). Firebase Authentication creates or loads a
 personal household, and transactions and user preferences are synchronized
-through Cloud Firestore. Production Firestore access is defined by strict,
-emulator-tested membership and field-validation rules. Transaction history now
+through Cloud Firestore. Production Firestore access is protected by strict,
+emulator-tested membership and field-validation rules. Transaction history
 supports combined filters, note search, explicit-save duplication, and
-localized client-side CSV export. Accessibility, narrow and landscape layouts,
-localized failure states, Hosting configuration, and application metadata are
-prepared without deploying anything.
+localized client-side CSV export. The reviewed MVP is deployed on Firebase
+Hosting at `https://ludcount-hanenashi.web.app`.
 
 ## Requirements
 
@@ -58,22 +57,20 @@ belongs in version control.
 
 ## Firebase Authentication
 
-Before production authentication can work, enable these providers in Firebase
-Console under **Authentication → Sign-in method**:
+The production project has these providers enabled:
 
 - Email/Password
 - Google
 
-Choose a project support email for Google sign-in and add every intended
-production hostname under **Authentication → Settings → Authorized domains**.
-The expected Firebase Hosting domains are
-`ludcount-hanenashi.firebaseapp.com` and `ludcount-hanenashi.web.app`; every
-future custom hostname must be added exactly as served.
+The authorized-domain list contains `ludcount-hanenashi.firebaseapp.com`,
+`ludcount-hanenashi.web.app`, and `localhost`. Add every future custom hostname
+under **Authentication → Settings → Authorized domains** before serving sign-in
+there.
 
 Do not create Firestore collections manually. The committed production
-[`firestore.rules`](./firestore.rules) file is the source of truth. It has not
-been deployed: the Firebase project therefore continues using its previously
-deployed deny-all rules until a future deployment is explicitly authorized.
+[`firestore.rules`](./firestore.rules) file is the source of truth. The exact
+tested file is deployed to production. Future rule changes must pass the local
+rules suite and follow the controlled release order before deployment.
 
 ## Firebase emulators
 
@@ -163,8 +160,8 @@ npm run build
 Run `npm run test:browser` separately while the emulators are active, as shown
 above.
 
-Deployment commands are documented for future authorized use, but they must not
-be run as part of local development.
+Deployment commands are documented for controlled future releases. They must
+not be run as part of ordinary local development.
 
 ## Money and dates
 
@@ -220,7 +217,7 @@ required for custom and archived categories are documented in
 - There is intentionally no service worker. Firestore caching does not make the
   complete authentication and write workflow available offline.
 
-## Phase 5 pre-deployment boundaries
+## MVP boundaries
 
 Included:
 
@@ -252,14 +249,22 @@ Deferred:
 
 - category management and archived-category handling
 - service-worker caching and full offline support
-- production deployment and live smoke testing
 - Cloud Functions, Storage, Analytics, App Check, and billing-dependent features
 
-## Before production deployment
+## Production status and future releases
 
-No Firebase deployment has been performed. The exact future preflight, required
-authorized domains, and ordered index → rules → Hosting → smoke-test commands
-are in [`docs/production-release.md`](./docs/production-release.md).
+The first production MVP release was deployed on 2026-07-29 from commit
+`11a1ecf2051749d02d299be40ad1ff54821d2c07`.
 
-Keep the currently deployed deny-all policy in place until those checks and
-deployment authorization are complete.
+- Hosting: `https://ludcount-hanenashi.web.app`
+- Alternate default domain: `https://ludcount-hanenashi.firebaseapp.com`
+- Firestore rules: the exact emulator-tested repository source
+- Firestore indexes: the required transactions index is ready
+
+Email/password authentication and the production data workflow passed live
+smoke tests. Google sign-in reaches the official Google account flow; completing
+the account chooser remains a manual credentialed verification.
+
+Use [`docs/production-release.md`](./docs/production-release.md) for every
+future controlled release. Preserve its index → readiness → rules → Hosting →
+smoke-test order.

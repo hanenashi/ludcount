@@ -1,12 +1,14 @@
 # Production Release Runbook
 
-This document prepares a future release. It does not authorize deployment.
-Production currently retains its deployed deny-all Firestore rules.
+This runbook was used for the first production release on 2026-07-29. It does
+not authorize another deployment. Production currently serves application
+commit `11a1ecf2051749d02d299be40ad1ff54821d2c07` with the repository's tested
+Firestore rules and required index.
 
 ## Authentication domains
 
-Before a release, verify these entries under Firebase Authentication authorized
-domains:
+Before every release, verify these entries under Firebase Authentication
+authorized domains:
 
 - `ludcount-hanenashi.firebaseapp.com`
 - `ludcount-hanenashi.web.app`
@@ -14,8 +16,9 @@ domains:
 - every exact custom hostname that will serve the app, including separate apex
   and `www` names where applicable
 
-Do not add domains until the intended production hostname is known and the
-release is explicitly authorized.
+The two default Hosting domains and `localhost` were verified for the first
+release. Do not add future custom domains until the intended hostname is known
+and its release is explicitly authorized.
 
 ## Preflight
 
@@ -50,7 +53,7 @@ different.
 
 ## Authorized release order
 
-Only after explicit release authorization:
+Only after explicit authorization for a future release:
 
 1. Deploy indexes:
 

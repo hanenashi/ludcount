@@ -1,5 +1,44 @@
 # Ludcount Handoff
 
+## First production release
+
+The first Ludcount MVP production release completed on 2026-07-29 from
+application commit `11a1ecf2051749d02d299be40ad1ff54821d2c07`.
+
+- Hosting is live at:
+  - `https://ludcount-hanenashi.web.app`
+  - `https://ludcount-hanenashi.firebaseapp.com`
+- The `transactions` composite index for descending `dateKey` and `createdAt`
+  is deployed and reports `READY`.
+- The live `cloud.firestore` release uses the repository's tested
+  `firestore.rules` exactly. Both the local and deployed source have SHA-256
+  `7889dcfc1758adc2c65f6dbe018e7ce71cdf5596f5bde2701ed840ca9e7bf556`.
+- Unauthenticated production Firestore access was directly verified to return
+  HTTP 403.
+- The owner production smoke test passed personal-household bootstrap,
+  income/expense creation, reload persistence, editing, explicit-save
+  duplication, combined month/type/category/note filtering, localized CSV
+  export with a UTF-8 BOM, locale persistence, and transaction cleanup.
+- A separate production account received only its own personal household.
+  Direct requests to both smoke-owner households and their transactions
+  returned HTTP 403 for that account.
+- Desktop Chromium, 390x844 mobile, 320x700 mobile, and 844x390 mobile
+  landscape passed without horizontal overflow. Forms, filters, settings, and
+  transaction controls remained reachable.
+- Google sign-in opens the official `accounts.google.com` flow from the
+  deployed hostname. Completing the account chooser remains a manual
+  credentialed smoke check and must not be reported as completed yet.
+- The Authentication authorized-domain list already contains `localhost`,
+  `ludcount-hanenashi.firebaseapp.com`, and
+  `ludcount-hanenashi.web.app`. No authorized-domain Console change is
+  currently required.
+- Three dedicated smoke user profiles and personal households remain in
+  production: two owner-run workspaces (one from an interrupted Playwright
+  harness run) and one non-member workspace. All smoke transactions were
+  deleted; no other application data was created.
+- No billing, Cloud Functions, Storage, Analytics, App Check, App Hosting, or
+  other Firebase service was enabled.
+
 ## Completed phases
 
 - Phase 1: local vertical slice in commit `42729a3`
@@ -35,8 +74,8 @@
   custom/archive schema and rule changes in `docs/category-management.md`.
 - Documented authorized domains and the exact future index, rules, Hosting, and
   smoke-test order in `docs/production-release.md`.
-- Did not deploy, modify Firebase Console, access production Firestore, create
-  collections, or change Firestore rules/indexes.
+- Phase 5 itself did not deploy or modify Firebase Console. The separately
+  authorized first production release is recorded above.
 
 ## Phase 4 result
 
@@ -162,32 +201,28 @@ workflow works.
 ## Firebase Console and production status
 
 - Email/Password and Google authentication are enabled.
-- Production Firestore still uses the previously deployed deny-all rules.
-- No production Firestore data was created or modified.
+- The tested strict Firestore rules and required composite index are deployed.
+- Firebase Hosting serves the reviewed Vite build on both default Hosting
+  domains.
+- Production contains only the three dedicated smoke user workspaces described
+  above, with zero smoke transactions remaining.
 - No Firebase Console settings were changed.
-- No deployment was performed.
-
-Before a safe production deployment:
-
-1. obtain explicit deployment authorization
-2. verify intended Authentication authorized domains
-3. run the clean-checkout preflight in `docs/production-release.md`
-4. deploy indexes and wait for readiness
-5. deploy the reviewed rules, then Hosting
-6. perform the documented owner and non-member production smoke tests
+- Indexes, rules, and Hosting were deployed in that order. Emulator-only rules
+  and configuration were not deployed.
 
 ## What to do next
 
-The requested Phase 5 pre-deployment polish is complete. Remaining work:
+The MVP is live. Remaining release follow-up:
 
-1. decide and explicitly authorize whether to implement the deferred custom and
-   archived-category slice
-2. review the release runbook and authorize a production release separately
-3. add the final production/custom domains to Authentication when known
-4. deploy and run live smoke tests only under that future authorization
-
-Production Firestore must remain on its currently deployed deny-all rules until
-an explicitly authorized, reviewed rules/index deployment.
+1. manually complete Google sign-in on
+   `https://ludcount-hanenashi.web.app` with an authorized Google account
+2. decide whether the three dedicated smoke Authentication users and their
+   empty personal workspaces should be retained or removed in a separately
+   authorized cleanup
+3. add any future custom domain to Authentication authorized domains before
+   serving sign-in there
+4. keep custom and archived categories deferred until their documented schema
+   and rule work is explicitly authorized
 
 ## Commands
 
