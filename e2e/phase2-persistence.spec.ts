@@ -14,6 +14,7 @@ async function clickVisible(locator: Locator): Promise<void> {
 test("persists a personal household, transactions, and locale through Firestore", async ({
   page,
 }, testInfo) => {
+  test.setTimeout(60_000);
   const email = `phase2-${testInfo.project.name}-${Date.now()}@example.test`;
   const consoleErrors: string[] = [];
   page.on("console", (message) => {

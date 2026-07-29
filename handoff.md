@@ -1,113 +1,146 @@
 # Ludcount Handoff
 
-## What was completed
+## Completed phases
 
-- Read and followed `battleplan.md`.
-- Phase 1 remains available in commit `42729a3`.
-- Implemented Phase 2:
-  - automatically creates a personal household, owner membership, and user
-    profile in one Firestore transaction after first sign-in
-  - loads the existing active household on subsequent sign-ins
-  - persists user locale and active household preference in the user profile
-  - replaces application-level in-memory transaction storage with a focused
-    Firestore repository and realtime subscription
-  - adds typed converters with runtime validation for profiles, households,
-    members, and transactions
-  - preserves positive integer minor-unit amounts and local `YYYY-MM-DD` /
-    `YYYY-MM` date keys
-  - adds explicit loading, offline, permission-denied, pending-write, and
-    write-failure UI states in Czech and English
-- Added a separate `firebase.emulators.json` and
-  `firestore.emulator.rules` for Phase 2 development. These emulator-only rules
-  allow authenticated traffic.
-- Kept the production `firestore.rules` file unchanged and deny-all.
-- Added the required Firestore composite index as version-controlled code.
-- Added unit coverage for converters, error normalization, data states, money,
-  dates, totals, repositories, and transaction form failure behavior.
-- Added emulator-backed Playwright coverage for first sign-in bootstrap,
-  transaction create/reload/edit/delete, Firestore-backed locale hydration,
-  Czech-first authentication, responsive desktop/mobile layouts, and browser
-  console errors.
-- Updated `README.md` with the Phase 2 architecture, emulator workflow, quality
-  commands, and boundaries.
-- No deployment, production Firestore writes, manual collection creation, or
-  production rule relaxation was performed.
+- Phase 1: local vertical slice in commit `42729a3`
+- Phase 2: Firebase persistence in commit `8af4299`
+- Phase 3: production Firestore Security Rules and emulator-backed allow/deny
+  coverage in the current Phase 3 commit
+
+## Phase 3 result
+
+- Replaced the repository's deny-all `firestore.rules` source with strict rules
+  for:
+  - `users/{uid}`
+  - `households/{householdId}`
+  - `households/{householdId}/members/{uid}`
+  - `households/{householdId}/transactions/{transactionId}`
+- Kept the actually deployed Firebase project unchanged. No rules, indexes, or
+  application code were deployed.
+- Added the Firebase Rules Unit Testing library and a dedicated
+  `npm run test:rules` workflow.
+- Added `firebase.rules-test.json`, which starts only Firestore on port `8081`
+  with the isolated `demo-ludcount-rules` project ID.
+- Kept `firebase.emulators.json` and `firestore.emulator.rules` explicitly
+  development-only for local UI and Playwright workflows.
+- Tested the strict rules as a separate candidate before promoting the exact
+  passing policy into `firestore.rules`.
+- Ran the complete Playwright signup, atomic household bootstrap,
+  create/reload/edit/delete, and locale-persistence flow against an emulator
+  loaded with the strict production rules.
+- Added 32 allow/deny tests covering authentication, profiles, households,
+  memberships, transactions, ownership, creator immutability, integer money,
+  dates, month consistency, timestamps, roles, and unexpected fields.
+
+## Final rule boundaries
+
+### User profiles
+
+- Unauthenticated access is denied.
+- A user may read only `users/{theirUid}`.
+- Initial profile creation must be part of a valid atomic personal-household
+  bootstrap and the stored email must match the authentication token.
+- Only `locale`, `activeHouseholdId`, and `updatedAt` may change.
+- Locale is limited to `cs` or `en`.
+- An active household must contain that user as a member.
+- Display name, email, creation timestamp, and arbitrary extra fields cannot be
+  changed.
+
+### Households
+
+- Only members may read a household.
+- Creation requires the authenticated user to be the owner and to create the
+  matching owner membership atomically.
+- Only the owner may update household settings.
+- `ownerId` and `createdAt` are immutable.
+- Currency is currently restricted to `CZK`.
+- Required types, timestamps, length limits, and exact fields are enforced.
+- Household deletion is denied.
+
+### Memberships
+
+- Only existing household members may read membership documents.
+- Initial owner membership must match both the authenticated user and the
+  atomically created household owner.
+- Existing owners may add only non-owner members.
+- Non-owners cannot grant themselves access or escalate roles.
+- Owners may change only a non-owner member's display name or remove that
+  non-owner member.
+- Owner membership and role/joined-at identity fields are immutable.
+
+### Transactions
+
+- Only household members may read or create transactions.
+- `createdBy` must equal the authenticated user on creation.
+- Only the creator may update or delete a transaction.
+- `createdBy` and `createdAt` are immutable.
+- Household identity is enforced by the parent document path; a stored
+  `householdId` field is rejected.
+- The current schema uses `dateKey` and `createdBy`; unexpected aliases such as
+  `localDate` and `creatorId` are rejected.
+- `amountMinor` must be an integer from `1` through `1,000,000,000`.
+- Currency must be `CZK`; type must be `income` or `expense`.
+- `dateKey` and `monthKey` must use constrained local calendar shapes and
+  describe the same month.
+- Required fields, server timestamps, string length limits, and exact field
+  sets are enforced.
 
 ## Verification
 
 - `npm run format:check`: passing
 - `npm run lint`: passing
 - `npm run typecheck`: passing
-- `npm test`: 21 tests passing across 8 files
-- `npm run test:browser`: 4 Playwright tests passing across desktop and mobile
-  Chromium against local Auth and Firestore emulators
+- `npm test`: passing
+- `npm run test:rules`: 32 tests passing against local Firestore only
+- `npm run test:browser`: 4 tests passing on desktop and mobile Chromium against
+  both the development rules and, in a separate integration run, the strict
+  production rules
 - `npm run build`: passing
-- Desktop and mobile screenshots were visually checked with no layout issue
-  found.
 
-Temurin OpenJDK 21.0.12 is installed in the user-local toolchain and is the
-active `java`, `javac`, and `JAVA_HOME` for new shells. The previous Java 17
-installation remains available. The committed Firebase CLI 15.24.0 and the
-normal `npm run emulators` command were verified to start both Authentication
-and Firestore successfully.
+Temurin OpenJDK 21.0.12 is active. The normal Firebase CLI 15.24.0 emulator
+workflow works.
 
-## Current data model
+## Firebase Console and production status
 
-- `users/{uid}` stores display name, email, locale, and `activeHouseholdId`.
-- `households/{householdId}` stores the personal household and CZK currency.
-- `households/{householdId}/members/{uid}` stores the owner membership.
-- `households/{householdId}/transactions/{transactionId}` stores transactions
-  with positive integer `amountMinor`, `currency: "CZK"`, local date/month keys,
-  category snapshot, creator, and timestamps.
+- Email/Password and Google authentication are enabled.
+- Production Firestore still uses the previously deployed deny-all rules.
+- No production Firestore data was created or modified.
+- No Firebase Console settings were changed.
+- No deployment was performed.
 
-The application does not use the Phase 1 in-memory repository for persistence.
-That small repository remains only as a unit-test utility.
+Before a safe production deployment:
 
-## Firebase Console status
-
-Email/Password and Google authentication are already enabled.
-
-Before a future production release:
-
-- add intended production hostnames to Authentication authorized domains
-- do not manually create Firestore collections
-- do not enable Cloud Functions, Storage, Analytics, App Check, or
-  billing-dependent features unless a later phase explicitly requires them
+1. review the strict rules and test evidence
+2. add intended production hostnames to Authentication authorized domains
+3. confirm any existing production documents match the exact field contracts
+4. explicitly authorize deployment of Firestore rules and indexes
+5. smoke-test production with separate owner and non-member accounts
 
 ## What to do next
 
-Proceed with Phase 3 from `battleplan.md`:
+Proceed with Phase 4 from `battleplan.md`:
 
-1. Replace the emulator-only broad authenticated rule with production household
-   membership and field-validation rules in `firestore.rules`.
-2. Add explicit allow/deny emulator tests for owners, members, non-members,
-   unauthenticated users, immutable ownership fields, integer money, valid local
-   dates, and permitted user preference updates.
-3. Keep deny-all production rules in place until those tests pass and deployment
-   is explicitly authorized.
-4. Do not deploy unless the user explicitly requests it.
+1. add month, type, and category filters
+2. add note search and transaction duplication
+3. add UTF-8 BOM CSV export
+4. keep all production deployment work out of scope until explicitly authorized
 
-## Local commands
+Category management remains deferred. Although the broad battle plan groups it
+with Phase 3, this Phase 3 request explicitly scoped implementation to security
+rules for the existing four collections.
+
+## Commands
 
 ```bash
 npm install
 npm run dev
-```
-
-Start Auth and Firestore emulators:
-
-```bash
 npm run emulators
+npm run test:rules
 ```
 
-In another terminal, run the app against them:
+With development emulators running in another terminal:
 
 ```bash
 VITE_USE_FIREBASE_EMULATORS=true npm run dev
-```
-
-With the emulators still running, execute browser tests:
-
-```bash
 npm run test:browser
 ```

@@ -1,9 +1,280 @@
 rules_version = '2';
 
+// Production rules. Changes must pass the emulator-backed rules test suite.
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if false;
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidLocale(locale) {
+      return locale is string && locale in ['cs', 'en'];
+    }
+
+    function isValidRequiredString(value, maximumLength) {
+      return value is string
+        && value.size() > 0
+        && value.size() <= maximumLength;
+    }
+
+    function isValidOptionalString(value, maximumLength) {
+      return value is string && value.size() <= maximumLength;
+    }
+
+    function isCurrentTimestamp(value) {
+      return value is timestamp && value == request.time;
+    }
+
+    function memberPath(householdId, userId) {
+      return /databases/$(database)/documents/households/$(householdId)/members/$(userId);
+    }
+
+    function householdPath(householdId) {
+      return /databases/$(database)/documents/households/$(householdId);
+    }
+
+    function isHouseholdMember(householdId) {
+      return isSignedIn() && exists(memberPath(householdId, request.auth.uid));
+    }
+
+    function isHouseholdOwner(householdId) {
+      return isSignedIn()
+        && get(householdPath(householdId)).data.ownerId == request.auth.uid;
+    }
+
+    function isValidProfile(data) {
+      return data.keys().hasAll([
+          'displayName',
+          'email',
+          'locale',
+          'activeHouseholdId',
+          'createdAt',
+          'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'displayName',
+          'email',
+          'locale',
+          'activeHouseholdId',
+          'createdAt',
+          'updatedAt'
+        ])
+        && isValidOptionalString(data.displayName, 100)
+        && isValidOptionalString(data.email, 320)
+        && isValidLocale(data.locale)
+        && isValidRequiredString(data.activeHouseholdId, 128)
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidHousehold(data) {
+      return data.keys().hasAll([
+          'name',
+          'currency',
+          'ownerId',
+          'createdAt',
+          'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'name',
+          'currency',
+          'ownerId',
+          'createdAt',
+          'updatedAt'
+        ])
+        && isValidRequiredString(data.name, 100)
+        && data.currency == 'CZK'
+        && isValidRequiredString(data.ownerId, 128)
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidMember(data) {
+      return data.keys().hasAll(['role', 'displayName', 'joinedAt'])
+        && data.keys().hasOnly(['role', 'displayName', 'joinedAt'])
+        && data.role in ['owner', 'member']
+        && isValidOptionalString(data.displayName, 100)
+        && data.joinedAt is timestamp;
+    }
+
+    function isValidDateKey(dateKey) {
+      return dateKey is string
+        && dateKey.matches(
+          '^[0-9]{4}-((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01])|(0[469]|11)-(0[1-9]|[12][0-9]|30)|02-(0[1-9]|1[0-9]|2[0-9]))$'
+        );
+    }
+
+    function isValidMonthKey(monthKey) {
+      return monthKey is string
+        && monthKey.matches('^[0-9]{4}-(0[1-9]|1[0-2])$');
+    }
+
+    function isConsistentMonth(dateKey, monthKey) {
+      return dateKey.matches('^' + monthKey + '-[0-9]{2}$');
+    }
+
+    function isValidTransaction(data) {
+      return data.keys().hasAll([
+          'type',
+          'amountMinor',
+          'currency',
+          'categoryId',
+          'categoryLabelSnapshot',
+          'dateKey',
+          'monthKey',
+          'note',
+          'createdBy',
+          'createdAt',
+          'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'type',
+          'amountMinor',
+          'currency',
+          'categoryId',
+          'categoryLabelSnapshot',
+          'dateKey',
+          'monthKey',
+          'note',
+          'createdBy',
+          'createdAt',
+          'updatedAt'
+        ])
+        && data.type in ['income', 'expense']
+        && data.amountMinor is int
+        && data.amountMinor > 0
+        && data.amountMinor <= 1000000000
+        && data.currency == 'CZK'
+        && isValidRequiredString(data.categoryId, 100)
+        && isValidRequiredString(data.categoryLabelSnapshot, 100)
+        && isValidDateKey(data.dateKey)
+        && isValidMonthKey(data.monthKey)
+        && isConsistentMonth(data.dateKey, data.monthKey)
+        && isValidOptionalString(data.note, 120)
+        && isValidRequiredString(data.createdBy, 128)
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    match /users/{userId} {
+      allow read: if isSignedIn() && request.auth.uid == userId;
+
+      allow create: if isSignedIn()
+        && request.auth.uid == userId
+        && isValidProfile(request.resource.data)
+        && request.auth.token.email is string
+        && request.resource.data.email == request.auth.token.email
+        && isCurrentTimestamp(request.resource.data.createdAt)
+        && isCurrentTimestamp(request.resource.data.updatedAt)
+        && getAfter(
+          memberPath(request.resource.data.activeHouseholdId, userId)
+        ).data.role == 'owner'
+        && getAfter(
+          householdPath(request.resource.data.activeHouseholdId)
+        ).data.ownerId == userId;
+
+      allow update: if isSignedIn()
+        && request.auth.uid == userId
+        && isValidProfile(request.resource.data)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'locale',
+          'activeHouseholdId',
+          'updatedAt'
+        ])
+        && isCurrentTimestamp(request.resource.data.updatedAt)
+        && exists(
+          memberPath(request.resource.data.activeHouseholdId, userId)
+        );
+    }
+
+    match /households/{householdId} {
+      allow read: if isHouseholdMember(householdId);
+
+      allow create: if isSignedIn()
+        && isValidHousehold(request.resource.data)
+        && request.resource.data.ownerId == request.auth.uid
+        && isCurrentTimestamp(request.resource.data.createdAt)
+        && isCurrentTimestamp(request.resource.data.updatedAt)
+        && getAfter(
+          memberPath(householdId, request.auth.uid)
+        ).data.role == 'owner';
+
+      allow update: if isHouseholdOwner(householdId)
+        && isValidHousehold(request.resource.data)
+        && request.resource.data.ownerId == resource.data.ownerId
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'name',
+          'currency',
+          'updatedAt'
+        ])
+        && isCurrentTimestamp(request.resource.data.updatedAt);
+
+      match /members/{memberId} {
+        allow read: if isHouseholdMember(householdId);
+
+        allow create: if isSignedIn()
+          && isValidMember(request.resource.data)
+          && isCurrentTimestamp(request.resource.data.joinedAt)
+          && (
+            (
+              memberId == request.auth.uid
+              && request.resource.data.role == 'owner'
+              && getAfter(householdPath(householdId)).data.ownerId
+                == request.auth.uid
+            )
+            || (
+              isHouseholdOwner(householdId)
+              && memberId != request.auth.uid
+              && request.resource.data.role == 'member'
+            )
+          );
+
+        allow update: if isHouseholdOwner(householdId)
+          && memberId != request.auth.uid
+          && resource.data.role == 'member'
+          && isValidMember(request.resource.data)
+          && request.resource.data.role == resource.data.role
+          && request.resource.data.joinedAt == resource.data.joinedAt
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'displayName'
+          ]);
+
+        allow delete: if isHouseholdOwner(householdId)
+          && memberId != request.auth.uid
+          && resource.data.role == 'member';
+      }
+
+      match /transactions/{transactionId} {
+        allow read: if isHouseholdMember(householdId);
+
+        allow create: if isHouseholdMember(householdId)
+          && isValidTransaction(request.resource.data)
+          && request.resource.data.createdBy == request.auth.uid
+          && isCurrentTimestamp(request.resource.data.createdAt)
+          && isCurrentTimestamp(request.resource.data.updatedAt);
+
+        allow update: if isHouseholdMember(householdId)
+          && resource.data.createdBy == request.auth.uid
+          && isValidTransaction(request.resource.data)
+          && request.resource.data.createdBy == resource.data.createdBy
+          && request.resource.data.createdAt == resource.data.createdAt
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'type',
+            'amountMinor',
+            'currency',
+            'categoryId',
+            'categoryLabelSnapshot',
+            'dateKey',
+            'monthKey',
+            'note',
+            'updatedAt'
+          ])
+          && isCurrentTimestamp(request.resource.data.updatedAt);
+
+        allow delete: if isHouseholdMember(householdId)
+          && resource.data.createdBy == request.auth.uid;
+      }
     }
   }
 }

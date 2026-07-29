@@ -3,11 +3,11 @@
 Ludcount is a small household income and expense journal. The interface defaults
 to Czech and can be switched to English in Settings.
 
-This repository currently implements Phase 2 from
+This repository currently implements Phase 3 from
 [`battleplan.md`](./battleplan.md). Firebase Authentication creates or loads a
 personal household, and transactions and user preferences are synchronized
-through Cloud Firestore. Production Firestore remains locked by deny-all
-security rules until Phase 3.
+through Cloud Firestore. Production Firestore access is defined by strict,
+emulator-tested membership and field-validation rules.
 
 ## Requirements
 
@@ -64,10 +64,9 @@ Choose a project support email for Google sign-in and add every intended
 production hostname under **Authentication → Settings → Authorized domains**.
 
 Do not create Firestore collections manually. The committed production
-[`firestore.rules`](./firestore.rules) file is the source of truth and currently
-denies every read and write. A signed-in production client therefore shows an
-explicit permission-denied state until Phase 3 rules are implemented and
-tested.
+[`firestore.rules`](./firestore.rules) file is the source of truth. It has not
+been deployed: the Firebase project therefore continues using its previously
+deployed deny-all rules until a future deployment is explicitly authorized.
 
 ## Firebase emulators
 
@@ -79,8 +78,8 @@ npm run emulators
 
 This command intentionally uses `firebase.emulators.json` and
 `firestore.emulator.rules`. Those development-only rules allow authenticated
-emulator traffic so Phase 2 persistence can be exercised without changing
-production `firestore.rules`.
+emulator traffic so local UI workflows remain easy to exercise. They are not
+the production security policy.
 
 Start the Vite app against the emulators in a second terminal:
 
@@ -104,6 +103,45 @@ Default local endpoints:
 Emulator state is intentionally ephemeral unless Firebase export/import options
 are supplied manually.
 
+## Firestore security rules tests
+
+Run the production rules suite independently:
+
+```bash
+npm run test:rules
+```
+
+This command:
+
+- starts only a local Firestore emulator on port `8081`
+- uses the isolated `demo-ludcount-rules` project ID
+- loads the production `firestore.rules` source
+- runs the Firebase Rules Unit Testing allow/deny suite
+- shuts the emulator down afterward
+
+The `demo-*` project ID prevents accidental fallback to non-emulated Firebase
+services. Automated rules tests never use the production project.
+
+The complete Playwright persistence workflow has also been verified locally
+against an emulator loaded with `firestore.rules`, proving the real client
+bootstrap and transaction writes satisfy the strict policy.
+
+The production rules enforce these boundaries:
+
+- users may read only their own profile and may update only `locale`,
+  `activeHouseholdId`, and `updatedAt`
+- profile identity fields and creation timestamps are immutable
+- only members may read a household, its memberships, and its transactions
+- a new personal household, owner membership, and profile must be created
+  atomically by that authenticated owner
+- only owners may update household settings or manage non-owner memberships;
+  ownership and roles cannot be escalated
+- members may create transactions only as themselves
+- transaction creators may update or delete their own transactions; other
+  members have read-only access to them
+- transaction fields, integer amounts, CZK currency, local date/month keys,
+  timestamps, and exact field sets are validated
+
 ## Quality commands
 
 ```bash
@@ -111,6 +149,7 @@ npm run format
 npm run lint
 npm run typecheck
 npm test
+npm run test:rules
 npm run build
 ```
 
@@ -128,7 +167,7 @@ No deployment command is configured in this phase.
 - User-selected dates use local `YYYY-MM-DD` date keys and `YYYY-MM` month keys.
 - The documented maximum transaction amount is `1,000,000,000` minor units.
 
-## Phase 2 boundaries
+## Phase 3 boundaries
 
 Included:
 
@@ -143,10 +182,27 @@ Included:
 - transaction creation, editing, deletion, totals, and localized categories
 - Firebase Auth and Firestore emulator configuration
 - validated Firebase client initialization
+- production Firestore rules for profiles, households, memberships, and
+  transactions
+- 32 emulator-backed allow/deny rules tests using the Firebase Rules Unit
+  Testing library
 
 Deferred:
 
-- production Firestore security rules beyond deny-all and their allow/deny tests
 - category management, filtering, duplicate, and CSV export
 - deployment and hosting
 - Cloud Functions, Storage, Analytics, App Check, and billing-dependent features
+
+## Before production deployment
+
+No Firebase deployment has been performed. Before deploying safely:
+
+1. review the committed rules and passing rules-test output
+2. confirm intended production hostnames are authorized for Authentication
+3. confirm any existing production documents conform to the exact Phase 3 field
+   contracts
+4. explicitly authorize and perform a rules/index deployment
+5. run a production smoke test with separate owner and non-member accounts
+
+Keep the currently deployed deny-all policy in place until those checks and
+deployment authorization are complete.

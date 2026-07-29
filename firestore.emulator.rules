@@ -1,7 +1,7 @@
 rules_version = '2';
 
-// Phase 2 development only. Production continues to use firestore.rules.
-// Phase 3 will replace this broad authenticated rule with tested membership rules.
+// Development only. Production uses the strict, emulator-tested firestore.rules.
+// This broad authenticated rule keeps local UI workflows easy to exercise.
 service cloud.firestore {
   match /databases/{database}/documents {
     match /{document=**} {
