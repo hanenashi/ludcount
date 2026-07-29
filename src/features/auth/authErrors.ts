@@ -2,6 +2,7 @@ import { FirebaseError } from "firebase/app";
 import type { TranslationKey } from "../../i18n/en";
 
 const authErrorKeys: Readonly<Record<string, TranslationKey>> = {
+  "auth/admin-restricted-operation": "auth.error.invitationOnly",
   "auth/invalid-credential": "auth.error.invalidCredentials",
   "auth/wrong-password": "auth.error.invalidCredentials",
   "auth/user-not-found": "auth.error.invalidCredentials",

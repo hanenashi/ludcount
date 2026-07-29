@@ -20,7 +20,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ["**/*Provider.tsx", "src/i18n/index.tsx"],
+    files: ["**/*Provider.tsx", "src/app/AppRuntime.tsx", "src/i18n/index.tsx"],
     rules: {
       "react-refresh/only-export-components": "off",
     },

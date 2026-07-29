@@ -1,17 +1,6 @@
 import { readFile } from "node:fs/promises";
-import { expect, test, type Locator, type Page } from "@playwright/test";
-
-async function clickVisible(locator: Locator): Promise<void> {
-  await locator.first().waitFor({ state: "attached" });
-  for (let index = 0; index < (await locator.count()); index += 1) {
-    const candidate = locator.nth(index);
-    if (await candidate.isVisible()) {
-      await candidate.click();
-      return;
-    }
-  }
-  throw new Error("No visible matching control was found.");
-}
+import { expect, test, type Page } from "@playwright/test";
+import { clickVisible, seedExistingUser } from "./helpers";
 
 function localDateKey(date: Date): string {
   const year = date.getFullYear();
@@ -50,6 +39,7 @@ async function addTransaction(
 
 test("filters, searches, duplicates, and exports transactions", async ({
   page,
+  request,
 }, testInfo) => {
   test.setTimeout(90_000);
   const today = new Date();
@@ -63,11 +53,11 @@ test("filters, searches, duplicates, and exports transactions", async ({
     }
   });
 
+  await seedExistingUser(request, email, "phase4-test-password");
   await page.goto("/sign-in");
-  await page.getByRole("button", { name: "Vytvořit účet" }).click();
   await page.getByLabel("E-mail").fill(email);
   await page.getByLabel("Heslo").fill("phase4-test-password");
-  await page.getByRole("button", { name: "Vytvořit účet" }).last().click();
+  await page.getByRole("button", { name: "Přihlásit se" }).click();
 
   await expect(
     page.getByRole("link", { name: "Přidat záznam" }).first(),

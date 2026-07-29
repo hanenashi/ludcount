@@ -2,6 +2,7 @@ import { Plus } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { MonthNavigator } from "../../components/MonthNavigator";
+import { useAppRuntime } from "../../app/AppRuntime";
 import { useI18n } from "../../i18n";
 import { monthKeyFromDate } from "../../lib/dates";
 import { asMoneyAmount, formatMoney } from "../../lib/money";
@@ -12,6 +13,7 @@ import { useTransactions } from "../transactions/TransactionProvider";
 
 export function OverviewPage() {
   const { locale, t } = useI18n();
+  const { basePath } = useAppRuntime();
   const { transactions } = useTransactions();
   const [monthKey, setMonthKey] = useState(monthKeyFromDate(new Date()));
   const monthlyTransactions = useMemo(
@@ -63,7 +65,7 @@ export function OverviewPage() {
 
       <Link
         className="button button-primary desktop-add-button"
-        to="/app/transactions/new"
+        to={`${basePath}/transactions/new`}
       >
         <Plus size={19} aria-hidden="true" />
         {t("transaction.add")}
@@ -73,12 +75,12 @@ export function OverviewPage() {
         <section className="content-section">
           <div className="section-heading">
             <h2>{t("overview.latest")}</h2>
-            <Link to="/app/transactions">{t("overview.viewAll")}</Link>
+            <Link to={`${basePath}/transactions`}>{t("overview.viewAll")}</Link>
           </div>
           {monthlyTransactions.length === 0 ? (
             <div className="empty-state" role="status" aria-live="polite">
               <p>{t("overview.empty")}</p>
-              <Link className="text-link" to="/app/transactions/new">
+              <Link className="text-link" to={`${basePath}/transactions/new`}>
                 {t("overview.emptyAction")}
               </Link>
             </div>

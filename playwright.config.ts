@@ -41,7 +41,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "VITE_USE_FIREBASE_EMULATORS=true npm run dev -- --host 127.0.0.1",
+    command:
+      "VITE_USE_FIREBASE_EMULATORS=true VITE_ACCESS_REQUEST_URL=https://example.test/request-access VITE_FIREBASE_APP_CHECK_DEBUG=true npm run dev -- --host 127.0.0.1",
     url: "http://127.0.0.1:5173/sign-in",
     reuseExistingServer: false,
     timeout: 120_000,

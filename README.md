@@ -9,8 +9,10 @@ personal household, and transactions and user preferences are synchronized
 through Cloud Firestore. Production Firestore access is protected by strict,
 emulator-tested membership and field-validation rules. Transaction history
 supports combined filters, note search, explicit-save duplication, and
-localized client-side CSV export. The reviewed MVP is deployed on Firebase
-Hosting at `https://ludcount-hanenashi.web.app`.
+localized client-side CSV export. The invitation-aware source also includes a
+fully local public demo at `/demo`. The currently deployed MVP is available on
+Firebase Hosting at `https://ludcount-hanenashi.web.app`; source changes are not
+live until a separately authorized deployment.
 
 ## Requirements
 
@@ -44,6 +46,19 @@ Hosting at `https://ludcount-hanenashi.web.app`.
    VITE_FIREBASE_APP_ID
    ```
 
+   Optional public configuration:
+
+   ```text
+   VITE_ACCESS_REQUEST_URL
+   VITE_FIREBASE_APP_CHECK_SITE_KEY
+   VITE_FIREBASE_APP_CHECK_DEBUG
+   ```
+
+   The access-request value accepts an `https:` or `mailto:` URL. The App Check
+   site key is used only when App Check is deliberately configured. Set the
+   debug flag only for local emulator/test work; never commit a generated App
+   Check debug token.
+
 4. Start the app:
 
    ```bash
@@ -61,6 +76,20 @@ The production project has these providers enabled:
 
 - Email/Password
 - Google
+
+The application is designed for invitation-only access:
+
+- public email/password registration UI is removed
+- existing users retain provider sign-in and password reset
+- restricted signup errors receive localized invitation-only copy
+- an optional access-request action comes from `VITE_ACCESS_REQUEST_URL`
+
+Backend enforcement still requires the manual Firebase Console setting
+**Authentication → Settings → User actions → disable end-user account
+creation**. Client-side hiding or Google-result cleanup is not an authorization
+boundary. The complete invitation workflow, manual user creation, Google
+provider limitation, demo guarantees, and App Check rollout are documented in
+[`docs/public-access.md`](./docs/public-access.md).
 
 The authorized-domain list contains `ludcount-hanenashi.firebaseapp.com`,
 `ludcount-hanenashi.web.app`, and `localhost`. Add every future custom hostname
@@ -90,6 +119,9 @@ Start the Vite app against the emulators in a second terminal:
 ```bash
 VITE_USE_FIREBASE_EMULATORS=true npm run dev
 ```
+
+The public demo is always available at `/demo` and uses only an in-memory
+repository. It does not require Firebase emulators or credentials.
 
 The emulator-backed browser suite also expects these emulators to remain
 running:
@@ -242,19 +274,26 @@ Included:
 - validated Firebase client initialization
 - production Firestore rules for profiles, households, memberships, and
   transactions
-- 32 emulator-backed allow/deny rules tests using the Firebase Rules Unit
+- 33 emulator-backed allow/deny rules tests using the Firebase Rules Unit
   Testing library
+- explicit invitation-only sign-in UX and a fully local fictional demo
 
 Deferred:
 
 - category management and archived-category handling
 - service-worker caching and full offline support
-- Cloud Functions, Storage, Analytics, App Check, and billing-dependent features
+- Cloud Functions, Storage, Analytics, App Check enforcement, and
+  billing-dependent features
 
 ## Production status and future releases
 
 The first production MVP release was deployed on 2026-07-29 from commit
 `11a1ecf2051749d02d299be40ad1ff54821d2c07`.
+
+Post-release invitation/demo hardening is prepared in source but must not be
+described as live until a later deployment is explicitly authorized. Firebase
+Console self-service account creation has not been disabled by this repository
+change.
 
 - Hosting: `https://ludcount-hanenashi.web.app`
 - Alternate default domain: `https://ludcount-hanenashi.firebaseapp.com`

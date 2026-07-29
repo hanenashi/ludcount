@@ -8,16 +8,10 @@ import {
   type ReactNode,
 } from "react";
 import { DataOperationError } from "../../firebase/errors";
-import {
-  createFirestoreTransactionRepository,
-  type FirestoreTransactionRepository,
-} from "../../firebase/transactionRepository";
 import { useI18n } from "../../i18n";
-import { getFirebaseServices } from "../../lib/firebase";
 import { useOnlineStatus } from "../../lib/useOnlineStatus";
-import { useAuth } from "../auth/AuthProvider";
-import { useHousehold } from "../household/HouseholdProvider";
 import { categories, type Transaction, type TransactionDraft } from "./model";
+import type { TransactionRepository } from "./repository";
 
 const categoriesById = new Map(
   categories.map((category) => [category.id, category]),
@@ -36,9 +30,17 @@ interface TransactionContextValue {
 
 const TransactionContext = createContext<TransactionContextValue | null>(null);
 
-export function TransactionProvider({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
-  const { workspace, status: householdStatus } = useHousehold();
+export function TransactionProvider({
+  repository,
+  waiting = false,
+  observeOnline = true,
+  children,
+}: {
+  repository: TransactionRepository | null;
+  waiting?: boolean;
+  observeOnline?: boolean;
+  children: ReactNode;
+}) {
   const { t } = useI18n();
   const isOnline = useOnlineStatus();
   const [transactions, setTransactions] = useState<readonly Transaction[]>([]);
@@ -47,23 +49,8 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<DataOperationError | null>(null);
   const [hasPendingWrites, setHasPendingWrites] = useState(false);
   const [retryToken, setRetryToken] = useState(0);
-  const userId = user?.uid;
-  const householdId = workspace?.household.id;
-
-  const repository = useMemo<FirestoreTransactionRepository | null>(
-    () =>
-      userId && householdId
-        ? createFirestoreTransactionRepository(
-            getFirebaseServices().firestore,
-            householdId,
-            userId,
-          )
-        : null,
-    [householdId, userId],
-  );
-
   useEffect(() => {
-    if (!repository || householdStatus !== "ready") {
+    if (!repository) {
       return;
     }
 
@@ -71,16 +58,28 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
       (snapshot) => {
         setTransactions(snapshot.transactions);
         setHasPendingWrites(snapshot.hasPendingWrites);
-        setStatus(snapshot.fromCache && !isOnline ? "offline" : "ready");
+        setStatus(
+          observeOnline && snapshot.fromCache && !isOnline
+            ? "offline"
+            : "ready",
+        );
       },
       (subscriptionError) => {
-        setError(subscriptionError);
-        setStatus(subscriptionError.kind === "offline" ? "offline" : "error");
+        const error =
+          subscriptionError instanceof DataOperationError
+            ? subscriptionError
+            : new DataOperationError(
+                "unknown",
+                "The transaction repository failed.",
+                subscriptionError,
+              );
+        setError(error);
+        setStatus(error.kind === "offline" ? "offline" : "error");
       },
     );
-  }, [householdStatus, isOnline, repository, retryToken]);
+  }, [isOnline, observeOnline, repository, retryToken]);
 
-  const requireRepository = useCallback((): FirestoreTransactionRepository => {
+  const requireRepository = useCallback((): TransactionRepository => {
     if (!repository) {
       throw new DataOperationError(
         "write-failure",
@@ -98,14 +97,13 @@ export function TransactionProvider({ children }: { children: ReactNode }) {
     [t],
   );
 
-  const effectiveStatus =
-    !repository || householdStatus !== "ready"
-      ? householdStatus === "loading"
-        ? "loading"
-        : "idle"
-      : !isOnline && status === "ready"
-        ? "offline"
-        : status;
+  const effectiveStatus = !repository
+    ? waiting
+      ? "loading"
+      : "idle"
+    : observeOnline && !isOnline && status === "ready"
+      ? "offline"
+      : status;
 
   const value = useMemo<TransactionContextValue>(
     () => ({

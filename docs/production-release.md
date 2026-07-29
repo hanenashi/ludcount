@@ -51,6 +51,17 @@ firebase projects:list
 The intended project ID is `ludcount-hanenashi`. Stop if the selected project is
 different.
 
+For an invitation-only release, also confirm:
+
+- `VITE_ACCESS_REQUEST_URL` contains the reviewed public contact or request URL
+- the authentication screen has no registration action
+- `/demo` completes without Firebase network traffic
+- App Check enforcement remains off unless separately authorized
+- no App Check debug token is tracked or included in the production build
+
+See [`public-access.md`](./public-access.md) for the enrollment and App Check
+operational boundaries.
+
 ## Authorized release order
 
 Only after explicit authorization for a future release:
@@ -80,13 +91,21 @@ Only after explicit authorization for a future release:
 
 5. Smoke-test the deployed application:
 
-   - register or sign in with a dedicated production test account
+   - sign in with a pre-created dedicated production test account
    - verify the personal household bootstrap
    - create, edit, duplicate, filter, export, and delete a small transaction
    - switch Czech to English and verify persistence
    - verify a separate non-member account cannot read the household
    - confirm no raw Firebase error appears in the UI or browser console
    - confirm direct navigation to SPA routes resolves through Hosting rewrites
+   - enter `/demo`, exercise local mutations, reload, reset, and exit
+   - verify the demo makes no Firebase requests
+
+6. Only after the invitation-aware Hosting build is verified, manually disable
+   end-user account creation under **Authentication → Settings → User actions**.
+   Re-test existing email/password and Google users, password reset, and a
+   rejected new-user attempt. This Console change requires explicit
+   authorization and is not performed by `firebase deploy`.
 
 If a step fails, stop the release and diagnose it before proceeding. Never
 weaken rules as a troubleshooting shortcut.

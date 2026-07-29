@@ -3,12 +3,14 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
 import {
   GoogleAuthProvider,
-  createUserWithEmailAndPassword,
+  deleteUser,
+  getAdditionalUserInfo,
   onAuthStateChanged,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
@@ -17,12 +19,12 @@ import {
   type User,
 } from "firebase/auth";
 import { getFirebaseServices } from "../../lib/firebase";
+import { enforceExistingGoogleEnrollment } from "./enrollment";
 
 interface AuthContextValue {
   user: User | null;
   loading: boolean;
   signInWithEmail: (email: string, password: string) => Promise<void>;
-  signUpWithEmail: (email: string, password: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   signOutUser: () => Promise<void>;
@@ -33,11 +35,14 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const interactiveSignInPending = useRef(false);
 
   useEffect(() => {
     const { auth } = getFirebaseServices();
     return onAuthStateChanged(auth, (nextUser) => {
-      setUser(nextUser);
+      if (!interactiveSignInPending.current) {
+        setUser(nextUser);
+      }
       setLoading(false);
     });
   }, []);
@@ -48,13 +53,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user,
       loading,
       signInWithEmail: async (email, password) => {
-        await signInWithEmailAndPassword(auth, email, password);
-      },
-      signUpWithEmail: async (email, password) => {
-        await createUserWithEmailAndPassword(auth, email, password);
+        interactiveSignInPending.current = true;
+        try {
+          const result = await signInWithEmailAndPassword(
+            auth,
+            email,
+            password,
+          );
+          setUser(result.user);
+        } finally {
+          interactiveSignInPending.current = false;
+        }
       },
       signInWithGoogle: async () => {
-        await signInWithPopup(auth, new GoogleAuthProvider());
+        interactiveSignInPending.current = true;
+        try {
+          const result = await signInWithPopup(auth, new GoogleAuthProvider());
+          await enforceExistingGoogleEnrollment({
+            isNewUser: getAdditionalUserInfo(result)?.isNewUser === true,
+            removeNewUser: () => deleteUser(result.user),
+            signOutUser: () => signOut(auth),
+          });
+          setUser(result.user);
+        } catch (error) {
+          setUser(null);
+          throw error;
+        } finally {
+          interactiveSignInPending.current = false;
+        }
       },
       resetPassword: async (email) => {
         await sendPasswordResetEmail(auth, email);

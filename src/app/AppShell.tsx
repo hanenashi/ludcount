@@ -3,16 +3,15 @@ import { useEffect, useRef, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { DataStatePanel, OfflineBanner } from "../components/DataState";
 import { SkipLink } from "../components/SkipLink";
-import { useAuth } from "../features/auth/AuthProvider";
-import { useHousehold } from "../features/household/HouseholdProvider";
 import { useTransactions } from "../features/transactions/TransactionProvider";
 import { useI18n } from "../i18n";
 import { useOnlineStatus } from "../lib/useOnlineStatus";
+import { useAppRuntime } from "./AppRuntime";
 
 const navigation = [
-  { to: "/app/overview", key: "nav.overview", icon: Home },
-  { to: "/app/transactions", key: "nav.transactions", icon: List },
-  { to: "/app/settings", key: "nav.settings", icon: Settings },
+  { path: "overview", key: "nav.overview", icon: Home },
+  { path: "transactions", key: "nav.transactions", icon: List },
+  { path: "settings", key: "nav.settings", icon: Settings },
 ] as const;
 
 function RouteAccessibility() {
@@ -47,28 +46,31 @@ function RouteAccessibility() {
 
 export function AppShell() {
   const { t } = useI18n();
-  const { user, signOutUser } = useAuth();
-  const household = useHousehold();
+  const runtime = useAppRuntime();
   const transactionState = useTransactions();
   const isOnline = useOnlineStatus();
+  const { pathname } = useLocation();
   const navigate = useNavigate();
   const [signOutError, setSignOutError] = useState(false);
   const loading =
-    household.status === "loading" ||
-    (household.status === "ready" && transactionState.status === "loading");
+    runtime.status === "loading" ||
+    (runtime.status === "ready" && transactionState.status === "loading");
   const blockingError =
-    household.error ??
+    runtime.error ??
     (transactionState.status === "error" ? transactionState.error : null);
   const dataReady =
-    household.status === "ready" &&
+    runtime.status === "ready" &&
     (transactionState.status === "ready" ||
       transactionState.status === "offline");
-  const offline = !isOnline || transactionState.status === "offline";
+  const offline =
+    runtime.mode === "production" &&
+    (!isOnline || transactionState.status === "offline");
+  const showMobileAdd = dataReady && pathname.endsWith("/overview");
 
   const handleSignOut = async () => {
     setSignOutError(false);
     try {
-      await signOutUser();
+      await runtime.exit();
       navigate("/sign-in");
     } catch {
       setSignOutError(true);
@@ -76,7 +78,11 @@ export function AppShell() {
   };
 
   return (
-    <div className="app-shell">
+    <div
+      className={
+        runtime.mode === "demo" ? "app-shell app-shell-demo" : "app-shell"
+      }
+    >
       <SkipLink targetId="main-content" />
       <RouteAccessibility />
       <aside className="sidebar">
@@ -86,14 +92,17 @@ export function AppShell() {
           </span>
           <span>Ludcount</span>
         </div>
+        {runtime.mode === "demo" ? (
+          <span className="demo-badge">{t("demo.badge")}</span>
+        ) : null}
         <nav className="sidebar-nav" aria-label={t("nav.primary")}>
-          {navigation.map(({ to, key, icon: Icon }) => (
+          {navigation.map(({ path, key, icon: Icon }) => (
             <NavLink
               className={({ isActive }) =>
                 `nav-link${isActive ? " nav-link-active" : ""}`
               }
-              key={to}
-              to={to}
+              key={path}
+              to={`${runtime.basePath}/${path}`}
             >
               <Icon size={21} aria-hidden="true" />
               {t(key)}
@@ -106,7 +115,7 @@ export function AppShell() {
           onClick={handleSignOut}
         >
           <LogOut size={20} aria-hidden="true" />
-          {t("nav.signOut")}
+          {runtime.mode === "demo" ? t("demo.exit") : t("nav.signOut")}
         </button>
         {signOutError ? (
           <p className="sidebar-error" role="alert">
@@ -122,17 +131,34 @@ export function AppShell() {
           </span>
           <span>Ludcount</span>
         </div>
-        <span className="mobile-user" title={user?.email ?? undefined}>
-          {(user?.displayName ?? user?.email ?? "L").slice(0, 1).toUpperCase()}
+        <span className="mobile-user" title={runtime.userLabel}>
+          {runtime.userLabel.slice(0, 1).toUpperCase()}
         </span>
       </div>
 
       <main className="app-main" id="main-content" tabIndex={-1}>
+        {runtime.mode === "demo" ? (
+          <div
+            className="demo-banner"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            <span>{t("demo.banner")}</span>
+            <button
+              className="demo-banner-exit"
+              type="button"
+              onClick={handleSignOut}
+            >
+              {t("demo.exit")}
+            </button>
+          </div>
+        ) : null}
         {loading ? (
           <DataStatePanel
             loading
             onRetry={() => {
-              household.retry();
+              runtime.retry();
               transactionState.retry();
             }}
           />
@@ -140,7 +166,7 @@ export function AppShell() {
           <DataStatePanel
             error={blockingError}
             onRetry={() => {
-              household.retry();
+              runtime.retry();
               transactionState.retry();
             }}
           />
@@ -154,9 +180,9 @@ export function AppShell() {
         ) : null}
       </main>
 
-      {dataReady ? (
+      {showMobileAdd ? (
         <NavLink
-          to="/app/transactions/new"
+          to={`${runtime.basePath}/transactions/new`}
           className="mobile-add-button"
           aria-label={t("transaction.add")}
         >
@@ -165,13 +191,13 @@ export function AppShell() {
       ) : null}
 
       <nav className="mobile-navigation" aria-label={t("nav.primary")}>
-        {navigation.map(({ to, key, icon: Icon }) => (
+        {navigation.map(({ path, key, icon: Icon }) => (
           <NavLink
             className={({ isActive }) =>
               `mobile-nav-link${isActive ? " mobile-nav-link-active" : ""}`
             }
-            key={to}
-            to={to}
+            key={path}
+            to={`${runtime.basePath}/${path}`}
           >
             <Icon size={23} aria-hidden="true" />
             <span>{t(key)}</span>

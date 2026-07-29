@@ -219,6 +219,33 @@ describe("authentication and user profiles", () => {
     );
   });
 
+  it("denies a signed-out demo from bootstrapping any household documents", async () => {
+    const firestore = unauthenticatedFirestore();
+    const demoUserId = "signed-out-demo";
+    const demoHouseholdId = "demo-must-stay-local";
+    const batch = writeBatch(firestore);
+
+    batch.set(doc(firestore, "users", demoUserId), {
+      ...profileData(demoHouseholdId),
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+    batch.set(doc(firestore, "households", demoHouseholdId), {
+      ...householdData(demoUserId),
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+    batch.set(
+      doc(firestore, "households", demoHouseholdId, "members", demoUserId),
+      {
+        ...memberData("owner"),
+        joinedAt: serverTimestamp(),
+      },
+    );
+
+    await assertFails(batch.commit());
+  });
+
   it("allows users to read only their own profile", async () => {
     const firestore = authenticatedFirestore(memberId);
 

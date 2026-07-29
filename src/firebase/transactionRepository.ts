@@ -9,37 +9,12 @@ import {
   setDoc,
   updateDoc,
   type Firestore,
-  type Unsubscribe,
 } from "firebase/firestore";
-import type {
-  Transaction,
-  TransactionDraft,
-} from "../features/transactions/model";
+import type { TransactionRepository } from "../features/transactions/repository";
 import { transactionConverter } from "./converters";
 import { assertOnline, normalizeDataError } from "./errors";
 
-export interface TransactionSnapshot {
-  transactions: readonly Transaction[];
-  fromCache: boolean;
-  hasPendingWrites: boolean;
-}
-
-export interface FirestoreTransactionRepository {
-  subscribe(
-    onData: (snapshot: TransactionSnapshot) => void,
-    onError: (error: ReturnType<typeof normalizeDataError>) => void,
-  ): Unsubscribe;
-  create(
-    draft: TransactionDraft,
-    categoryLabelSnapshot: string,
-  ): Promise<string>;
-  update(
-    id: string,
-    draft: TransactionDraft,
-    categoryLabelSnapshot: string,
-  ): Promise<void>;
-  remove(id: string): Promise<void>;
-}
+export type FirestoreTransactionRepository = TransactionRepository;
 
 export function createFirestoreTransactionRepository(
   firestore: Firestore,

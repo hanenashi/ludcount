@@ -1,28 +1,24 @@
 import { WalletCards } from "lucide-react";
 import { useState, type FormEvent } from "react";
-import { Navigate } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { SkipLink } from "../../components/SkipLink";
 import { useI18n } from "../../i18n";
+import { getAccessRequestUrl } from "../../lib/publicConfig";
 import { getAuthErrorKey } from "./authErrors";
 import { useAuth } from "./AuthProvider";
 
-type AuthMode = "signIn" | "signUp" | "reset";
+type AuthMode = "signIn" | "reset";
 
 export function SignInPage() {
   const { t } = useI18n();
-  const {
-    user,
-    signInWithEmail,
-    signUpWithEmail,
-    signInWithGoogle,
-    resetPassword,
-  } = useAuth();
+  const { user, signInWithEmail, signInWithGoogle, resetPassword } = useAuth();
   const [mode, setMode] = useState<AuthMode>("signIn");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const accessRequestUrl = getAccessRequestUrl();
 
   if (user) {
     return <Navigate to="/app/overview" replace />;
@@ -38,8 +34,6 @@ export function SignInPage() {
       if (mode === "reset") {
         await resetPassword(email);
         setSuccessMessage(t("auth.resetSent"));
-      } else if (mode === "signUp") {
-        await signUpWithEmail(email, password);
       } else {
         await signInWithEmail(email, password);
       }
@@ -94,11 +88,7 @@ export function SignInPage() {
             aria-busy={submitting}
           >
             <h2 id="auth-form-title">
-              {mode === "reset"
-                ? t("auth.resetHeading")
-                : mode === "signUp"
-                  ? t("auth.signUp")
-                  : t("auth.signIn")}
+              {mode === "reset" ? t("auth.resetHeading") : t("auth.signIn")}
             </h2>
             {mode === "reset" ? <p>{t("auth.resetDescription")}</p> : null}
 
@@ -113,7 +103,7 @@ export function SignInPage() {
                 onChange={(event) => setEmail(event.target.value)}
               />
             </label>
-            {mode !== "reset" ? (
+            {mode === "signIn" ? (
               <label className="field" htmlFor="auth-password">
                 <span>{t("auth.password")}</span>
                 <input
@@ -121,9 +111,7 @@ export function SignInPage() {
                   required
                   minLength={6}
                   type="password"
-                  autoComplete={
-                    mode === "signUp" ? "new-password" : "current-password"
-                  }
+                  autoComplete="current-password"
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                 />
@@ -159,9 +147,7 @@ export function SignInPage() {
                 ? t("common.working")
                 : mode === "reset"
                   ? t("auth.sendReset")
-                  : mode === "signUp"
-                    ? t("auth.signUp")
-                    : t("auth.signIn")}
+                  : t("auth.signIn")}
             </button>
 
             {mode !== "reset" ? (
@@ -185,25 +171,13 @@ export function SignInPage() {
 
             <div className="auth-links">
               {mode === "signIn" ? (
-                <>
-                  <button
-                    className="text-button"
-                    type="button"
-                    onClick={() => changeMode("reset")}
-                  >
-                    {t("auth.forgotPassword")}
-                  </button>
-                  <span>
-                    {t("auth.noAccount")}{" "}
-                    <button
-                      className="text-button"
-                      type="button"
-                      onClick={() => changeMode("signUp")}
-                    >
-                      {t("auth.createAccount")}
-                    </button>
-                  </span>
-                </>
+                <button
+                  className="text-button"
+                  type="button"
+                  onClick={() => changeMode("reset")}
+                >
+                  {t("auth.forgotPassword")}
+                </button>
               ) : (
                 <button
                   className="text-button"
@@ -214,6 +188,21 @@ export function SignInPage() {
                 </button>
               )}
             </div>
+
+            <div className="invitation-notice" role="note">
+              <strong>{t("auth.invitationOnly")}</strong>
+              {accessRequestUrl ? (
+                <a className="text-link" href={accessRequestUrl}>
+                  {t("auth.requestAccess")}
+                </a>
+              ) : (
+                <span>{t("auth.requestAccessPending")}</span>
+              )}
+            </div>
+
+            <Link className="button button-demo button-full" to="/demo">
+              {t("demo.try")}
+            </Link>
           </form>
         </section>
       </main>

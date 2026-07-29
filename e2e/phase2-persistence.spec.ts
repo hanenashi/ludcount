@@ -1,18 +1,9 @@
-import { expect, test, type Locator } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+import { clickVisible, seedExistingUser } from "./helpers";
 
-async function clickVisible(locator: Locator): Promise<void> {
-  for (let index = 0; index < (await locator.count()); index += 1) {
-    const candidate = locator.nth(index);
-    if (await candidate.isVisible()) {
-      await candidate.click();
-      return;
-    }
-  }
-  throw new Error("No visible matching control was found.");
-}
-
-test("persists a personal household, transactions, and locale through Firestore", async ({
+test("persists an invited user's household, transactions, and locale through Firestore", async ({
   page,
+  request,
 }, testInfo) => {
   test.setTimeout(60_000);
   const email = `phase2-${testInfo.project.name}-${Date.now()}@example.test`;
@@ -23,11 +14,11 @@ test("persists a personal household, transactions, and locale through Firestore"
     }
   });
 
+  await seedExistingUser(request, email, "phase2-test-password");
   await page.goto("/sign-in");
-  await page.getByRole("button", { name: "Vytvořit účet" }).click();
   await page.getByLabel("E-mail").fill(email);
   await page.getByLabel("Heslo").fill("phase2-test-password");
-  await page.getByRole("button", { name: "Vytvořit účet" }).last().click();
+  await page.getByRole("button", { name: "Přihlásit se" }).click();
 
   await expect(
     page.getByRole("link", { name: "Přidat záznam" }).first(),

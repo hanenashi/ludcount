@@ -1,60 +1,27 @@
 import { asMoneyAmount, type MoneyAmount } from "../../lib/money";
 import type { Transaction, TransactionDraft } from "./model";
 
-export interface TransactionRepository {
-  list(): readonly Transaction[];
-  create(draft: TransactionDraft): Transaction;
-  update(id: string, draft: TransactionDraft): Transaction;
-  remove(id: string): void;
+export interface TransactionSnapshot {
+  transactions: readonly Transaction[];
+  fromCache: boolean;
+  hasPendingWrites: boolean;
 }
 
-export function createMemoryTransactionRepository(
-  initial: readonly Transaction[] = [],
-): TransactionRepository {
-  let transactions = [...initial];
-
-  return {
-    list: () =>
-      [...transactions].sort(
-        (left, right) =>
-          right.dateKey.localeCompare(left.dateKey) ||
-          right.createdAt - left.createdAt,
-      ),
-    create: (draft) => {
-      const now = Date.now();
-      const transaction: Transaction = {
-        ...draft,
-        id: crypto.randomUUID(),
-        currency: "CZK",
-        categoryLabelSnapshot: draft.categoryId,
-        createdBy: "memory",
-        createdAt: now,
-        updatedAt: now,
-      };
-      transactions = [...transactions, transaction];
-      return transaction;
-    },
-    update: (id, draft) => {
-      const current = transactions.find((transaction) => transaction.id === id);
-      if (!current) {
-        throw new Error(`Transaction ${id} does not exist.`);
-      }
-      const updated: Transaction = {
-        ...current,
-        ...draft,
-        updatedAt: Date.now(),
-      };
-      transactions = transactions.map((transaction) =>
-        transaction.id === id ? updated : transaction,
-      );
-      return updated;
-    },
-    remove: (id) => {
-      transactions = transactions.filter(
-        (transaction) => transaction.id !== id,
-      );
-    },
-  };
+export interface TransactionRepository {
+  subscribe(
+    onData: (snapshot: TransactionSnapshot) => void,
+    onError: (error: Error) => void,
+  ): () => void;
+  create(
+    draft: TransactionDraft,
+    categoryLabelSnapshot: string,
+  ): Promise<string>;
+  update(
+    id: string,
+    draft: TransactionDraft,
+    categoryLabelSnapshot: string,
+  ): Promise<void>;
+  remove(id: string): Promise<void>;
 }
 
 export interface TransactionTotals {

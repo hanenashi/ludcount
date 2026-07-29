@@ -4,6 +4,10 @@ import {
   initializeApp,
   type FirebaseOptions,
 } from "firebase/app";
+import {
+  ReCaptchaEnterpriseProvider,
+  initializeAppCheck,
+} from "firebase/app-check";
 import { connectAuthEmulator, getAuth, type Auth } from "firebase/auth";
 import {
   connectFirestoreEmulator,
@@ -57,6 +61,32 @@ interface FirebaseServices {
 let services: FirebaseServices | undefined;
 let emulatorsConnected = false;
 
+function initializeOptionalAppCheck(app: ReturnType<typeof initializeApp>) {
+  const siteKey = import.meta.env.VITE_FIREBASE_APP_CHECK_SITE_KEY?.trim();
+  if (!siteKey) {
+    return;
+  }
+
+  const debugMode = import.meta.env.VITE_FIREBASE_APP_CHECK_DEBUG === "true";
+  if (debugMode && import.meta.env.PROD) {
+    throw new Error(
+      "VITE_FIREBASE_APP_CHECK_DEBUG must never be enabled in a production build.",
+    );
+  }
+  if (debugMode) {
+    (
+      globalThis as typeof globalThis & {
+        FIREBASE_APPCHECK_DEBUG_TOKEN?: boolean;
+      }
+    ).FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+  }
+
+  initializeAppCheck(app, {
+    provider: new ReCaptchaEnterpriseProvider(siteKey),
+    isTokenAutoRefreshEnabled: true,
+  });
+}
+
 export function getFirebaseServices(): FirebaseServices {
   if (services) {
     return services;
@@ -64,6 +94,7 @@ export function getFirebaseServices(): FirebaseServices {
 
   const app =
     getApps().length > 0 ? getApp() : initializeApp(readFirebaseConfig());
+  initializeOptionalAppCheck(app);
   const auth = getAuth(app);
   const firestore = getFirestore(app);
 

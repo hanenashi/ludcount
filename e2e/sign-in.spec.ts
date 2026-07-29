@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("renders the Czech-first authentication flow without production access", async ({
+test("renders invitation-only authentication and public demo entry", async ({
   page,
 }, testInfo) => {
   const consoleErrors: string[] = [];
@@ -26,15 +26,24 @@ test("renders the Czech-first authentication flow without production access", as
   await expect(
     page.getByRole("button", { name: "Přihlásit se" }),
   ).toBeVisible();
-
-  await page.getByRole("button", { name: "Vytvořit účet" }).click();
   await expect(
-    page.getByRole("heading", { name: "Vytvořit účet" }),
+    page.getByText("Registrace je zatím pouze na pozvánku."),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Požádat o přístup" }),
+  ).toBeVisible();
+  await expect(page.getByRole("button", { name: "Vytvořit účet" })).toHaveCount(
+    0,
+  );
+  await expect(
+    page.getByRole("link", { name: "Vyzkoušet demo" }),
+  ).toBeVisible();
+
+  await page.getByRole("button", { name: "Zapomenuté heslo?" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Obnovit heslo" }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Zpět k přihlášení" }).click();
-  await expect(
-    page.getByRole("heading", { name: "Přihlásit se" }),
-  ).toBeVisible();
 
   expect(consoleErrors).toEqual([]);
   expect(

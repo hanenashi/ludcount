@@ -1,17 +1,16 @@
-import { LogOut } from "lucide-react";
+import { LogOut, RotateCcw } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAppRuntime } from "../../app/AppRuntime";
 import { useI18n } from "../../i18n";
-import { useAuth } from "../auth/AuthProvider";
-import { useHousehold } from "../household/HouseholdProvider";
 
 export function SettingsPage() {
   const { locale, setLocale, t } = useI18n();
-  const { user, signOutUser } = useAuth();
-  const { saveLocale, preferenceError } = useHousehold();
+  const runtime = useAppRuntime();
   const [savingLocale, setSavingLocale] = useState<"cs" | "en" | null>(null);
   const [signingOut, setSigningOut] = useState(false);
   const [signOutError, setSignOutError] = useState(false);
+  const [demoReset, setDemoReset] = useState(false);
   const navigate = useNavigate();
 
   const changeLocale = async (nextLocale: "cs" | "en") => {
@@ -20,7 +19,7 @@ export function SettingsPage() {
     }
     setSavingLocale(nextLocale);
     try {
-      await saveLocale(nextLocale);
+      await runtime.saveLocale(nextLocale);
       setLocale(nextLocale);
     } catch {
       // The provider exposes the localized write state below.
@@ -70,7 +69,7 @@ export function SettingsPage() {
             {t("settings.english")}
           </button>
         </div>
-        {preferenceError ? (
+        {runtime.preferenceError ? (
           <p className="settings-inline-error" role="alert">
             {t("settings.languageSaveError")}
           </p>
@@ -85,15 +84,44 @@ export function SettingsPage() {
       <section className="settings-section">
         <div>
           <h2>{t("settings.dataHeading")}</h2>
-          <p>{t("settings.dataDescription")}</p>
+          <p>
+            {runtime.mode === "demo"
+              ? t("demo.settingsDescription")
+              : t("settings.dataDescription")}
+          </p>
         </div>
+        {runtime.resetDemo ? (
+          <button
+            className="button button-secondary"
+            type="button"
+            onClick={() => {
+              runtime.resetDemo?.();
+              setDemoReset(true);
+            }}
+          >
+            <RotateCcw size={18} aria-hidden="true" />
+            {t("demo.reset")}
+          </button>
+        ) : null}
+        {demoReset ? (
+          <p
+            className="settings-inline-success"
+            role="status"
+            aria-live="polite"
+          >
+            {t("demo.resetComplete")}
+          </p>
+        ) : null}
       </section>
 
       <section className="settings-section">
         <div>
           <h2>{t("settings.account")}</h2>
           <p>
-            {t("settings.signedInAs")}: <strong>{user?.email}</strong>
+            {runtime.mode === "demo"
+              ? t("demo.identityDescription")
+              : t("settings.signedInAs")}
+            : <strong>{runtime.userLabel}</strong>
           </p>
         </div>
         <button
@@ -103,14 +131,19 @@ export function SettingsPage() {
           onClick={() => {
             setSigningOut(true);
             setSignOutError(false);
-            void signOutUser()
+            void runtime
+              .exit()
               .then(() => navigate("/sign-in"))
               .catch(() => setSignOutError(true))
               .finally(() => setSigningOut(false));
           }}
         >
           <LogOut size={18} aria-hidden="true" />
-          {signingOut ? t("common.working") : t("nav.signOut")}
+          {signingOut
+            ? t("common.working")
+            : runtime.mode === "demo"
+              ? t("demo.exit")
+              : t("nav.signOut")}
         </button>
         {signOutError ? (
           <p className="settings-inline-error" role="alert">

@@ -177,9 +177,55 @@ summary:focus-visible {
   line-height: 1.4;
 }
 
+.demo-badge {
+  align-self: flex-start;
+  padding: 5px 9px;
+  margin-top: 16px;
+  color: #193b31;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  background: #bfe8d0;
+}
+
 .app-main {
   min-height: 100vh;
   margin-left: 248px;
+}
+
+.app-shell-demo {
+  --demo-accent: #246b53;
+}
+
+.demo-banner {
+  position: sticky;
+  z-index: 9;
+  top: 0;
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 9px 22px;
+  color: #173c30;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+  background: #dff4e7;
+  border-bottom: 1px solid #9fd1b3;
+}
+
+.demo-banner-exit {
+  min-height: 34px;
+  padding: 0 11px;
+  color: #173c30;
+  font-weight: 800;
+  border: 1px solid #6da88a;
+  border-radius: 8px;
+  background: #ffffff;
+  cursor: pointer;
 }
 
 .data-state-panel {
@@ -388,6 +434,15 @@ summary:focus-visible {
 .button-danger {
   color: var(--white);
   background: var(--danger);
+}
+
+.button-demo {
+  color: #ffffff;
+  background: #246b53;
+}
+
+.button-demo:hover {
+  background: #194f3d;
 }
 
 .button-full {
@@ -850,6 +905,12 @@ summary:focus-visible {
   font-size: 14px;
 }
 
+.settings-inline-success {
+  grid-column: 1 / -1;
+  color: #23623b !important;
+  font-size: 14px;
+}
+
 .settings-section h2 {
   margin: 0 0 6px;
   color: var(--ink);
@@ -984,6 +1045,29 @@ summary:focus-visible {
   text-align: center;
 }
 
+.invitation-notice {
+  display: grid;
+  justify-items: center;
+  gap: 7px;
+  padding: 16px;
+  margin-top: 20px;
+  color: #4d5969;
+  font-size: 14px;
+  line-height: 1.45;
+  text-align: center;
+  border: 1px solid #cfd7df;
+  border-radius: 10px;
+  background: var(--soft);
+}
+
+.invitation-notice strong {
+  color: var(--ink);
+}
+
+.auth-form > .button-demo {
+  margin-top: 14px;
+}
+
 .form-notice {
   padding: 12px 14px;
   margin: 18px 0 0 !important;
@@ -1025,6 +1109,10 @@ summary:focus-visible {
     top: 68px;
     align-items: flex-start;
     justify-content: flex-start;
+  }
+
+  .demo-banner {
+    top: 68px;
   }
 
   .mobile-header {
@@ -1170,6 +1258,19 @@ summary:focus-visible {
     display: none;
   }
 
+  .page-heading-row {
+    flex-wrap: wrap;
+  }
+
+  .page-heading-row .month-navigator {
+    width: 100%;
+  }
+
+  .page-heading-row .page-add-button {
+    display: inline-flex;
+    width: 100%;
+  }
+
   .overview-grid {
     gap: 40px;
     margin-top: 35px;
@@ -1273,6 +1374,10 @@ summary:focus-visible {
   }
 
   .connection-banner {
+    top: 56px;
+  }
+
+  .demo-banner {
     top: 56px;
   }
 

@@ -1,5 +1,59 @@
 # Ludcount Handoff
 
+## Post-release invitation and public-demo hardening
+
+The repository now prepares a separately deployable invitation-aware release.
+It has not been deployed, and no Firebase Console setting was changed.
+
+- Public email/password registration UI and client signup code were removed.
+- Existing email/password and Google users retain sign-in; password reset
+  remains available.
+- `auth/admin-restricted-operation` maps to exact Czech and English
+  invitation-only messages.
+- An optional public access-request action is configured with
+  `VITE_ACCESS_REQUEST_URL`.
+- A first-time Google result is rejected before application user state is
+  exposed, with best-effort identity deletion and sign-out fallback. This is
+  defense in depth only; Firebase Authentication's end-user account-creation
+  setting is the required backend control.
+- `/demo` has an explicit provider tree and a dedicated in-memory
+  `DemoTransactionRepository`. It mounts no Auth or household provider and
+  performs no Firebase requests.
+- The fictional Czech fixture covers income and expenses across categories and
+  months. Normal forms, list operations, filters, search, duplication, locale
+  switching, deletion, and CSV export work in demo mode.
+- Demo mutations reset on reload or through an explicit Reset action. A
+  persistent localized banner and Exit action distinguish the mode.
+- Optional reCAPTCHA Enterprise App Check client initialization is prepared
+  through `VITE_FIREBASE_APP_CHECK_SITE_KEY`; enforcement remains off. Local
+  debug-provider support uses a boolean switch and stores no debug token.
+- Firestore rules and the production data model were not changed.
+- Operational details are in `docs/public-access.md`.
+
+Final local verification:
+
+- `npm run format:check`: passing
+- `npm run lint`: passing
+- `npm run typecheck`: passing
+- `npm test`: 50 tests passing
+- `npm run test:rules`: 33 tests passing against the isolated Firestore emulator
+- `npm run test:browser`: 20 tests passing across desktop, standard mobile,
+  320px mobile, and mobile landscape Chromium
+- `npm run build`: passing (with the existing Firebase vendor chunk-size
+  advisory)
+
+Before this build can safely become the invitation-only production release:
+
+1. configure a real `VITE_ACCESS_REQUEST_URL`
+2. explicitly authorize and deploy the tested Hosting build
+3. verify existing-user sign-in and the local demo on the deployed origin
+4. explicitly authorize the manual Console action at **Authentication →
+   Settings → User actions → disable end-user account creation**
+5. re-test existing providers and rejected new-user enrollment
+
+The current production site continues to serve the earlier application commit
+until a later deployment is authorized.
+
 ## First production release
 
 The first Ludcount MVP production release completed on 2026-07-29 from

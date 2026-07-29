@@ -1,4 +1,5 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
+import { seedExistingUser } from "./helpers";
 
 async function visible(locator: Locator): Promise<Locator> {
   await locator.first().waitFor({ state: "attached" });
@@ -21,6 +22,7 @@ async function expectNoHorizontalOverflow(page: Page): Promise<void> {
 
 test("supports keyboard navigation, dialog focus, and narrow layouts", async ({
   page,
+  request,
 }, testInfo) => {
   test.setTimeout(90_000);
   const email = `phase5-${testInfo.project.name}-${Date.now()}@example.test`;
@@ -31,6 +33,7 @@ test("supports keyboard navigation, dialog focus, and narrow layouts", async ({
     }
   });
 
+  await seedExistingUser(request, email, "phase5-test-password");
   await page.goto("/sign-in");
   await page.keyboard.press("Tab");
   const skipLink = page.getByRole("link", {
@@ -41,10 +44,9 @@ test("supports keyboard navigation, dialog focus, and narrow layouts", async ({
   await expect(page.locator("#auth-content")).toBeFocused();
   await expectNoHorizontalOverflow(page);
 
-  await page.getByRole("button", { name: "Vytvořit účet" }).click();
   await page.getByLabel("E-mail").fill(email);
   await page.getByLabel("Heslo").fill("phase5-test-password");
-  await page.getByRole("button", { name: "Vytvořit účet" }).last().click();
+  await page.getByRole("button", { name: "Přihlásit se" }).click();
 
   const transactionsLink = await visible(
     page.getByRole("link", { name: "Záznamy" }),

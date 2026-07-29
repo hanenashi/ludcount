@@ -4,6 +4,7 @@ import {
   useParams,
   useSearchParams,
 } from "react-router-dom";
+import { useAppRuntime } from "../../app/AppRuntime";
 import { createDuplicateDraft } from "./duplication";
 import { TransactionForm } from "./TransactionForm";
 import { useTransactions } from "./TransactionProvider";
@@ -12,6 +13,7 @@ export function TransactionFormPage() {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { basePath } = useAppRuntime();
   const { transactions, createTransaction, updateTransaction } =
     useTransactions();
   const transaction = id
@@ -23,7 +25,7 @@ export function TransactionFormPage() {
     : undefined;
 
   if ((id && !transaction) || (duplicateId && !duplicateSource)) {
-    return <Navigate to="/app/transactions" replace />;
+    return <Navigate to={`${basePath}/transactions`} replace />;
   }
 
   return (
@@ -42,7 +44,7 @@ export function TransactionFormPage() {
           } else {
             await createTransaction(draft);
           }
-          navigate("/app/transactions");
+          navigate(`${basePath}/transactions`);
         }}
       />
     </div>

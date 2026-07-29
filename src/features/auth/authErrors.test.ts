@@ -4,6 +4,7 @@ import { getAuthErrorKey } from "./authErrors";
 
 describe("authentication error mapping", () => {
   it.each([
+    ["auth/admin-restricted-operation", "auth.error.invitationOnly"],
     ["auth/invalid-email", "auth.error.invalidEmail"],
     ["auth/too-many-requests", "auth.error.tooManyRequests"],
     ["auth/network-request-failed", "auth.error.network"],

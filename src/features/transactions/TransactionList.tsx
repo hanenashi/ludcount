@@ -1,5 +1,6 @@
 import { ChevronRight, Copy, Pencil, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAppRuntime } from "../../app/AppRuntime";
 import { useI18n } from "../../i18n";
 import { formatDateKey } from "../../lib/dates";
 import { formatMoney } from "../../lib/money";
@@ -19,6 +20,7 @@ export function TransactionList({
   emptyMessage,
 }: TransactionListProps) {
   const { locale, t } = useI18n();
+  const { basePath } = useAppRuntime();
 
   if (transactions.length === 0) {
     return (
@@ -74,7 +76,7 @@ export function TransactionList({
             {compact ? (
               <Link
                 className="row-link"
-                to={`/app/transactions/${transaction.id}/edit`}
+                to={`${basePath}/transactions/${transaction.id}/edit`}
                 aria-label={`${t("common.edit")} – ${actionContext}`}
               >
                 <ChevronRight size={22} aria-hidden="true" />
@@ -87,14 +89,14 @@ export function TransactionList({
               >
                 <Link
                   className="icon-button"
-                  to={`/app/transactions/new?duplicate=${encodeURIComponent(transaction.id)}`}
+                  to={`${basePath}/transactions/new?duplicate=${encodeURIComponent(transaction.id)}`}
                   aria-label={`${t("transaction.duplicate")} – ${actionContext}`}
                 >
                   <Copy size={18} aria-hidden="true" />
                 </Link>
                 <Link
                   className="icon-button"
-                  to={`/app/transactions/${transaction.id}/edit`}
+                  to={`${basePath}/transactions/${transaction.id}/edit`}
                   aria-label={`${t("common.edit")} – ${actionContext}`}
                 >
                   <Pencil size={18} aria-hidden="true" />
