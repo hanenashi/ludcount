@@ -6,6 +6,11 @@ The invitation-only release was deployed to Firebase Hosting on 2026-07-29
 from application commit `5e12b0c1d93e0af949a111a110f1bb766be71c1d`.
 End-user account creation was then disabled under Firebase Authentication
 Settings after the Hosting build and existing-provider sign-ins were verified.
+A later Hosting-only branding refresh from application commit
+`cdf71a804cd197fdf174da8170fa5444b55b2506` added the supplied cat-and-abacus
+mark to the app shell and sign-in screen, plus PNG favicon, Apple touch,
+standard install, and maskable install icons. Rules, indexes, and Firebase
+Console settings were unchanged.
 
 - Public email/password registration UI and client signup code were removed.
 - Existing email/password and Google users retain sign-in; password reset
