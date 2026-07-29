@@ -3,11 +3,13 @@
 Ludcount is a small household income and expense journal. The interface defaults
 to Czech and can be switched to English in Settings.
 
-This repository currently implements Phase 3 from
+This repository currently implements Phase 4 from
 [`battleplan.md`](./battleplan.md). Firebase Authentication creates or loads a
 personal household, and transactions and user preferences are synchronized
 through Cloud Firestore. Production Firestore access is defined by strict,
-emulator-tested membership and field-validation rules.
+emulator-tested membership and field-validation rules. Transaction history now
+supports combined filters, note search, explicit-save duplication, and
+localized client-side CSV export.
 
 ## Requirements
 
@@ -167,7 +169,21 @@ No deployment command is configured in this phase.
 - User-selected dates use local `YYYY-MM-DD` date keys and `YYYY-MM` month keys.
 - The documented maximum transaction amount is `1,000,000,000` minor units.
 
-## Phase 3 boundaries
+## Transaction history and CSV export
+
+- Month, type, category, and case-insensitive note filters combine locally over
+  the signed-in household's synchronized transactions.
+- Reset returns to the current month and clears type, category, and note
+  filters.
+- Duplicating a transaction opens a create form with copied amount, type,
+  category, and note, while the date defaults to today. Nothing is written
+  until Save is selected.
+- CSV export includes only the currently filtered transactions.
+- CSV files are generated entirely in the browser with a UTF-8 BOM, semicolon
+  delimiters, localized headers and category/type labels, and deterministic
+  `ludcount-YYYY-MM.csv` filenames.
+
+## Phase 4 boundaries
 
 Included:
 
@@ -180,6 +196,9 @@ Included:
 - Czech-first UI with persistent English selection
 - responsive overview, transaction list, and settings screens
 - transaction creation, editing, deletion, totals, and localized categories
+- combined transaction filters and case-insensitive note search
+- explicit-save transaction duplication with today's local date
+- Czech/English client-side CSV export of the filtered result set
 - Firebase Auth and Firestore emulator configuration
 - validated Firebase client initialization
 - production Firestore rules for profiles, households, memberships, and
@@ -189,7 +208,8 @@ Included:
 
 Deferred:
 
-- category management, filtering, duplicate, and CSV export
+- category management and archived-category handling
+- Phase 5 accessibility and production-polish work
 - deployment and hosting
 - Cloud Functions, Storage, Analytics, App Check, and billing-dependent features
 

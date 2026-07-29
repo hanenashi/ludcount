@@ -5,7 +5,37 @@
 - Phase 1: local vertical slice in commit `42729a3`
 - Phase 2: Firebase persistence in commit `8af4299`
 - Phase 3: production Firestore Security Rules and emulator-backed allow/deny
-  coverage in the current Phase 3 commit
+  coverage in commit `9a7cf0b`
+- Phase 4: filters, note search, transaction duplication, and CSV export in the
+  current Phase 4 commit
+
+## Phase 4 result
+
+- Added combinable month, transaction-type, category, and case-insensitive note
+  filters.
+- Kept filters in a compact collapsed panel that expands to a responsive
+  single-column layout on small screens.
+- Added a reset action that returns to the current local month and clears every
+  secondary filter.
+- Added a localized empty-results message and visible result count.
+- Added transaction duplication through the create form. Amount, type,
+  category, and note are copied, the local date defaults to today, and no
+  Firestore write occurs before explicit Save.
+- Added fully client-side CSV export for the currently filtered rows with:
+  - UTF-8 BOM
+  - semicolon delimiters
+  - Czech or English headers and labels based on the current locale
+  - fixed two-decimal amounts sourced from integer minor units
+  - deterministic `ludcount-YYYY-MM.csv` filenames
+  - correct escaping for semicolons, quotes, line breaks, Czech characters, and
+    empty notes
+- Added focused unit tests for filter combinations, Czech case-insensitive
+  search, duplication, and CSV output.
+- Added an emulator-backed Playwright workflow covering filtering, empty
+  results, reset, explicit-save duplication, filtered CSV download, BOM
+  verification, and horizontal-overflow checks on desktop and mobile Chromium.
+- Did not add category management, deploy anything, modify Firebase Console, or
+  access production Firestore.
 
 ## Phase 3 result
 
@@ -90,11 +120,10 @@
 - `npm run format:check`: passing
 - `npm run lint`: passing
 - `npm run typecheck`: passing
-- `npm test`: passing
+- `npm test`: 31 tests passing
 - `npm run test:rules`: 32 tests passing against local Firestore only
-- `npm run test:browser`: 4 tests passing on desktop and mobile Chromium against
-  both the development rules and, in a separate integration run, the strict
-  production rules
+- `npm run test:browser`: 6 tests passing on desktop and mobile Chromium against
+  local Authentication and Firestore emulators
 - `npm run build`: passing
 
 Temurin OpenJDK 21.0.12 is active. The normal Firebase CLI 15.24.0 emulator
@@ -118,16 +147,18 @@ Before a safe production deployment:
 
 ## What to do next
 
-Proceed with Phase 4 from `battleplan.md`:
+Phase 5 is next in `battleplan.md`, but deployment still requires separate,
+explicit authorization. Before any deployment work:
 
-1. add month, type, and category filters
-2. add note search and transaction duplication
-3. add UTF-8 BOM CSV export
-4. keep all production deployment work out of scope until explicitly authorized
+1. complete the remaining accessibility and responsive polish
+2. review production error handling and any required indexes
+3. decide when to implement the Phase 3 category-management and
+   archived-category work that remained outside the strict rules request
+4. prepare deployment documentation and hosting configuration without
+   deploying unless explicitly authorized
 
-Category management remains deferred. Although the broad battle plan groups it
-with Phase 3, this Phase 3 request explicitly scoped implementation to security
-rules for the existing four collections.
+Production Firestore must remain on its currently deployed deny-all rules until
+an explicitly authorized, reviewed rules/index deployment.
 
 ## Commands
 

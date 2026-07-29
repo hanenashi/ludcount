@@ -531,6 +531,97 @@ textarea:focus-visible {
   margin-top: 42px;
 }
 
+.history-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.history-heading h2 {
+  margin-bottom: 3px;
+}
+
+.result-count {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.transaction-filters {
+  margin-top: 18px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--soft);
+}
+
+.transaction-filters summary {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  gap: 9px;
+  padding: 0 15px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  list-style: none;
+}
+
+.transaction-filters summary::-webkit-details-marker {
+  display: none;
+}
+
+.filter-count {
+  display: grid;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  color: var(--white);
+  font-size: 12px;
+  border-radius: 999px;
+  background: var(--coral);
+  place-items: center;
+}
+
+.filter-controls {
+  display: grid;
+  grid-template-columns:
+    minmax(140px, 0.8fr) minmax(170px, 1fr) minmax(220px, 1.5fr)
+    auto;
+  align-items: end;
+  gap: 13px;
+  padding: 3px 15px 15px;
+}
+
+.filter-controls label {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.filter-controls input,
+.filter-controls select {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 11px;
+  color: var(--text);
+  border: 1px solid #aeb7c2;
+  border-radius: 9px;
+  background: var(--white);
+}
+
+.filter-controls input:focus,
+.filter-controls select:focus {
+  border-color: var(--coral);
+  outline: 2px solid transparent;
+}
+
+.filter-reset {
+  min-height: 44px;
+}
+
 .drawer-page {
   display: flex;
   min-height: 100vh;
@@ -1040,6 +1131,23 @@ textarea:focus-visible {
 
   .section-heading {
     align-items: flex-end;
+  }
+
+  .history-heading {
+    align-items: flex-end;
+  }
+
+  .history-heading .button {
+    min-height: 42px;
+    padding-inline: 13px;
+  }
+
+  .filter-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-reset {
+    width: 100%;
   }
 
   .section-heading h2,

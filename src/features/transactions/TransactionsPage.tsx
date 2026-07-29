@@ -1,5 +1,5 @@
-import { Plus } from "lucide-react";
-import { useState } from "react";
+import { Download, Plus } from "lucide-react";
+import { useDeferredValue, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { MonthNavigator } from "../../components/MonthNavigator";
 import { DataWriteError } from "../../components/DataState";
@@ -9,22 +9,84 @@ import {
 } from "../../firebase/errors";
 import { useI18n } from "../../i18n";
 import { monthKeyFromDate } from "../../lib/dates";
-import type { Transaction } from "./model";
+import {
+  createTransactionsCsv,
+  createTransactionsCsvFilename,
+  downloadTransactionsCsv,
+} from "../export/csv";
+import {
+  filterTransactions,
+  hasSecondaryFilters,
+  type TransactionTypeFilter,
+} from "./filters";
+import { getCategory, type Transaction } from "./model";
+import { TransactionFilters } from "./TransactionFilters";
 import { TransactionList } from "./TransactionList";
 import { useTransactions } from "./TransactionProvider";
 
 export function TransactionsPage() {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
   const { transactions, deleteTransaction } = useTransactions();
-  const [monthKey, setMonthKey] = useState(monthKeyFromDate(new Date()));
+  const currentMonthKey = monthKeyFromDate(new Date());
+  const [monthKey, setMonthKey] = useState(currentMonthKey);
+  const [type, setType] = useState<TransactionTypeFilter>("all");
+  const [categoryId, setCategoryId] = useState("all");
+  const [noteQuery, setNoteQuery] = useState("");
+  const deferredNoteQuery = useDeferredValue(noteQuery);
   const [pendingDelete, setPendingDelete] = useState<Transaction | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<DataOperationError | null>(
     null,
   );
-  const visibleTransactions = transactions.filter(
-    (transaction) => transaction.monthKey === monthKey,
+  const filters = useMemo(
+    () => ({
+      monthKey,
+      type,
+      categoryId,
+      noteQuery: deferredNoteQuery,
+    }),
+    [categoryId, deferredNoteQuery, monthKey, type],
   );
+  const visibleTransactions = useMemo(
+    () => filterTransactions(transactions, filters),
+    [filters, transactions],
+  );
+  const secondaryFiltersActive = hasSecondaryFilters({
+    type,
+    categoryId,
+    noteQuery,
+  });
+  const activeFilterCount =
+    Number(type !== "all") +
+    Number(categoryId !== "all") +
+    Number(noteQuery.trim() !== "");
+
+  const resetFilters = () => {
+    setMonthKey(currentMonthKey);
+    setType("all");
+    setCategoryId("all");
+    setNoteQuery("");
+  };
+
+  const exportTransactions = () => {
+    const csv = createTransactionsCsv(visibleTransactions, locale, {
+      date: t("csv.header.date"),
+      type: t("csv.header.type"),
+      amount: t("csv.header.amount"),
+      currency: t("csv.header.currency"),
+      category: t("csv.header.category"),
+      note: t("csv.header.note"),
+      expense: t("transaction.type.expense"),
+      income: t("transaction.type.income"),
+      categoryFor: (transaction) => {
+        const category = getCategory(transaction.categoryId);
+        return category
+          ? t(category.labelKey)
+          : transaction.categoryLabelSnapshot;
+      },
+    });
+    downloadTransactionsCsv(csv, createTransactionsCsvFilename(monthKey));
+  };
 
   const confirmDelete = async () => {
     if (pendingDelete) {
@@ -51,10 +113,39 @@ export function TransactionsPage() {
         </Link>
       </div>
       <section className="content-section transaction-history">
-        <h2>{t("transaction.listHeading")}</h2>
+        <div className="history-heading">
+          <div>
+            <h2>{t("transaction.listHeading")}</h2>
+            <span className="result-count">
+              {t("transaction.results")}: {visibleTransactions.length}
+            </span>
+          </div>
+          <button
+            className="button button-secondary"
+            type="button"
+            disabled={visibleTransactions.length === 0}
+            onClick={exportTransactions}
+          >
+            <Download size={18} aria-hidden="true" />
+            {t("transaction.exportCsv")}
+          </button>
+        </div>
+        <TransactionFilters
+          filters={{ type, categoryId, noteQuery }}
+          activeCount={activeFilterCount}
+          onTypeChange={setType}
+          onCategoryChange={setCategoryId}
+          onNoteQueryChange={setNoteQuery}
+          onReset={resetFilters}
+        />
         <TransactionList
           transactions={visibleTransactions}
           onDelete={setPendingDelete}
+          emptyMessage={
+            secondaryFiltersActive
+              ? t("transaction.emptyFiltered")
+              : t("transaction.empty")
+          }
         />
       </section>
 

@@ -11,34 +11,37 @@ import { categories, type Transaction, type TransactionDraft } from "./model";
 
 interface TransactionFormProps {
   transaction?: Transaction;
+  initialDraft?: TransactionDraft;
   onSubmit: (draft: TransactionDraft) => Promise<void>;
   onCancel: () => void;
 }
 
 export function TransactionForm({
   transaction,
+  initialDraft,
   onSubmit,
   onCancel,
 }: TransactionFormProps) {
   const { locale, t } = useI18n();
-  const initialType = transaction?.type ?? "expense";
+  const initialValues = transaction ?? initialDraft;
+  const initialType = initialValues?.type ?? "expense";
   const [type, setType] = useState(initialType);
   const [amount, setAmount] = useState(
-    transaction
-      ? (transaction.amountMinor / 100)
+    initialValues
+      ? (initialValues.amountMinor / 100)
           .toFixed(2)
           .replace(".", locale === "cs" ? "," : ".")
       : "",
   );
   const [categoryId, setCategoryId] = useState(
-    transaction?.categoryId ??
+    initialValues?.categoryId ??
       categories.find((category) => category.type === initialType)?.id ??
       "",
   );
   const [dateKey, setDateKey] = useState(
-    transaction?.dateKey ?? toDateKey(new Date()),
+    initialValues?.dateKey ?? toDateKey(new Date()),
   );
-  const [note, setNote] = useState(transaction?.note ?? "");
+  const [note, setNote] = useState(initialValues?.note ?? "");
   const [errors, setErrors] = useState<{
     amount?: string;
     date?: string;
@@ -100,9 +103,13 @@ export function TransactionForm({
     ? type === "expense"
       ? t("transaction.editExpense")
       : t("transaction.editIncome")
-    : type === "expense"
-      ? t("transaction.newExpense")
-      : t("transaction.newIncome");
+    : initialDraft
+      ? type === "expense"
+        ? t("transaction.duplicateExpense")
+        : t("transaction.duplicateIncome")
+      : type === "expense"
+        ? t("transaction.newExpense")
+        : t("transaction.newIncome");
 
   return (
     <form

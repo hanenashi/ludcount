@@ -1,4 +1,4 @@
-import { ChevronRight, Pencil, Trash2 } from "lucide-react";
+import { ChevronRight, Copy, Pencil, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useI18n } from "../../i18n";
 import { formatDateKey } from "../../lib/dates";
@@ -9,17 +9,21 @@ interface TransactionListProps {
   transactions: readonly Transaction[];
   onDelete?: (transaction: Transaction) => void;
   compact?: boolean;
+  emptyMessage?: string;
 }
 
 export function TransactionList({
   transactions,
   onDelete,
   compact = false,
+  emptyMessage,
 }: TransactionListProps) {
   const { locale, t } = useI18n();
 
   if (transactions.length === 0) {
-    return <p className="empty-copy">{t("transaction.empty")}</p>;
+    return (
+      <p className="empty-copy">{emptyMessage ?? t("transaction.empty")}</p>
+    );
   }
 
   return (
@@ -59,6 +63,13 @@ export function TransactionList({
               </Link>
             ) : (
               <div className="row-actions">
+                <Link
+                  className="icon-button"
+                  to={`/app/transactions/new?duplicate=${encodeURIComponent(transaction.id)}`}
+                  aria-label={t("transaction.duplicate")}
+                >
+                  <Copy size={18} aria-hidden="true" />
+                </Link>
                 <Link
                   className="icon-button"
                   to={`/app/transactions/${transaction.id}/edit`}
