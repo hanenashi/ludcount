@@ -45,12 +45,11 @@
 - Desktop and mobile screenshots were visually checked with no layout issue
   found.
 
-The installed Java is Temurin OpenJDK 17.0.19. The committed Firebase CLI
-version (`firebase-tools` 15.24.0) requires Java 21, so `npm run emulators`
-cannot currently start with the installed Java. Full local emulator and browser
-verification was completed without changing system Java by temporarily invoking
-Firebase CLI 14.27.0. Install or select Java 21 before using the committed
-Firebase CLI normally.
+Temurin OpenJDK 21.0.12 is installed in the user-local toolchain and is the
+active `java`, `javac`, and `JAVA_HOME` for new shells. The previous Java 17
+installation remains available. The committed Firebase CLI 15.24.0 and the
+normal `npm run emulators` command were verified to start both Authentication
+and Firestore successfully.
 
 ## Current data model
 
@@ -79,15 +78,14 @@ Before a future production release:
 
 Proceed with Phase 3 from `battleplan.md`:
 
-1. Install or select Java 21.
-2. Replace the emulator-only broad authenticated rule with production household
+1. Replace the emulator-only broad authenticated rule with production household
    membership and field-validation rules in `firestore.rules`.
-3. Add explicit allow/deny emulator tests for owners, members, non-members,
+2. Add explicit allow/deny emulator tests for owners, members, non-members,
    unauthenticated users, immutable ownership fields, integer money, valid local
    dates, and permitted user preference updates.
-4. Keep deny-all production rules in place until those tests pass and deployment
+3. Keep deny-all production rules in place until those tests pass and deployment
    is explicitly authorized.
-5. Do not deploy unless the user explicitly requests it.
+4. Do not deploy unless the user explicitly requests it.
 
 ## Local commands
 
@@ -96,7 +94,7 @@ npm install
 npm run dev
 ```
 
-With Java 21, start Auth and Firestore emulators:
+Start Auth and Firestore emulators:
 
 ```bash
 npm run emulators
