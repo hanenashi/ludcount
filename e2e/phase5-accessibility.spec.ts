@@ -68,9 +68,11 @@ test("supports keyboard navigation, dialog focus, and narrow layouts", async ({
   await page.keyboard.press("Enter");
   await expect(page).toHaveURL(/\/app\/transactions$/);
   await expect(page.getByText("Klávesnicový test")).toBeVisible();
+  await expect(page.locator(".app-main h1")).toBeFocused();
 
   const filterSummary = page.locator(".transaction-filters summary");
   await filterSummary.focus();
+  await expect(filterSummary).toBeFocused();
   const focusStyle = await filterSummary.evaluate((element) => {
     const style = getComputedStyle(element);
     return {
