@@ -1,4 +1,3 @@
-import { WalletCards } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { SkipLink } from "../../components/SkipLink";
@@ -69,9 +68,12 @@ export function SignInPage() {
       <main className="auth-page" id="auth-content" tabIndex={-1}>
         <section className="auth-intro" aria-labelledby="auth-intro-title">
           <div className="brand brand-large">
-            <span className="brand-mark" aria-hidden="true">
-              <WalletCards size={27} />
-            </span>
+            <img
+              className="brand-logo brand-logo-auth"
+              src="/prsk-256.png"
+              alt=""
+              aria-hidden="true"
+            />
             <span>Ludcount</span>
           </div>
           <div>

@@ -1,4 +1,4 @@
-import { Home, List, LogOut, Plus, Settings, WalletCards } from "lucide-react";
+import { Home, List, LogOut, Plus, Settings } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { DataStatePanel, OfflineBanner } from "../components/DataState";
@@ -87,9 +87,12 @@ export function AppShell() {
       <RouteAccessibility />
       <aside className="sidebar">
         <div className="brand">
-          <span className="brand-mark" aria-hidden="true">
-            <WalletCards size={25} />
-          </span>
+          <img
+            className="brand-logo"
+            src="/prsk-256.png"
+            alt=""
+            aria-hidden="true"
+          />
           <span>Ludcount</span>
         </div>
         {runtime.mode === "demo" ? (
@@ -126,9 +129,12 @@ export function AppShell() {
 
       <div className="mobile-header">
         <div className="brand">
-          <span className="brand-mark" aria-hidden="true">
-            <WalletCards size={23} />
-          </span>
+          <img
+            className="brand-logo"
+            src="/prsk-256.png"
+            alt=""
+            aria-hidden="true"
+          />
           <span>Ludcount</span>
         </div>
         <span className="mobile-user" title={runtime.userLabel}>
