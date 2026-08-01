@@ -13,7 +13,7 @@ tested Hosting releases.
 - Primary URL: <https://ludcount-hanenashi.web.app/>
 - Alternate URL: <https://ludcount-hanenashi.firebaseapp.com/>
 - Firebase project: `ludcount-hanenashi`
-- Current deployed application commit: `ce40e9723e791d678b5216f2846d5f6c8b2b9525`
+- Current deployed application commit: `96fdb43785dbb828a3d14e7c9f6f0d0aef0bbe4e`
 - Current repository HEAD: [`main`](https://github.com/hanenashi/ludcount/commits/main)
 
 The live `main` link is the source of truth for repository HEAD because a Git

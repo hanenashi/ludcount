@@ -4,6 +4,30 @@ This archive preserves verified deployment and implementation history in
 newest-first order. For the concise current project state, see
 [`../../handoff.md`](../../handoff.md).
 
+## 2026-08-02 — Okanereco CSV import
+
+This Hosting-only release was deployed from application commit
+`96fdb43785dbb828a3d14e7c9f6f0d0aef0bbe4e`.
+
+- Added an owner-only Settings workflow that validates and previews canonical
+  CSV output from the Okanereco conversion tool before any write.
+- Preserved positive integer minor units, `CZK`, source local calendar dates,
+  Czech/Japanese text, quoted notes, and custom income/expense categories.
+- Added deterministic imported category and transaction IDs, category-first
+  writes, and existence checks inside Firestore transaction chunks. Retrying or
+  reselecting the same source file skips existing documents safely.
+- Kept import unavailable to demo mode and non-owner members. No Firestore
+  rule, index, query, data-model, Authentication, or App Check change was made.
+- Local verification passed formatting, lint, TypeScript, 79 unit tests, 2
+  converter tests, 38 isolated Firestore rules tests, 36 Playwright tests across
+  four Chromium viewports, and the production build. The existing Firebase
+  vendor chunk-size advisory remains.
+- Both default Hosting domains returned HTTP 200 after release. A live 390px
+  demo check showed no importer, Firebase requests, console errors, or
+  horizontal overflow.
+- Only Hosting was deployed; Firestore rules, indexes, Authentication settings,
+  App Check enforcement, and other Firebase services were unchanged.
+
 ## 2026-08-01 — Combined amount focus and handoff archive
 
 This Hosting-only release was deployed from application commit
