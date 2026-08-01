@@ -3,6 +3,7 @@ import { asMoneyAmount } from "../../lib/money";
 import type { Transaction } from "../transactions/model";
 import {
   createTransactionsCsv,
+  createAllTransactionsCsvFilename,
   createTransactionsCsvFilename,
   type CsvLabels,
 } from "./csv";
@@ -74,6 +75,9 @@ describe("CSV export", () => {
     expect(csv).toContain('"850.50"');
     expect(createTransactionsCsvFilename("2026-07")).toBe(
       "ludcount-2026-07.csv",
+    );
+    expect(createAllTransactionsCsvFilename("2026-08-02")).toBe(
+      "ludcount-all-2026-08-02.csv",
     );
   });
 });

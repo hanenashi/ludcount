@@ -414,7 +414,10 @@ service cloud.firestore {
           && isCurrentTimestamp(request.resource.data.updatedAt);
 
         allow delete: if isHouseholdMember(householdId)
-          && resource.data.createdBy == request.auth.uid;
+          && (
+            resource.data.createdBy == request.auth.uid
+            || isHouseholdOwner(householdId)
+          );
       }
     }
   }

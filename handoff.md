@@ -56,7 +56,8 @@ households/{householdId}/categories/{categoryId}
 - Household owners manage settings, non-owner memberships, and custom
   categories; ownership and role escalation are denied.
 - Members create transactions only as themselves. Only a transaction creator
-  can update or delete it.
+  can update it; creators can delete their own transactions and the household
+  owner can delete any transaction for explicit whole-household cleanup.
 - Firestore rules validate exact fields, types, immutable identities,
   timestamps, integer amount bounds, dates, categories, and currency.
 - [`firestore.rules`](firestore.rules) and
@@ -80,15 +81,17 @@ households/{householdId}/categories/{categoryId}
 - read-only Okanereco SQLite-to-Ludcount CSV conversion with review reporting
 - owner-only, preview-first Okanereco CSV import with deterministic IDs and
   idempotent chunked Firestore writes
+- whole-household CSV export and owner-only, typed-confirmation deletion of all
+  transaction history while retaining account/preferences/categories
 - responsive and accessibility coverage across desktop and mobile layouts
 
 ## Verification
 
 Current verified full-suite counts:
 
-- unit tests: 79 passing
+- unit tests: 81 passing
 - migration-tool tests: 2 passing with synthetic SQLite data
-- Firestore rules tests: 38 passing against isolated local Firestore
+- Firestore rules tests: 39 passing against isolated local Firestore
 - Playwright tests: 36 passing across desktop, 390px mobile, 320px mobile, and
   mobile landscape Chromium
 - production build: passing

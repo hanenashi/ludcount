@@ -91,8 +91,20 @@ export function DataImportSection() {
         preview.categoriesToCreate.length + preview.transactionsToCreate.length,
     });
     try {
-      setResult(
-        await runtime.importRepository!.importCsv(preview, setProgress),
+      const importResult = await runtime.importRepository!.importCsv(
+        preview,
+        setProgress,
+      );
+      setResult(importResult);
+      setPreview((current) =>
+        current
+          ? {
+              ...current,
+              categoriesToCreate: [],
+              transactionsToCreate: [],
+              skippedTransactions: current.transactions.length,
+            }
+          : current,
       );
     } catch (nextError) {
       setError(nextError);

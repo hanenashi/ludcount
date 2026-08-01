@@ -21,6 +21,7 @@ interface TransactionContextValue {
   createTransaction: (draft: TransactionDraft) => Promise<string>;
   updateTransaction: (id: string, draft: TransactionDraft) => Promise<void>;
   deleteTransaction: (id: string) => Promise<void>;
+  deleteAllTransactions: () => Promise<void>;
   retry: () => void;
 }
 
@@ -115,6 +116,11 @@ export function TransactionProvider({
       },
       deleteTransaction: async (id) => {
         await requireRepository().remove(id);
+      },
+      deleteAllTransactions: async () => {
+        await requireRepository().removeAll(
+          transactions.map((transaction) => transaction.id),
+        );
       },
       retry: () => {
         setStatus("loading");

@@ -204,6 +204,16 @@ export const en = {
   "settings.categoriesDescription":
     "Create reusable household categories and archive ones you no longer use.",
   "settings.manageCategories": "Manage categories",
+  "settings.dataManagement": "Data management",
+  "settings.dataManagementDescription":
+    "Export every transaction in this household or permanently clear its transaction history.",
+  "settings.exportAll": "Export all transactions",
+  "settings.deleteAll": "Delete all transactions",
+  "settings.deleteAllTitle": "Delete every transaction?",
+  "settings.deleteAllDescription":
+    "This permanently deletes the household's complete transaction history. The account, household, preferences, and categories remain. Export first if you need a copy.",
+  "settings.deleteAllConfirmation": "To confirm, type",
+  "settings.deleteAllComplete": "All household transactions were deleted.",
   "import.heading": "Import Okanereco CSV",
   "import.description":
     "Household owners can preview and import the canonical CSV produced by the Ludcount conversion tool. Nothing is saved before confirmation.",

@@ -229,6 +229,9 @@ not be run as part of ordinary local development.
   category, and note, while the date defaults to today. Nothing is written
   until Save is selected.
 - CSV export includes only the currently filtered transactions.
+- Settings provides a separate whole-household transaction export regardless
+  of the selected period or filters. Its deterministic filename is
+  `ludcount-all-YYYY-MM-DD.csv`.
 - CSV files are generated entirely in the browser with a UTF-8 BOM, semicolon
   delimiters, localized headers and category/type labels, and deterministic
   `ludcount-YYYY-MM.csv` filenames.
@@ -246,6 +249,11 @@ python3 tools/okane_reco_to_ludcount_csv.py MMJ.sqlite ludcount-import.csv \
   --review-output ludcount-review.csv
 python3 -m unittest tools.tests.test_okane_reco_to_ludcount_csv
 ```
+
+A ready-to-import fictional 20-row fixture is available at
+[`examples/okane-reco-import-sample.csv`](./examples/okane-reco-import-sample.csv).
+It covers income and expenses across three months, repeated and varied
+categories, Czech characters, semicolons, and escaped quotes.
 
 The converter preserves the source row ID, local date and time, income/expense
 type, category, note, payment ID, and shop ID. Numeric values are converted to
@@ -265,6 +273,18 @@ IDs. Import is unavailable in the backend-free demo and to non-owner members.
 The source time is retained in the CSV for audit purposes but is not part of
 Ludcount's transaction schema. Ludcount preserves the source local calendar
 date and records the actual import time in Firestore `createdAt`/`updatedAt`.
+The localized six-column Ludcount export is intended for spreadsheets and
+external backup; it is not the canonical 12-column Okanereco import format.
+
+## Bulk transaction deletion
+
+The household owner can delete every transaction from Settings after typing
+`DELETE` in an alert dialog. This operation deletes transaction documents in
+bounded Firestore batches. It deliberately retains the Firebase user, household
+document, membership, preferences, and custom categories, so a cleared
+household remains usable and a previously imported CSV can be imported again.
+Firestore rules allow this bulk cleanup only to the household owner; ordinary
+members can still delete only transactions they created.
 
 ## Periods and graphs
 
@@ -336,6 +356,7 @@ Included:
 - explicit-save transaction duplication with today's local date
 - Czech/English/Japanese client-side CSV export of the filtered result set
 - preview-first, idempotent owner import of canonical Okanereco CSV files
+- whole-household CSV export and owner-confirmed bulk transaction deletion
 - keyboard navigation, dialog focus management, accessible validation, and
   live status announcements
 - narrow-mobile and landscape responsive polish

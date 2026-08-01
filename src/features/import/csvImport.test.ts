@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
 import { asMoneyAmount } from "../../lib/money";
 import type { CustomCategory, Transaction } from "../transactions/model";
 import {
@@ -37,6 +38,21 @@ function csv(
 }
 
 describe("parseOkaneRecoCsv", () => {
+  it("keeps the committed 20-row sample canonical and importable", () => {
+    const sample = readFileSync(
+      "examples/okane-reco-import-sample.csv",
+      "utf8",
+    );
+    const plan = parseOkaneRecoCsv(sample);
+
+    expect(sample.charCodeAt(0)).toBe(0xfeff);
+    expect(plan.transactions).toHaveLength(20);
+    expect(plan.incomeCount).toBe(5);
+    expect(plan.expenseCount).toBe(15);
+    expect(plan.firstDate).toBe("2026-06-03");
+    expect(plan.lastDate).toBe("2026-08-02");
+  });
+
   it("parses the canonical BOM CSV and preserves escaped Czech text", () => {
     const plan = parseOkaneRecoCsv(csv());
 

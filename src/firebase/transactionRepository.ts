@@ -8,6 +8,7 @@ import {
   serverTimestamp,
   setDoc,
   updateDoc,
+  writeBatch,
   type Firestore,
 } from "firebase/firestore";
 import type { TransactionRepository } from "../features/transactions/repository";
@@ -15,6 +16,8 @@ import { transactionConverter } from "./converters";
 import { assertOnline, normalizeDataError } from "./errors";
 
 export type FirestoreTransactionRepository = TransactionRepository;
+
+const BULK_DELETE_SIZE = 400;
 
 export function createFirestoreTransactionRepository(
   firestore: Firestore,
@@ -86,6 +89,21 @@ export function createFirestoreTransactionRepository(
       assertOnline();
       try {
         await deleteDoc(doc(transactionsCollection, id));
+      } catch (error) {
+        throw normalizeDataError(error, "write-failure");
+      }
+    },
+
+    async removeAll(ids) {
+      assertOnline();
+      try {
+        for (let index = 0; index < ids.length; index += BULK_DELETE_SIZE) {
+          const batch = writeBatch(firestore);
+          for (const id of ids.slice(index, index + BULK_DELETE_SIZE)) {
+            batch.delete(doc(transactionsCollection, id));
+          }
+          await batch.commit();
+        }
       } catch (error) {
         throw normalizeDataError(error, "write-failure");
       }

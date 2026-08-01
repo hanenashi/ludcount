@@ -58,6 +58,24 @@ describe("demo transaction repository", () => {
     expect(repository.snapshotForTesting()).toEqual([original]);
   });
 
+  it("deletes a requested set of transactions in one repository operation", async () => {
+    const first: Transaction = {
+      ...expense,
+      id: "first",
+      currency: "CZK",
+      categoryLabelSnapshot: "Potraviny",
+      createdBy: "demo-fixture",
+      createdAt: 1,
+      updatedAt: 1,
+    };
+    const second = { ...first, id: "second" };
+    const repository = new DemoTransactionRepository(() => [first, second]);
+
+    await repository.removeAll([first.id, second.id]);
+
+    expect(repository.snapshotForTesting()).toEqual([]);
+  });
+
   it("calculates income, expenses, and signed balance from integers", () => {
     const transactions: readonly Transaction[] = [
       {

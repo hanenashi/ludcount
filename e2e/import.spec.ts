@@ -58,6 +58,14 @@ async function selectImportFile(page: Page) {
   });
 }
 
+async function downloadText(stream: NodeJS.ReadableStream): Promise<string> {
+  const chunks: Buffer[] = [];
+  for await (const chunk of stream) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  }
+  return Buffer.concat(chunks).toString("utf8");
+}
+
 test("previews and idempotently imports a canonical Okanereco CSV", async ({
   page,
   request,
@@ -75,7 +83,9 @@ test("previews and idempotently imports a canonical Okanereco CSV", async ({
   await page.getByLabel("Heslo").fill("import-test-password");
   await page.getByRole("button", { name: "Přihlásit se" }).click();
   await expect(page).toHaveURL(/\/app\/overview$/, { timeout: 15_000 });
-  await expect(page.getByRole("region", { name: "Přehled" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Přehled" })).toBeVisible({
+    timeout: 20_000,
+  });
 
   await clickVisible(page.getByRole("link", { name: "Nastavení" }));
   await expect(
@@ -109,6 +119,37 @@ test("previews and idempotently imports a canonical Okanereco CSV", async ({
   await expect(
     page.getByRole("button", { name: "Importovat transakce (0)" }),
   ).toBeDisabled();
+
+  const downloadPromise = page.waitForEvent("download");
+  await page
+    .getByRole("button", { name: "Exportovat všechny transakce" })
+    .click();
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toMatch(
+    /^ludcount-all-\d{4}-\d{2}-\d{2}\.csv$/,
+  );
+  const stream = await download.createReadStream();
+  const exported = await downloadText(stream);
+  expect(exported.charCodeAt(0)).toBe(0xfeff);
+  expect(exported).toContain('Pečivo; ""bio""');
+  expect(exported).toContain("Vrácené peníze");
+
+  await page.getByRole("button", { name: "Smazat všechny transakce" }).click();
+  const deleteConfirmation = page.getByLabel(/Pro potvrzení napište DELETE/);
+  const confirmDelete = page
+    .getByRole("alertdialog")
+    .getByRole("button", { name: "Smazat všechny transakce" });
+  await expect(confirmDelete).toBeDisabled();
+  await deleteConfirmation.fill("DELETE");
+  await expect(confirmDelete).toBeEnabled();
+  await confirmDelete.click();
+  await expect(
+    page.getByText("Všechny transakce domácnosti byly smazány."),
+  ).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByText(/Verze 0\.2\.0/)).toBeVisible();
+
+  await clickVisible(page.getByRole("link", { name: "Záznamy" }));
+  await expect(page.getByText("Nejsou tu žádné záznamy.")).toBeVisible();
 
   expect(
     await page.evaluate(

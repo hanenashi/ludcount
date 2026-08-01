@@ -66,6 +66,10 @@ export function createTransactionsCsvFilename(monthKey: string): string {
   return `ludcount-${monthKey}.csv`;
 }
 
+export function createAllTransactionsCsvFilename(dateKey: string): string {
+  return `ludcount-all-${dateKey}.csv`;
+}
+
 export function downloadTransactionsCsv(csv: string, filename: string): void {
   const url = URL.createObjectURL(
     new Blob([csv], { type: "text/csv;charset=utf-8" }),

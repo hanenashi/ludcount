@@ -883,6 +883,18 @@ describe("transactions", () => {
     await assertFails(deleteDoc(reference));
   });
 
+  it("allows the household owner to delete a member transaction", async () => {
+    const reference = doc(
+      authenticatedFirestore(ownerId),
+      "households",
+      primaryHouseholdId,
+      "transactions",
+      "member-transaction",
+    );
+
+    await assertSucceeds(deleteDoc(reference));
+  });
+
   it.each([
     ["floating-point", 850.5],
     ["zero", 0],

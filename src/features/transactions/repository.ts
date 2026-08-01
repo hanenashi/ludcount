@@ -22,6 +22,7 @@ export interface TransactionRepository {
     categoryLabelSnapshot: string,
   ): Promise<void>;
   remove(id: string): Promise<void>;
+  removeAll(ids: readonly string[]): Promise<void>;
 }
 
 export interface TransactionTotals {

@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAppRuntime } from "../../app/AppRuntime";
 import { useI18n, type Locale } from "../../i18n";
 import { DataImportSection } from "../import/DataImportSection";
+import { DataManagementSection } from "./DataManagementSection";
 import {
   defaultDisplayCurrency,
   displayCurrencySymbol,
@@ -122,8 +123,6 @@ export function SettingsPage() {
         ) : null}
       </section>
 
-      <DataImportSection />
-
       <section className="settings-section">
         <div>
           <h2>{t("settings.currency")}</h2>
@@ -173,6 +172,10 @@ export function SettingsPage() {
         ) : null}
       </section>
 
+      <DataManagementSection />
+
+      <DataImportSection />
+
       <section className="settings-section">
         <div>
           <h2>{t("settings.categories")}</h2>
@@ -187,16 +190,12 @@ export function SettingsPage() {
         </Link>
       </section>
 
-      <section className="settings-section">
-        <div>
-          <h2>{t("settings.dataHeading")}</h2>
-          <p>
-            {runtime.mode === "demo"
-              ? t("demo.settingsDescription")
-              : t("settings.dataDescription")}
-          </p>
-        </div>
-        {runtime.resetDemo ? (
+      {runtime.mode === "demo" ? (
+        <section className="settings-section">
+          <div>
+            <h2>{t("settings.dataHeading")}</h2>
+            <p>{t("demo.settingsDescription")}</p>
+          </div>
           <button
             className="button button-secondary"
             type="button"
@@ -208,17 +207,17 @@ export function SettingsPage() {
             <RotateCcw size={18} aria-hidden="true" />
             {t("demo.reset")}
           </button>
-        ) : null}
-        {demoReset ? (
-          <p
-            className="settings-inline-success"
-            role="status"
-            aria-live="polite"
-          >
-            {t("demo.resetComplete")}
-          </p>
-        ) : null}
-      </section>
+          {demoReset ? (
+            <p
+              className="settings-inline-success"
+              role="status"
+              aria-live="polite"
+            >
+              {t("demo.resetComplete")}
+            </p>
+          ) : null}
+        </section>
+      ) : null}
 
       <section className="settings-section">
         <div>
@@ -258,7 +257,9 @@ export function SettingsPage() {
         ) : null}
       </section>
 
-      <p className="version-copy">{t("settings.version")} 0.1.0</p>
+      <p className="version-copy">
+        {t("settings.version")} {__APP_VERSION__}
+      </p>
     </div>
   );
 }

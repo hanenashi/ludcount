@@ -207,6 +207,16 @@ export const cs = {
   "settings.categoriesDescription":
     "Vytvářejte vlastní kategorie domácnosti a archivujte ty, které už nepoužíváte.",
   "settings.manageCategories": "Spravovat kategorie",
+  "settings.dataManagement": "Správa dat",
+  "settings.dataManagementDescription":
+    "Exportujte všechny transakce domácnosti nebo trvale vymažte její historii transakcí.",
+  "settings.exportAll": "Exportovat všechny transakce",
+  "settings.deleteAll": "Smazat všechny transakce",
+  "settings.deleteAllTitle": "Smazat všechny transakce?",
+  "settings.deleteAllDescription":
+    "Tímto trvale smažete celou historii transakcí domácnosti. Účet, domácnost, nastavení a kategorie zůstanou zachovány. Pokud potřebujete kopii, nejprve data exportujte.",
+  "settings.deleteAllConfirmation": "Pro potvrzení napište",
+  "settings.deleteAllComplete": "Všechny transakce domácnosti byly smazány.",
   "import.heading": "Import CSV z Okanereco",
   "import.description":
     "Vlastník domácnosti může zkontrolovat a importovat standardní CSV vytvořené převodním nástrojem Ludcount. Před potvrzením se nic neuloží.",

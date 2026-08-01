@@ -33,6 +33,7 @@ interface AppRuntimeContextValue {
   displayCurrency: DisplayCurrency;
   currencySymbol: string;
   importRepository: DataImportRepository | null;
+  canManageHouseholdData: boolean;
   saveLocale: (locale: Locale) => Promise<void>;
   saveCurrencyPreference: (
     preference: DisplayCurrencyPreference,
@@ -80,6 +81,7 @@ export function ProductionRuntimeProvider({
       displayCurrency,
       currencySymbol: displayCurrencySymbol(displayCurrency),
       importRepository,
+      canManageHouseholdData: importRepository !== null,
       saveLocale: household.saveLocale,
       saveCurrencyPreference: household.saveDisplayCurrency,
       exit: signOutUser,
@@ -132,6 +134,7 @@ export function DemoRuntimeProvider({
       displayCurrency,
       currencySymbol: displayCurrencySymbol(displayCurrency),
       importRepository: null,
+      canManageHouseholdData: false,
       saveLocale: async () => undefined,
       saveCurrencyPreference: async (preference) => {
         setCurrencyPreference(preference);

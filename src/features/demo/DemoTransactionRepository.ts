@@ -88,6 +88,14 @@ export class DemoTransactionRepository implements TransactionRepository {
     this.#emit();
   }
 
+  async removeAll(ids: readonly string[]): Promise<void> {
+    const removed = new Set(ids);
+    this.#transactions = this.#transactions.filter(
+      (transaction) => !removed.has(transaction.id),
+    );
+    this.#emit();
+  }
+
   reset(): void {
     this.#transactions = sortTransactions(this.#fixtureFactory());
     this.#emit();

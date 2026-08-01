@@ -198,6 +198,16 @@ export const ja: Translations = {
   "settings.categoriesDescription":
     "世帯で共有するカテゴリを作成し、使わないものをアーカイブできます。",
   "settings.manageCategories": "カテゴリを管理",
+  "settings.dataManagement": "データ管理",
+  "settings.dataManagementDescription":
+    "世帯のすべての取引を書き出すか、取引履歴を完全に削除します。",
+  "settings.exportAll": "すべての取引をエクスポート",
+  "settings.deleteAll": "すべての取引を削除",
+  "settings.deleteAllTitle": "すべての取引を削除しますか？",
+  "settings.deleteAllDescription":
+    "世帯の全取引履歴が完全に削除されます。アカウント、世帯、設定、カテゴリは残ります。コピーが必要な場合は先にエクスポートしてください。",
+  "settings.deleteAllConfirmation": "確認するには次を入力してください：",
+  "settings.deleteAllComplete": "世帯のすべての取引を削除しました。",
   "import.heading": "Okanereco CSVをインポート",
   "import.description":
     "世帯の所有者は、Ludcount変換ツールで作成した標準CSVを確認してインポートできます。確認するまで保存されません。",

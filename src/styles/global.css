@@ -1462,6 +1462,13 @@ summary:focus-visible {
   margin-top: 20px;
 }
 
+.data-management-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
 .page-description {
   max-width: 720px;
   margin: 10px 0 32px;
@@ -2046,6 +2053,14 @@ summary:focus-visible {
   }
 
   .import-actions .button {
+    width: 100%;
+  }
+
+  .data-management-actions {
+    width: 100%;
+  }
+
+  .data-management-actions .button {
     width: 100%;
   }
 }
