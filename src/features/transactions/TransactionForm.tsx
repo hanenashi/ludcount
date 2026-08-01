@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { DataWriteError } from "../../components/DataState";
+import { useAppRuntime } from "../../app/AppRuntime";
 import {
   normalizeDataError,
   type DataOperationError,
@@ -24,6 +25,7 @@ export function TransactionForm({
   onCancel,
 }: TransactionFormProps) {
   const { locale, t } = useI18n();
+  const { currencySymbol } = useAppRuntime();
   const { categories, labelFor } = useCategories();
   const initialValues = transaction ?? initialDraft;
   const initialType = initialValues?.type ?? "expense";
@@ -182,7 +184,7 @@ export function TransactionForm({
             aria-describedby={errors.amount ? "amount-error" : undefined}
             aria-errormessage={errors.amount ? "amount-error" : undefined}
           />
-          <span>Kč</span>
+          <span>{currencySymbol}</span>
         </div>
         {errors.amount ? (
           <small className="error-message" id="amount-error" role="alert">

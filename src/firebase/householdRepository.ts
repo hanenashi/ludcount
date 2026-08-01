@@ -8,6 +8,7 @@ import {
   type Firestore,
 } from "firebase/firestore";
 import type { Locale } from "../i18n";
+import type { DisplayCurrencyPreference } from "../lib/money";
 import { householdConverter, userProfileConverter } from "./converters";
 import { assertOnline, DataOperationError, normalizeDataError } from "./errors";
 import type { UserWorkspace } from "./model";
@@ -21,6 +22,10 @@ export interface HouseholdRepository {
     localizedHouseholdName: string,
   ): Promise<UserWorkspace>;
   updateLocale(userId: string, locale: Locale): Promise<void>;
+  updateDisplayCurrency(
+    userId: string,
+    preference: DisplayCurrencyPreference,
+  ): Promise<void>;
 }
 
 export function createFirestoreHouseholdRepository(
@@ -85,6 +90,7 @@ export function createFirestoreHouseholdRepository(
             displayName,
             email,
             locale: fallbackLocale,
+            displayCurrency: "auto",
             activeHouseholdId: householdReference.id,
             createdAt: now,
             updatedAt: now,
@@ -109,6 +115,7 @@ export function createFirestoreHouseholdRepository(
               displayName,
               email,
               locale: fallbackLocale,
+              displayCurrency: "auto",
               activeHouseholdId: householdReference.id,
               createdAt: timestamp,
               updatedAt: timestamp,
@@ -144,6 +151,18 @@ export function createFirestoreHouseholdRepository(
       try {
         await updateDoc(doc(firestore, "users", userId), {
           locale,
+          updatedAt: serverTimestamp(),
+        });
+      } catch (error) {
+        throw normalizeDataError(error, "write-failure");
+      }
+    },
+
+    async updateDisplayCurrency(userId, displayCurrency) {
+      assertOnline();
+      try {
+        await updateDoc(doc(firestore, "users", userId), {
+          displayCurrency,
           updatedAt: serverTimestamp(),
         });
       } catch (error) {

@@ -97,6 +97,8 @@ Only after explicit authorization for a future release:
    - verify the personal household bootstrap
    - create, edit, duplicate, filter, export, and delete a small transaction
    - switch Czech to English and Japanese and verify persistence
+   - verify automatic `Kč`, `$`, and `¥` symbols follow those locales;
+     save a manual override, reload, and verify only the symbol changes
    - as an owner, create and rename a custom category, use it for a transaction,
      then archive it and confirm it remains visible in history but unavailable
      for new transactions

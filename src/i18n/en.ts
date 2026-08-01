@@ -147,6 +147,15 @@ export const en = {
   "settings.czech": "Czech",
   "settings.english": "English",
   "settings.japanese": "Japanese",
+  "settings.currency": "Amount symbol",
+  "settings.currencyDescription":
+    "Choose the symbol shown beside amounts. Values are not converted.",
+  "settings.currencyAuto": "Automatic",
+  "settings.currencyCzk": "Czech koruna (Kč)",
+  "settings.currencyUsd": "US dollar ($)",
+  "settings.currencyJpy": "Japanese yen (¥)",
+  "settings.currencySaveError": "The amount symbol could not be saved.",
+  "settings.savingCurrency": "Saving amount symbol.",
   "settings.dataHeading": "Data for this phase",
   "settings.dataDescription":
     "Transactions and preferences are synchronized through Cloud Firestore.",

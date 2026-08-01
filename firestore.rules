@@ -11,6 +11,11 @@ service cloud.firestore {
       return locale is string && locale in ['cs', 'en', 'ja'];
     }
 
+    function hasValidDisplayCurrency(data) {
+      return !data.keys().hasAny(['displayCurrency'])
+        || data.displayCurrency in ['auto', 'CZK', 'USD', 'JPY'];
+    }
+
     function isValidRequiredString(value, maximumLength) {
       return value is string
         && value.size() > 0
@@ -59,6 +64,7 @@ service cloud.firestore {
           'displayName',
           'email',
           'locale',
+          'displayCurrency',
           'activeHouseholdId',
           'createdAt',
           'updatedAt'
@@ -66,6 +72,7 @@ service cloud.firestore {
         && isValidOptionalString(data.displayName, 100)
         && isValidOptionalString(data.email, 320)
         && isValidLocale(data.locale)
+        && hasValidDisplayCurrency(data)
         && isValidRequiredString(data.activeHouseholdId, 128)
         && data.createdAt is timestamp
         && data.updatedAt is timestamp;
@@ -279,6 +286,7 @@ service cloud.firestore {
         && isValidProfile(request.resource.data)
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
           'locale',
+          'displayCurrency',
           'activeHouseholdId',
           'updatedAt'
         ])

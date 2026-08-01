@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import { DemoRuntimeProvider } from "../../app/AppRuntime";
 import { DataOperationError } from "../../firebase/errors";
 import {
   CategoryProvider,
@@ -20,9 +21,15 @@ function renderForm(
 ) {
   return render(
     <I18nProvider>
-      <CategoryProvider repository={repository} observeOnline={false} canManage>
-        <CategoryReady>{form}</CategoryReady>
-      </CategoryProvider>
+      <DemoRuntimeProvider onReset={vi.fn()} userLabel="Demo">
+        <CategoryProvider
+          repository={repository}
+          observeOnline={false}
+          canManage
+        >
+          <CategoryReady>{form}</CategoryReady>
+        </CategoryProvider>
+      </DemoRuntimeProvider>
     </I18nProvider>,
   );
 }

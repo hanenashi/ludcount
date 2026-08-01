@@ -84,6 +84,7 @@ describe("Firestore converters", () => {
       displayName: "Ludva",
       email: "ludva@example.test",
       locale: "ja",
+      displayCurrency: "USD",
       activeHouseholdId: "home-1",
       createdAt: Timestamp.fromMillis(1000),
       updatedAt: Timestamp.fromMillis(2000),
@@ -92,8 +93,24 @@ describe("Firestore converters", () => {
     expect(userProfileConverter.fromFirestore(snapshot)).toMatchObject({
       id: "user-1",
       locale: "ja",
+      displayCurrency: "USD",
       activeHouseholdId: "home-1",
     });
+  });
+
+  it("defaults legacy profiles to automatic display currency", () => {
+    const snapshot = createSnapshot("user-1", "users/user-1", {
+      displayName: "Ludva",
+      email: "ludva@example.test",
+      locale: "en",
+      activeHouseholdId: "home-1",
+      createdAt: Timestamp.fromMillis(1000),
+      updatedAt: Timestamp.fromMillis(2000),
+    });
+
+    expect(userProfileConverter.fromFirestore(snapshot).displayCurrency).toBe(
+      "auto",
+    );
   });
 
   it("converts a valid custom category", () => {

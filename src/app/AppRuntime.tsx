@@ -1,8 +1,21 @@
-import { createContext, useContext, useMemo, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import type { DataOperationError } from "../firebase/errors";
 import { useAuth } from "../features/auth/AuthProvider";
 import { useHousehold } from "../features/household/HouseholdProvider";
-import type { Locale } from "../i18n";
+import { useI18n, type Locale } from "../i18n";
+import {
+  displayCurrencySymbol,
+  resolveDisplayCurrency,
+  type DisplayCurrency,
+  type DisplayCurrencyPreference,
+} from "../lib/money";
 
 export type ApplicationMode = "production" | "demo";
 
@@ -13,7 +26,13 @@ interface AppRuntimeContextValue {
   status: "loading" | "ready" | "error";
   error: DataOperationError | null;
   preferenceError: DataOperationError | null;
+  currencyPreference: DisplayCurrencyPreference;
+  displayCurrency: DisplayCurrency;
+  currencySymbol: string;
   saveLocale: (locale: Locale) => Promise<void>;
+  saveCurrencyPreference: (
+    preference: DisplayCurrencyPreference,
+  ) => Promise<void>;
   exit: () => Promise<void>;
   retry: () => void;
   resetDemo: (() => void) | null;
@@ -28,6 +47,10 @@ export function ProductionRuntimeProvider({
 }) {
   const { user, signOutUser } = useAuth();
   const household = useHousehold();
+  const { locale } = useI18n();
+  const currencyPreference =
+    household.workspace?.profile.displayCurrency ?? "auto";
+  const displayCurrency = resolveDisplayCurrency(locale, currencyPreference);
   const value = useMemo<AppRuntimeContextValue>(
     () => ({
       mode: "production",
@@ -36,12 +59,16 @@ export function ProductionRuntimeProvider({
       status: household.status === "idle" ? "loading" : household.status,
       error: household.error,
       preferenceError: household.preferenceError,
+      currencyPreference,
+      displayCurrency,
+      currencySymbol: displayCurrencySymbol(displayCurrency),
       saveLocale: household.saveLocale,
+      saveCurrencyPreference: household.saveDisplayCurrency,
       exit: signOutUser,
       retry: household.retry,
       resetDemo: null,
     }),
-    [household, signOutUser, user],
+    [currencyPreference, displayCurrency, household, signOutUser, user],
   );
 
   return (
@@ -60,6 +87,14 @@ export function DemoRuntimeProvider({
   userLabel: string;
   children: ReactNode;
 }) {
+  const { locale } = useI18n();
+  const [currencyPreference, setCurrencyPreference] =
+    useState<DisplayCurrencyPreference>("auto");
+  const displayCurrency = resolveDisplayCurrency(locale, currencyPreference);
+  const resetDemo = useCallback(() => {
+    setCurrencyPreference("auto");
+    onReset();
+  }, [onReset]);
   const value = useMemo<AppRuntimeContextValue>(
     () => ({
       mode: "demo",
@@ -68,12 +103,18 @@ export function DemoRuntimeProvider({
       status: "ready",
       error: null,
       preferenceError: null,
+      currencyPreference,
+      displayCurrency,
+      currencySymbol: displayCurrencySymbol(displayCurrency),
       saveLocale: async () => undefined,
+      saveCurrencyPreference: async (preference) => {
+        setCurrencyPreference(preference);
+      },
       exit: async () => undefined,
       retry: () => undefined,
-      resetDemo: onReset,
+      resetDemo,
     }),
-    [onReset, userLabel],
+    [currencyPreference, displayCurrency, resetDemo, userLabel],
   );
 
   return (

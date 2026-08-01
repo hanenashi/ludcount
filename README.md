@@ -164,7 +164,7 @@ bootstrap and transaction writes satisfy the strict policy.
 The production rules enforce these boundaries:
 
 - users may read only their own profile and may update only `locale`,
-  `activeHouseholdId`, and `updatedAt`
+  `displayCurrency`, `activeHouseholdId`, and `updatedAt`
 - profile identity fields and creation timestamps are immutable
 - only members may read a household, its memberships, and its transactions
 - a new personal household, owner membership, and profile must be created
@@ -202,6 +202,12 @@ not be run as part of ordinary local development.
 
 - Money is stored and aggregated as integer minor units. For example, `12550`
   means `125.50 CZK`.
+- Amount symbols default from the UI locale: Czech uses `Kč`, English uses
+  `$`, and Japanese uses `¥`. Each user can save an automatic or explicit
+  `Kč`/`$`/`¥` display preference in Settings.
+- Symbol changes are presentation-only. They do not convert or modify numeric
+  values, transaction documents, or the underlying `CZK` field; CSV export
+  continues to report that stored currency accurately.
 - Transaction direction is represented by `income` or `expense`; stored amounts
   are always positive.
 - User-selected dates use local `YYYY-MM-DD` date keys and `YYYY-MM` month keys.

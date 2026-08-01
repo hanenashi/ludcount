@@ -16,6 +16,7 @@ import type { DataOperationError } from "../../firebase/errors";
 import type { UserWorkspace } from "../../firebase/model";
 import { useI18n, type Locale } from "../../i18n";
 import { getFirebaseServices } from "../../lib/firebase";
+import type { DisplayCurrencyPreference } from "../../lib/money";
 import { useAuth } from "../auth/AuthProvider";
 
 type HouseholdStatus = "idle" | "loading" | "ready" | "error";
@@ -26,6 +27,7 @@ interface HouseholdContextValue {
   error: DataOperationError | null;
   preferenceError: DataOperationError | null;
   saveLocale: (locale: Locale) => Promise<void>;
+  saveDisplayCurrency: (preference: DisplayCurrencyPreference) => Promise<void>;
   retry: () => void;
 }
 
@@ -110,6 +112,32 @@ export function HouseholdProvider({ children }: { children: ReactNode }) {
     [repository, user, workspace],
   );
 
+  const saveDisplayCurrency = useCallback(
+    async (displayCurrency: DisplayCurrencyPreference) => {
+      if (!user || !workspace) return;
+      setPreferenceError(null);
+      try {
+        await repository.updateDisplayCurrency(user.uid, displayCurrency);
+        setWorkspace((current) =>
+          current
+            ? {
+                ...current,
+                profile: {
+                  ...current.profile,
+                  displayCurrency,
+                  updatedAt: Date.now(),
+                },
+              }
+            : current,
+        );
+      } catch (saveError) {
+        setPreferenceError(saveError as DataOperationError);
+        throw saveError;
+      }
+    },
+    [repository, user, workspace],
+  );
+
   const value = useMemo<HouseholdContextValue>(
     () => ({
       workspace: user ? workspace : null,
@@ -117,13 +145,22 @@ export function HouseholdProvider({ children }: { children: ReactNode }) {
       error: user ? error : null,
       preferenceError: user ? preferenceError : null,
       saveLocale,
+      saveDisplayCurrency,
       retry: () => {
         setStatus("loading");
         setError(null);
         setRetryToken((current) => current + 1);
       },
     }),
-    [error, preferenceError, saveLocale, status, user, workspace],
+    [
+      error,
+      preferenceError,
+      saveDisplayCurrency,
+      saveLocale,
+      status,
+      user,
+      workspace,
+    ],
   );
 
   return (

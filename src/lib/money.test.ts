@@ -2,8 +2,11 @@ import { describe, expect, it } from "vitest";
 import {
   MAX_AMOUNT_MINOR,
   asMoneyAmount,
+  defaultDisplayCurrency,
+  displayCurrencySymbol,
   formatMoney,
   parseMoneyInput,
+  resolveDisplayCurrency,
   sumMoney,
 } from "./money";
 
@@ -29,7 +32,17 @@ describe("money helpers", () => {
 
   it("formats only at the display boundary", () => {
     expect(formatMoney(asMoneyAmount(12550), "cs")).toContain("125,50");
-    expect(formatMoney(asMoneyAmount(12550), "en")).toContain("125.50");
-    expect(formatMoney(asMoneyAmount(12550), "ja")).toContain("125.50");
+    expect(formatMoney(asMoneyAmount(12550), "cs")).toContain("Kč");
+    expect(formatMoney(asMoneyAmount(12550), "en")).toBe("$125.50");
+    expect(formatMoney(asMoneyAmount(12550), "ja")).toBe("¥125.50");
+    expect(formatMoney(asMoneyAmount(12550), "cs", "USD")).toBe("$125,50");
+  });
+
+  it("resolves locale defaults and persistent manual symbol overrides", () => {
+    expect(defaultDisplayCurrency("cs")).toBe("CZK");
+    expect(defaultDisplayCurrency("en")).toBe("USD");
+    expect(defaultDisplayCurrency("ja")).toBe("JPY");
+    expect(resolveDisplayCurrency("ja", "USD")).toBe("USD");
+    expect(displayCurrencySymbol("CZK")).toBe("Kč");
   });
 });

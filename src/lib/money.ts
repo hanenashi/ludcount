@@ -2,6 +2,9 @@ export type MoneyAmount = number & {
   readonly __brand: "MoneyAmountMinorUnits";
 };
 
+export type DisplayCurrency = "CZK" | "USD" | "JPY";
+export type DisplayCurrencyPreference = "auto" | DisplayCurrency;
+
 export const MAX_AMOUNT_MINOR = 1_000_000_000;
 
 export function asMoneyAmount(value: number): MoneyAmount {
@@ -42,16 +45,34 @@ export function parseMoneyInput(
 export function formatMoney(
   amountMinor: MoneyAmount,
   locale: "cs" | "en" | "ja",
-  currency = "CZK",
+  currency: DisplayCurrency = defaultDisplayCurrency(locale),
 ): string {
   const numberLocale =
     locale === "cs" ? "cs-CZ" : locale === "ja" ? "ja-JP" : "en-GB";
-  return new Intl.NumberFormat(numberLocale, {
-    style: "currency",
-    currency,
+  const amount = new Intl.NumberFormat(numberLocale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(amountMinor / 100);
+  return currency === "CZK"
+    ? `${amount}\u00a0Kč`
+    : `${currency === "USD" ? "$" : "¥"}${amount}`;
+}
+
+export function defaultDisplayCurrency(
+  locale: "cs" | "en" | "ja",
+): DisplayCurrency {
+  return locale === "cs" ? "CZK" : locale === "ja" ? "JPY" : "USD";
+}
+
+export function resolveDisplayCurrency(
+  locale: "cs" | "en" | "ja",
+  preference: DisplayCurrencyPreference,
+): DisplayCurrency {
+  return preference === "auto" ? defaultDisplayCurrency(locale) : preference;
+}
+
+export function displayCurrencySymbol(currency: DisplayCurrency): string {
+  return currency === "CZK" ? "Kč" : currency === "USD" ? "$" : "¥";
 }
 
 export function sumMoney(values: readonly MoneyAmount[]): MoneyAmount {

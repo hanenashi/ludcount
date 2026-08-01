@@ -150,6 +150,15 @@ export const cs = {
   "settings.czech": "Čeština",
   "settings.english": "Angličtina",
   "settings.japanese": "Japonština",
+  "settings.currency": "Symbol částky",
+  "settings.currencyDescription":
+    "Vyberte symbol zobrazovaný u částek. Hodnoty se nepřepočítávají.",
+  "settings.currencyAuto": "Automaticky",
+  "settings.currencyCzk": "Česká koruna (Kč)",
+  "settings.currencyUsd": "Americký dolar ($)",
+  "settings.currencyJpy": "Japonský jen (¥)",
+  "settings.currencySaveError": "Symbol částky se nepodařilo uložit.",
+  "settings.savingCurrency": "Ukládám symbol částky.",
   "settings.dataHeading": "Data v této fázi",
   "settings.dataDescription":
     "Záznamy a nastavení se synchronizují přes Cloud Firestore.",

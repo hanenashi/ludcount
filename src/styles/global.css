@@ -961,6 +961,18 @@ summary:focus-visible {
   box-shadow: 0 2px 7px rgb(7 28 54 / 9%);
 }
 
+.currency-options {
+  display: grid;
+  width: min(440px, 100%);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.currency-options .language-button {
+  height: auto;
+  min-height: 48px;
+  padding: 7px 12px;
+}
+
 .version-copy {
   margin-top: 30px;
   color: var(--muted);

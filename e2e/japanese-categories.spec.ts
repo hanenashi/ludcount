@@ -40,6 +40,10 @@ test("uses Japanese and manages custom demo categories locally", async ({
   await page.getByRole("button", { name: "Japonština" }).click();
   await expect(page.locator("html")).toHaveAttribute("lang", "ja");
   await expect(page.getByRole("heading", { name: "設定" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "自動 (¥)" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
 
   await page.getByRole("link", { name: "カテゴリを管理" }).click();
   await expect(page).toHaveURL(/\/demo\/settings\/categories$/);

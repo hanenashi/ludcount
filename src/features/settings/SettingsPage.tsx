@@ -3,11 +3,24 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAppRuntime } from "../../app/AppRuntime";
 import { useI18n, type Locale } from "../../i18n";
+import {
+  defaultDisplayCurrency,
+  displayCurrencySymbol,
+  type DisplayCurrencyPreference,
+} from "../../lib/money";
 
 export function SettingsPage() {
   const { locale, setLocale, t } = useI18n();
   const runtime = useAppRuntime();
+  const automaticCurrencySymbol = displayCurrencySymbol(
+    defaultDisplayCurrency(locale),
+  );
   const [savingLocale, setSavingLocale] = useState<Locale | null>(null);
+  const [savingCurrency, setSavingCurrency] =
+    useState<DisplayCurrencyPreference | null>(null);
+  const [preferenceFailure, setPreferenceFailure] = useState<
+    "locale" | "currency" | null
+  >(null);
   const [signingOut, setSigningOut] = useState(false);
   const [signOutError, setSignOutError] = useState(false);
   const [demoReset, setDemoReset] = useState(false);
@@ -18,13 +31,27 @@ export function SettingsPage() {
       return;
     }
     setSavingLocale(nextLocale);
+    setPreferenceFailure(null);
     try {
       await runtime.saveLocale(nextLocale);
       setLocale(nextLocale);
     } catch {
-      // The provider exposes the localized write state below.
+      setPreferenceFailure("locale");
     } finally {
       setSavingLocale(null);
+    }
+  };
+
+  const changeCurrency = async (next: DisplayCurrencyPreference) => {
+    if (next === runtime.currencyPreference || savingCurrency) return;
+    setSavingCurrency(next);
+    setPreferenceFailure(null);
+    try {
+      await runtime.saveCurrencyPreference(next);
+    } catch {
+      setPreferenceFailure("currency");
+    } finally {
+      setSavingCurrency(null);
     }
   };
 
@@ -82,7 +109,7 @@ export function SettingsPage() {
             {t("settings.japanese")}
           </button>
         </div>
-        {runtime.preferenceError ? (
+        {preferenceFailure === "locale" ? (
           <p className="settings-inline-error" role="alert">
             {t("settings.languageSaveError")}
           </p>
@@ -90,6 +117,55 @@ export function SettingsPage() {
         {savingLocale ? (
           <p className="sr-only" role="status" aria-live="polite">
             {t("settings.savingLanguage")}
+          </p>
+        ) : null}
+      </section>
+
+      <section className="settings-section">
+        <div>
+          <h2>{t("settings.currency")}</h2>
+          <p>{t("settings.currencyDescription")}</p>
+        </div>
+        <div
+          className="language-options currency-options"
+          role="group"
+          aria-label={t("settings.currency")}
+        >
+          {(
+            [
+              [
+                "auto",
+                `${t("settings.currencyAuto")} (${automaticCurrencySymbol})`,
+              ],
+              ["CZK", t("settings.currencyCzk")],
+              ["USD", t("settings.currencyUsd")],
+              ["JPY", t("settings.currencyJpy")],
+            ] as const
+          ).map(([value, label]) => (
+            <button
+              className={
+                runtime.currencyPreference === value
+                  ? "language-button language-button-active"
+                  : "language-button"
+              }
+              type="button"
+              key={value}
+              aria-pressed={runtime.currencyPreference === value}
+              disabled={savingCurrency !== null}
+              onClick={() => void changeCurrency(value)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        {preferenceFailure === "currency" ? (
+          <p className="settings-inline-error" role="alert">
+            {t("settings.currencySaveError")}
+          </p>
+        ) : null}
+        {savingCurrency ? (
+          <p className="sr-only" role="status" aria-live="polite">
+            {t("settings.savingCurrency")}
           </p>
         ) : null}
       </section>

@@ -8,6 +8,7 @@ import {
 } from "firebase/firestore";
 import { isValidDateKey } from "../lib/dates";
 import { asMoneyAmount, MAX_AMOUNT_MINOR } from "../lib/money";
+import type { DisplayCurrencyPreference } from "../lib/money";
 import type {
   CustomCategory,
   Transaction,
@@ -85,6 +86,22 @@ function readLocale(data: DocumentData, path: string): "cs" | "en" | "ja" {
   return locale;
 }
 
+function readDisplayCurrency(
+  data: DocumentData,
+  path: string,
+): DisplayCurrencyPreference {
+  const value = data.displayCurrency ?? "auto";
+  if (
+    value !== "auto" &&
+    value !== "CZK" &&
+    value !== "USD" &&
+    value !== "JPY"
+  ) {
+    invalidData(path, "displayCurrency must be auto, CZK, USD, or JPY.");
+  }
+  return value;
+}
+
 function readTransactionType(
   data: DocumentData,
   path: string,
@@ -115,6 +132,7 @@ export const userProfileConverter: FirestoreDataConverter<UserProfile> = {
       displayName: profile.displayName,
       email: profile.email,
       locale: profile.locale,
+      displayCurrency: profile.displayCurrency,
       activeHouseholdId: profile.activeHouseholdId,
       createdAt: writeTimestamp(profile.createdAt, "createdAt"),
       updatedAt: writeTimestamp(profile.updatedAt, "updatedAt"),
@@ -127,6 +145,7 @@ export const userProfileConverter: FirestoreDataConverter<UserProfile> = {
       displayName: readString(data, "displayName", path, true),
       email: readString(data, "email", path, true),
       locale: readLocale(data, path),
+      displayCurrency: readDisplayCurrency(data, path),
       activeHouseholdId: readString(data, "activeHouseholdId", path),
       createdAt: readTimestamp(data, "createdAt", path),
       updatedAt: readTimestamp(data, "updatedAt", path),

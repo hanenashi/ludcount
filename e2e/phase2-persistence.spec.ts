@@ -58,14 +58,23 @@ test("persists an invited user's household, transactions, and locale through Fir
   await clickVisible(page.getByRole("link", { name: "Nastavení" }));
   await page.getByRole("button", { name: "Japonština" }).click();
   await expect(page.getByRole("heading", { name: "設定" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "自動 (¥)" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  await page.getByRole("button", { name: "米ドル ($)" }).click();
+  await expect(page.getByRole("button", { name: "自動 (¥)" })).toBeVisible();
 
   await page.evaluate(() => localStorage.removeItem("ludcount.locale"));
   await page.reload();
   await expect(page.getByRole("heading", { name: "設定" })).toBeVisible();
   await expect(page.locator("html")).toHaveAttribute("lang", "ja");
+  await expect(
+    page.getByRole("button", { name: "米ドル ($)" }),
+  ).toHaveAttribute("aria-pressed", "true");
 
   await clickVisible(page.getByRole("link", { name: "取引" }));
-  await expect(page.getByText(/900.00/).first()).toBeVisible();
+  await expect(page.getByText(/\$900.00/).first()).toBeVisible();
   await page.getByRole("button", { name: /削除/ }).click();
   await page.getByRole("button", { name: "削除", exact: true }).click();
   await expect(page.getByText("表示する取引がありません。")).toBeVisible();

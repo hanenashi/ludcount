@@ -13,7 +13,7 @@ import { useTransactions } from "../transactions/TransactionProvider";
 
 export function OverviewPage() {
   const { locale, t } = useI18n();
-  const { basePath } = useAppRuntime();
+  const { basePath, displayCurrency } = useAppRuntime();
   const { transactions } = useTransactions();
   const { categoryFor, labelFor } = useCategories();
   const [monthKey, setMonthKey] = useState(monthKeyFromDate(new Date()));
@@ -46,20 +46,24 @@ export function OverviewPage() {
         <div className="summary-item">
           <span>{t("overview.income")}</span>
           <strong className="summary-value-income">
-            {formatMoney(totals.income, locale)}
+            {formatMoney(totals.income, locale, displayCurrency)}
           </strong>
         </div>
         <div className="summary-item">
           <span>{t("overview.expenses")}</span>
           <strong className="summary-value-expense">
-            {formatMoney(totals.expenses, locale)}
+            {formatMoney(totals.expenses, locale, displayCurrency)}
           </strong>
         </div>
         <div className="summary-item">
           <span>{t("overview.balance")}</span>
           <strong className={balanceClass}>
             {totals.balanceMinor < 0 ? "−" : ""}
-            {formatMoney(asMoneyAmount(Math.abs(totals.balanceMinor)), locale)}
+            {formatMoney(
+              asMoneyAmount(Math.abs(totals.balanceMinor)),
+              locale,
+              displayCurrency,
+            )}
           </strong>
         </div>
       </section>
@@ -107,7 +111,11 @@ export function OverviewPage() {
                   <div className="category-total" key={categoryId}>
                     <span>{category ? labelFor(category) : categoryId}</span>
                     <strong>
-                      {formatMoney(asMoneyAmount(amount), locale)}
+                      {formatMoney(
+                        asMoneyAmount(amount),
+                        locale,
+                        displayCurrency,
+                      )}
                     </strong>
                   </div>
                 );

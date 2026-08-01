@@ -1,10 +1,12 @@
 import type { Locale } from "../i18n";
+import type { DisplayCurrencyPreference } from "../lib/money";
 
 export interface UserProfile {
   id: string;
   displayName: string;
   email: string;
   locale: Locale;
+  displayCurrency: DisplayCurrencyPreference;
   activeHouseholdId: string;
   createdAt: number;
   updatedAt: number;

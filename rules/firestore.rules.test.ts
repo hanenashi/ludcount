@@ -288,7 +288,7 @@ describe("authentication and user profiles", () => {
     await assertFails(getDoc(doc(firestore, "users", ownerId)));
   });
 
-  it("allows locale and active household preference updates", async () => {
+  it("allows locale, display-symbol, and active household preference updates", async () => {
     await testEnvironment.withSecurityRulesDisabled(async (context) => {
       await setDoc(
         doc(
@@ -313,9 +313,18 @@ describe("authentication and user profiles", () => {
     await assertSucceeds(
       updateDoc(doc(firestore, "users", memberId), {
         locale: "ja",
+        displayCurrency: "JPY",
         updatedAt: serverTimestamp(),
       }),
     );
+    for (const displayCurrency of ["auto", "CZK", "USD", "JPY"]) {
+      await assertSucceeds(
+        updateDoc(doc(firestore, "users", memberId), {
+          displayCurrency,
+          updatedAt: serverTimestamp(),
+        }),
+      );
+    }
   });
 
   it("denies invalid preferences and active non-member households", async () => {
@@ -324,6 +333,12 @@ describe("authentication and user profiles", () => {
     await assertFails(
       updateDoc(doc(firestore, "users", memberId), {
         locale: "de",
+        updatedAt: serverTimestamp(),
+      }),
+    );
+    await assertFails(
+      updateDoc(doc(firestore, "users", memberId), {
+        displayCurrency: "EUR",
         updatedAt: serverTimestamp(),
       }),
     );
