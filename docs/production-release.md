@@ -1,11 +1,11 @@
 # Production Release Runbook
 
 This runbook was used for the first production release, the invitation-only
-follow-up on 2026-07-29, and the Japanese/custom-category release on 2026-08-01.
-It does not authorize another deployment. Production currently serves
-application commit `4274715281906312ca5f02af4db16e8dc128ae0a` with the
-repository's tested Firestore rules and required index. End-user account
-creation is disabled.
+follow-up on 2026-07-29, the Japanese/custom-category release, and the saved
+display-symbol release on 2026-08-01. It does not authorize another deployment.
+Production currently serves application commit
+`72687669ce74a1e7f5b8c4b70f2d01ccda19d02e` with the repository's tested
+Firestore rules and required index. End-user account creation is disabled.
 
 ## Authentication domains
 

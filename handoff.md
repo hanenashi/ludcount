@@ -2,12 +2,14 @@
 
 ## Display-symbol preference
 
-The current post-release work adds a per-user amount-symbol preference without
-currency conversion. Automatic mode follows the UI locale (`Kč` for Czech,
-`$` for English, and `¥` for Japanese); users may override it with any of
-those three symbols in Settings. Amounts, integer minor units, transaction
-documents, and the stored `CZK` currency remain unchanged. CSV export continues
-to report the stored currency rather than the presentation override.
+This release was deployed on 2026-08-01 from application commit
+`72687669ce74a1e7f5b8c4b70f2d01ccda19d02e`. It adds a per-user amount-symbol
+preference without currency conversion. Automatic mode follows the UI locale
+(`Kč` for Czech, `$` for English, and `¥` for Japanese); users may override it
+with any of those three symbols in Settings. Amounts, integer minor units,
+transaction documents, and the stored `CZK` currency remain unchanged. CSV
+export continues to report the stored currency rather than the presentation
+override.
 
 Legacy profiles without `displayCurrency` resolve to `auto`. New profiles store
 `auto`, and strict rules allow users to update only `auto`, `CZK`, `USD`, or
@@ -24,7 +26,13 @@ Local verification:
 - production build: passing (with the existing Firebase vendor chunk-size
   advisory)
 
-This work has not been deployed. App Check enforcement remains off.
+- The tested Firestore rules compiled and were released before Hosting.
+- Hosting is live at `https://ludcount-hanenashi.web.app` and the alternate
+  default Firebase Hosting domain.
+- A live 390px demo smoke test passed automatic `¥`, manual `$`, reset to
+  automatic after reload, zero Firebase backend requests, no horizontal
+  overflow, and no console errors.
+- No index changed or was deployed. App Check enforcement remains off.
 
 ## Japanese and custom-category release
 
