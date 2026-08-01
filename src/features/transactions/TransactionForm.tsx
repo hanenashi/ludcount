@@ -93,13 +93,27 @@ export function TransactionForm({
 
   useEffect(() => {
     if (!numberPadOpen) return;
+    const frame = window.requestAnimationFrame(() => {
+      const pad = document.getElementById("transaction-amount-pad");
+      const mobileNavigation = document.querySelector(".mobile-navigation");
+      if (!pad) return;
+      const padBottom = pad.getBoundingClientRect().bottom;
+      const availableBottom = mobileNavigation
+        ? mobileNavigation.getBoundingClientRect().top
+        : window.innerHeight;
+      const overlap = padBottom - availableBottom + 8;
+      if (overlap > 0) window.scrollBy({ top: overlap, behavior: "auto" });
+    });
     const closeOutside = (event: PointerEvent) => {
       if (!amountFieldRef.current?.contains(event.target as Node)) {
         setNumberPadOpen(false);
       }
     };
     document.addEventListener("pointerdown", closeOutside);
-    return () => document.removeEventListener("pointerdown", closeOutside);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      document.removeEventListener("pointerdown", closeOutside);
+    };
   }, [numberPadOpen]);
 
   const dismissNumberPad = () => {

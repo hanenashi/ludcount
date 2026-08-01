@@ -45,6 +45,13 @@ test("uses a compact amount number pad on touch devices", async ({
     expect(bounds).not.toBeNull();
     expect(bounds?.width).toBeLessThanOrEqual(270);
     expect(bounds?.height).toBeLessThanOrEqual(215);
+    const navigationBounds = await page
+      .locator(".mobile-navigation")
+      .boundingBox();
+    expect(navigationBounds).not.toBeNull();
+    expect((bounds?.y ?? 0) + (bounds?.height ?? 0)).toBeLessThanOrEqual(
+      navigationBounds?.y ?? 0,
+    );
 
     for (const digit of ["1", "2", "3"] as const) {
       await pad.getByRole("button", { name: digit, exact: true }).click();

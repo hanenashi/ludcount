@@ -22,8 +22,9 @@ Local verification before release:
   mobile landscape Chromium
 - production build: passing (with the existing Firebase vendor chunk-size
   advisory)
-- rendered pad: 270 × 214 CSS pixels, no bottom-navigation overlap, no page
-  overflow, locale-aware Czech/Japanese entry, and zero demo Firebase requests
+- rendered pad: 270 × 214 CSS pixels with overlap-aware form scrolling, no
+  bottom-navigation overlap, no page overflow, locale-aware Czech/Japanese
+  entry, and zero demo Firebase requests
 
 This work has not yet been released. It changes only the Hosting application.
 
