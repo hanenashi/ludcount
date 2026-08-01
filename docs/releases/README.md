@@ -4,6 +4,37 @@ This archive preserves verified deployment and implementation history in
 newest-first order. For the concise current project state, see
 [`../../handoff.md`](../../handoff.md).
 
+## 2026-08-02 — Household data management and version 0.2.0
+
+This rules-and-Hosting release was deployed from application commit
+`3f0fc4b26e1b3b7e887cd851148cc08175f33d84`.
+
+- Added a fictional, canonical 20-row Okanereco import fixture covering three
+  months, income and expenses, repeated categories, Czech characters,
+  semicolons, and escaped quotes.
+- Added a Settings export of every synchronized household transaction,
+  independent of the current period and filters, using UTF-8 BOM and a
+  deterministic `ludcount-all-YYYY-MM-DD.csv` filename. The existing filtered
+  Transactions-page export remains unchanged.
+- Added owner-only deletion of all household transaction history in bounded
+  Firestore batches. A localized alert dialog requires typing `DELETE` and
+  states that the account, household, preferences, and categories remain.
+- Extended strict rules so the household owner may delete a member-created
+  transaction for whole-household cleanup. Members remain unable to update or
+  delete another member's transaction, and every other rule boundary is
+  unchanged.
+- Replaced the stale hard-coded Settings version with package-derived build
+  metadata and bumped the application to `0.2.0`.
+- Local verification passed formatting, lint, TypeScript, 81 unit tests, 2
+  converter tests, 39 isolated Firestore rules tests, 36 Playwright tests across
+  four Chromium viewports, and the production build. The existing Firebase
+  vendor chunk-size advisory remains.
+- Production rules compiled and were released before Hosting. No index or
+  other Firebase service changed.
+- Both default Hosting domains returned HTTP 200. A live 390px demo check
+  verified version `0.2.0`, full CSV download, zero Firebase requests, no
+  owner-only delete control, no console errors, and no horizontal overflow.
+
 ## 2026-08-02 — Okanereco CSV import
 
 This Hosting-only release was deployed from application commit
