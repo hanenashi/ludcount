@@ -233,6 +233,27 @@ not be run as part of ordinary local development.
   delimiters, localized headers and category/type labels, and deterministic
   `ludcount-YYYY-MM.csv` filenames.
 
+### Okanereco backup conversion
+
+The read-only converter at
+[`tools/okane_reco_to_ludcount_csv.py`](./tools/okane_reco_to_ludcount_csv.py)
+turns an Okanereco MMJ SQLite backup into two UTF-8 BOM, semicolon-delimited
+files: an import-ready Ludcount CSV and a review CSV for deleted or invalid
+source rows. It does not connect to Firebase or modify the source database.
+
+```bash
+python3 tools/okane_reco_to_ludcount_csv.py MMJ.sqlite ludcount-import.csv \
+  --review-output ludcount-review.csv
+python3 -m unittest tools.tests.test_okane_reco_to_ludcount_csv
+```
+
+The converter preserves the source row ID, local date and time, income/expense
+type, category, note, payment ID, and shop ID. Numeric values are converted to
+integer minor units without currency conversion. The `currency` column is
+`CZK`, matching Ludcount's current storage schema; a saved `¥` display
+preference remains presentation-only. The browser import workflow is separate
+follow-up work and must preview validation results before any Firestore writes.
+
 ## Periods and graphs
 
 - Clicking the current period on Overview, Transactions, or Graphs opens the
