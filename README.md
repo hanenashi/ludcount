@@ -268,7 +268,9 @@ IDs, and each write chunk checks Firestore for existing documents, so selecting
 the same file again safely skips previously imported rows. Categories are
 created before their transactions. The importer accepts at most 5 MiB and
 10,000 rows per file; larger migrations can be split without changing source
-IDs. Import is unavailable in the backend-free demo and to non-owner members.
+IDs. Signed numeric source-category IDs are supported because Okanereco uses
+negative IDs for some system categories. Import is unavailable in the
+backend-free demo and to non-owner members.
 
 The source time is retained in the CSV for audit purposes but is not part of
 Ludcount's transaction schema. Ludcount preserves the source local calendar

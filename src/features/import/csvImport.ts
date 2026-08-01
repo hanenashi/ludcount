@@ -177,7 +177,7 @@ export function parseOkaneRecoCsv(input: string): CsvImportPlan {
     if (
       sourceApp !== "okane-reco" ||
       !/^\d{1,18}$/.test(sourceId) ||
-      !/^\d{1,18}$/.test(categorySourceId) ||
+      !/^-?\d{1,18}$/.test(categorySourceId) ||
       (type !== "income" && type !== "expense") ||
       !Number.isInteger(amountMinor) ||
       amountMinor <= 0 ||

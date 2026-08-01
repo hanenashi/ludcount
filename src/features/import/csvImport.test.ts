@@ -74,6 +74,15 @@ describe("parseOkaneRecoCsv", () => {
     });
   });
 
+  it("accepts signed category IDs used by real Okanereco system categories", () => {
+    const plan = parseOkaneRecoCsv(csv({ categorySourceId: "-3" }));
+
+    expect(plan.categories[0].id).toBe("import-okane-reco-expense--3");
+    expect(plan.transactions[0].categoryId).toBe(
+      "import-okane-reco-expense--3",
+    );
+  });
+
   it.each([
     ["zero amount", { amountMinor: "0" }],
     ["floating amount", { amountMinor: "12.5" }],
