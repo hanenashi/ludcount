@@ -1,6 +1,11 @@
 import { readFile } from "node:fs/promises";
 import { expect, test, type Page } from "@playwright/test";
-import { clickVisible, fillAmount, seedExistingUser } from "./helpers";
+import {
+  clickVisible,
+  dismissAmountPad,
+  fillAmount,
+  seedExistingUser,
+} from "./helpers";
 
 function localDateKey(date: Date): string {
   const year = date.getFullYear();
@@ -110,14 +115,20 @@ test("filters, searches, duplicates, and exports transactions", async ({
   await expect(page.getByLabel("Datum")).toHaveValue(todayKey);
   await expect(page.getByLabel("Poznámka")).toHaveValue("Týdenní nákup");
 
+  await dismissAmountPad(page);
   await page.getByRole("button", { name: "Zrušit" }).click();
+  await expect(page).toHaveURL(/\/app\/transactions$/);
   await expect(page.getByText("Týdenní nákup")).toHaveCount(1);
   await page
     .locator(".transaction-row")
     .filter({ hasText: "Týdenní nákup" })
     .getByRole("link", { name: "Duplikovat" })
     .click();
-  await page.getByRole("button", { name: "Uložit výdaj" }).click();
+  await dismissAmountPad(page);
+  const saveDuplicate = page.getByRole("button", { name: "Uložit výdaj" });
+  await saveDuplicate.focus();
+  await saveDuplicate.press("Enter");
+  await expect(page).toHaveURL(/\/app\/transactions$/);
   await expect(page.getByText("Týdenní nákup")).toHaveCount(2);
 
   await page.locator(".transaction-filters summary").click();

@@ -342,4 +342,7 @@ zero Firebase requests.
 
 Use [`docs/production-release.md`](./docs/production-release.md) for every
 future controlled release. Preserve its index → readiness → rules → Hosting →
-smoke-test order.
+smoke-test order. Verified chronological deployment and migration notes are in
+the [newest-first release history](./docs/releases/README.md); the root
+[`handoff.md`](./handoff.md) intentionally contains only current operational
+state and next work.

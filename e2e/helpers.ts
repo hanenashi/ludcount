@@ -34,6 +34,14 @@ export async function clickVisible(locator: Locator): Promise<void> {
   throw new Error("No visible matching control was found.");
 }
 
+export async function dismissAmountPad(
+  page: Page,
+  doneLabel = "Hotovo",
+): Promise<void> {
+  const done = page.getByRole("button", { name: doneLabel, exact: true });
+  if (await done.isVisible()) await done.click();
+}
+
 export async function fillAmount(
   page: Page,
   value: string,
@@ -74,4 +82,54 @@ export async function fillAmount(
     }
   }
   await pad.getByRole("button", { name: labels.done }).click();
+}
+
+export async function expectCombinedAmountFocus(
+  page: Page,
+  amountLabel = "Částka",
+  expectedColor = "rgb(215, 46, 39)",
+): Promise<void> {
+  const amount = page.getByLabel(amountLabel, { exact: true });
+  const control = amount.locator("xpath=..");
+  const styles = await control.evaluate((wrapper) => {
+    const input = wrapper.querySelector("input");
+    const symbol = wrapper.querySelector("span");
+    const toggle = wrapper.querySelector(".amount-pad-toggle");
+    if (!input || !symbol) throw new Error("Amount control is incomplete.");
+    const inputStyle = getComputedStyle(input);
+    const wrapperStyle = getComputedStyle(wrapper);
+    const toggleStyle = toggle ? getComputedStyle(toggle) : null;
+    const inputBounds = input.getBoundingClientRect();
+    const symbolBounds = symbol.getBoundingClientRect();
+    const toggleBounds = toggle?.getBoundingClientRect() ?? null;
+    return {
+      inputOutlineStyle: inputStyle.outlineStyle,
+      inputBoxShadow: inputStyle.boxShadow,
+      inputBorderRightWidth: inputStyle.borderRightWidth,
+      wrapperOutlineStyle: wrapperStyle.outlineStyle,
+      wrapperOutlineWidth: wrapperStyle.outlineWidth,
+      wrapperOutlineColor: wrapperStyle.outlineColor,
+      wrapperBorderColor: wrapperStyle.borderColor,
+      inputToSymbolGap: symbolBounds.left - inputBounds.right,
+      symbolToToggleGap: toggleBounds
+        ? toggleBounds.left - symbolBounds.right
+        : null,
+      toggleBorderLeftStyle: toggleStyle?.borderLeftStyle ?? null,
+      toggleBorderLeftWidth: toggleStyle?.borderLeftWidth ?? null,
+    };
+  });
+
+  expect(styles.inputOutlineStyle).toBe("none");
+  expect(styles.inputBoxShadow).toBe("none");
+  expect(styles.inputBorderRightWidth).toBe("0px");
+  expect(styles.wrapperOutlineStyle).toBe("solid");
+  expect(styles.wrapperOutlineWidth).toBe("3px");
+  expect(styles.wrapperOutlineColor).toBe(expectedColor);
+  expect(styles.wrapperBorderColor).toBe(expectedColor);
+  expect(Math.abs(styles.inputToSymbolGap)).toBeLessThanOrEqual(0.5);
+  if (styles.symbolToToggleGap !== null) {
+    expect(Math.abs(styles.symbolToToggleGap)).toBeLessThanOrEqual(0.5);
+    expect(styles.toggleBorderLeftStyle).toBe("solid");
+    expect(styles.toggleBorderLeftWidth).toBe("1px");
+  }
 }

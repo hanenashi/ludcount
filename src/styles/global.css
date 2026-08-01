@@ -843,9 +843,21 @@ summary:focus-visible {
 
 .field input:focus,
 .field select:focus,
-.field textarea:focus,
+.field textarea:focus {
+  border-color: var(--coral);
+}
+
 .money-input:focus-within {
   border-color: var(--coral);
+  outline: 3px solid var(--coral);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px var(--white);
+}
+
+.money-input input:focus-visible,
+.money-input .amount-pad-toggle:focus-visible {
+  outline: none;
+  box-shadow: none;
 }
 
 .money-input {
@@ -998,6 +1010,15 @@ summary:focus-visible {
 
 .field-error {
   border-color: var(--danger);
+}
+
+.money-input.field-error,
+.money-input.field-error:focus-within {
+  border-color: var(--danger);
+}
+
+.money-input.field-error:focus-within {
+  outline-color: var(--danger);
 }
 
 .error-message {

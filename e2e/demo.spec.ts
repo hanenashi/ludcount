@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { expect, test, type Page } from "@playwright/test";
-import { clickVisible, fillAmount } from "./helpers";
+import { clickVisible, dismissAmountPad, fillAmount } from "./helpers";
 
 function isFirebaseBackendRequest(urlValue: string): boolean {
   const url = new URL(urlValue);
@@ -77,8 +77,12 @@ test("runs the complete demo locally without Firebase access", async ({
   const editLink = groceriesRow.getByRole("link", { name: /Upravit/ });
   await editLink.focus();
   await page.keyboard.press("Enter");
+  await dismissAmountPad(page);
   await page.getByLabel("Poznámka").fill("Upravená ukázka");
-  await page.getByRole("button", { name: "Uložit změny" }).click();
+  const saveChanges = page.getByRole("button", { name: "Uložit změny" });
+  await saveChanges.focus();
+  await saveChanges.press("Enter");
+  await expect(page).toHaveURL(/\/demo\/transactions$/);
   await expect(page.getByText("Upravená ukázka")).toBeVisible();
 
   const editedRow = page
@@ -88,8 +92,11 @@ test("runs the complete demo locally without Firebase access", async ({
   await expect(
     page.getByRole("heading", { name: "Duplikovat výdaj" }),
   ).toBeVisible();
+  await dismissAmountPad(page);
   await page.getByLabel("Poznámka").fill("Duplikovaná ukázka");
-  await page.getByRole("button", { name: "Uložit výdaj" }).click();
+  const saveDuplicate = page.getByRole("button", { name: "Uložit výdaj" });
+  await saveDuplicate.focus();
+  await saveDuplicate.press("Enter");
   await expect(page.getByText("Duplikovaná ukázka")).toBeVisible();
 
   await clickVisible(page.getByRole("link", { name: "Přidat záznam" }));

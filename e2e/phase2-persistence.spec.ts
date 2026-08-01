@@ -1,5 +1,10 @@
 import { expect, test } from "@playwright/test";
-import { clickVisible, fillAmount, seedExistingUser } from "./helpers";
+import {
+  clickVisible,
+  expectCombinedAmountFocus,
+  fillAmount,
+  seedExistingUser,
+} from "./helpers";
 
 test("persists an invited user's household, transactions, and locale through Firestore", async ({
   page,
@@ -37,6 +42,7 @@ test("persists an invited user's household, transactions, and locale through Fir
   await clickVisible(page.getByRole("link", { name: "Záznamy" }));
   await clickVisible(page.getByRole("link", { name: "Přidat záznam" }));
 
+  await expectCombinedAmountFocus(page);
   await fillAmount(page, "850,50");
   await page.getByLabel("Kategorie").selectOption({ label: "Mazlíčci" });
   await page.getByLabel("Poznámka").fill("Týdenní nákup");
