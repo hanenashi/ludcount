@@ -4,6 +4,24 @@ This archive preserves verified deployment and implementation history in
 newest-first order. For the concise current project state, see
 [`../../handoff.md`](../../handoff.md).
 
+## 2026-08-02 — Signed Okanereco category compatibility
+
+This Hosting-only correction was deployed from application commit
+`75da4250e413bf3b2b38eea67c35064f1803c62b`.
+
+- Fixed the CSV importer to accept signed numeric category source IDs.
+  Okanereco uses negative IDs for some legitimate system categories; the
+  previous digits-only validation rejected those rows before any write.
+- Added regression coverage for deterministic category and transaction
+  references derived from a negative category ID.
+- Verified the exact private 20-row sample generated from the real converted
+  database through the browser importer and a complete local Firestore import:
+  20 rows saved, no validation or console errors, and a disabled repeat-import
+  action afterward. The private CSV and source database were not committed.
+- Local formatting, lint, TypeScript, 82 unit tests, and the production build
+  passed. Firestore rules, indexes, Authentication, and other Firebase services
+  were unchanged; only Hosting was deployed.
+
 ## 2026-08-02 — Household data management and version 0.2.0
 
 This rules-and-Hosting release was deployed from application commit
