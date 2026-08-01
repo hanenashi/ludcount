@@ -2,6 +2,9 @@
 
 ## Category pie charts
 
+This Hosting-only release was deployed on 2026-08-01 from application commit
+`d89c18aa0fef82a8d5c861b045b97966133f3dbd`.
+
 The current Graphs work adds separate income and expense category pies for the
 shared Month/Year/From–To period. Each chart has an exact localized amount and
 percentage legend. Categories below 5% are combined into a localized Other
@@ -23,7 +26,15 @@ Local verification before release:
 - local demo category-pie checks: localized grouping, empty states, exact
   legends, zero Firebase requests, no console errors, and no page overflow
 
-This work has not yet been released. It changes only the Hosting application.
+Release verification:
+
+- Both default Hosting domains returned HTTP 200.
+- Live desktop and 390px demo checks rendered two pies and four expense slices,
+  including the grouped Czech `Ostatní` slice and Japanese localization.
+- The live demo made zero Firebase Auth, Firestore, token, App Check, or
+  Installations requests and produced no console errors or page overflow.
+- Firestore rules, indexes, Authentication settings, and App Check enforcement
+  were unchanged.
 
 ## Shared periods and graphs
 
