@@ -13,7 +13,10 @@ Amount strings still pass through the existing locale-aware parser and are
 saved only as integer minor units. No Firebase schema, rules, indexes, queries,
 or stored data change.
 
-Local verification before release:
+This Hosting-only release was deployed on 2026-08-01 from application commit
+`125e8417aa1183ac63854e207e80b42ba26632b0`.
+
+Local verification:
 
 - formatting, lint, and TypeScript: passing
 - unit tests: 69 passing
@@ -26,7 +29,11 @@ Local verification before release:
   bottom-navigation overlap, no page overflow, locale-aware Czech/Japanese
   entry, and zero demo Firebase requests
 
-This work has not yet been released. It changes only the Hosting application.
+Live verification on the default `web.app` domain confirmed a 200 response,
+locale-aware amount entry, no bottom-navigation overlap, no horizontal
+overflow, no console errors, and zero Firebase requests from the demo. Desktop
+keeps its editable decimal field. Firestore rules, indexes, Authentication,
+and App Check settings were unchanged.
 
 ## Category pie charts
 
