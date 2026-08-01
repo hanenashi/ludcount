@@ -186,7 +186,11 @@ export function TransactionForm({
 
   return (
     <form
-      className="transaction-form"
+      className={
+        numberPadOpen
+          ? "transaction-form transaction-form-pad-open"
+          : "transaction-form"
+      }
       onSubmit={(event) => void handleSubmit(event)}
       noValidate
       aria-busy={submitting}

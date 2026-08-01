@@ -766,6 +766,10 @@ summary:focus-visible {
   box-shadow: var(--shadow);
 }
 
+.transaction-form.transaction-form-pad-open {
+  padding-bottom: 160px;
+}
+
 .transaction-form h1 {
   margin: 0 0 30px;
   color: var(--ink);
