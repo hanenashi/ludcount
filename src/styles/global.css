@@ -861,6 +861,137 @@ summary:focus-visible {
   font-weight: 600;
 }
 
+.amount-pad-toggle {
+  display: grid;
+  width: 46px;
+  min-width: 46px;
+  height: 46px;
+  padding: 0;
+  color: var(--muted);
+  border: 0;
+  border-left: 1px solid var(--line);
+  background: var(--soft);
+  cursor: pointer;
+  place-items: center;
+}
+
+.amount-pad-toggle:hover,
+.amount-pad-toggle[aria-expanded="true"] {
+  color: var(--coral-dark);
+  background: #fff3f1;
+}
+
+.amount-number-pad {
+  position: absolute;
+  z-index: 25;
+  top: calc(100% + 6px);
+  right: 0;
+  display: grid;
+  width: min(270px, calc(100vw - 46px));
+  padding: 9px;
+  grid-template-areas:
+    "seven eight nine back"
+    "four five six done"
+    "one two three done"
+    "decimal zero zero done";
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: repeat(4, 44px);
+  gap: 6px;
+  border: 1px solid #cfd6de;
+  border-radius: 13px;
+  background: var(--white);
+  box-shadow: 0 14px 35px rgb(7 28 54 / 22%);
+}
+
+.amount-pad-key {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: var(--ink);
+  font-size: 18px;
+  font-weight: 750;
+  border: 1px solid #d8dee5;
+  border-radius: 9px;
+  background: var(--soft);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.amount-pad-key:hover {
+  border-color: #b8c2cc;
+  background: #e9edf1;
+}
+
+.amount-pad-key:active {
+  transform: translateY(1px);
+}
+
+.amount-pad-7 {
+  grid-area: seven;
+}
+
+.amount-pad-8 {
+  grid-area: eight;
+}
+
+.amount-pad-9 {
+  grid-area: nine;
+}
+
+.amount-pad-4 {
+  grid-area: four;
+}
+
+.amount-pad-5 {
+  grid-area: five;
+}
+
+.amount-pad-6 {
+  grid-area: six;
+}
+
+.amount-pad-1 {
+  grid-area: one;
+}
+
+.amount-pad-2 {
+  grid-area: two;
+}
+
+.amount-pad-3 {
+  grid-area: three;
+}
+
+.amount-pad-0 {
+  grid-area: zero;
+}
+
+.amount-pad-decimal {
+  grid-area: decimal;
+}
+
+.amount-pad-backspace {
+  grid-area: back;
+  color: var(--muted);
+}
+
+.amount-pad-done {
+  flex-direction: column;
+  grid-area: done;
+  gap: 5px;
+  color: var(--white);
+  font-size: 12px;
+  border-color: var(--coral-dark);
+  background: var(--coral-dark);
+}
+
+.amount-pad-done:hover {
+  border-color: #a32119;
+  background: #a32119;
+}
+
 .field-error {
   border-color: var(--danger);
 }

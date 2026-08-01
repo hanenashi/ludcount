@@ -1,3 +1,4 @@
+import { Keyboard } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { DataWriteError } from "../../components/DataState";
 import { useAppRuntime } from "../../app/AppRuntime";
@@ -9,7 +10,16 @@ import { useI18n } from "../../i18n";
 import { isValidDateKey, toDateKey, toMonthKey } from "../../lib/dates";
 import { parseMoneyInput } from "../../lib/money";
 import { useCategories } from "../categories/CategoryProvider";
+import { AmountNumberPad } from "./AmountNumberPad";
 import type { Transaction, TransactionDraft } from "./model";
+
+function prefersCustomNumberPad(): boolean {
+  if (typeof window === "undefined") return false;
+  return (
+    window.matchMedia?.("(pointer: coarse)").matches === true ||
+    window.navigator.maxTouchPoints > 0
+  );
+}
 
 interface TransactionFormProps {
   transaction?: Transaction;
@@ -56,11 +66,16 @@ export function TransactionForm({
     date?: string;
   }>({});
   const [submitting, setSubmitting] = useState(false);
+  const [useCustomNumberPad] = useState(prefersCustomNumberPad);
+  const [numberPadOpen, setNumberPadOpen] = useState(false);
   const [submitError, setSubmitError] = useState<DataOperationError | null>(
     null,
   );
   const amountRef = useRef<HTMLInputElement>(null);
+  const amountFieldRef = useRef<HTMLDivElement>(null);
+  const categoryRef = useRef<HTMLSelectElement>(null);
   const dateRef = useRef<HTMLInputElement>(null);
+  const suppressNumberPadOpen = useRef(false);
 
   const visibleCategories = useMemo(
     () =>
@@ -76,7 +91,28 @@ export function TransactionForm({
     amountRef.current?.focus();
   }, []);
 
+  useEffect(() => {
+    if (!numberPadOpen) return;
+    const closeOutside = (event: PointerEvent) => {
+      if (!amountFieldRef.current?.contains(event.target as Node)) {
+        setNumberPadOpen(false);
+      }
+    };
+    document.addEventListener("pointerdown", closeOutside);
+    return () => document.removeEventListener("pointerdown", closeOutside);
+  }, [numberPadOpen]);
+
+  const dismissNumberPad = () => {
+    setNumberPadOpen(false);
+    suppressNumberPadOpen.current = true;
+    window.requestAnimationFrame(() => {
+      amountRef.current?.focus();
+      suppressNumberPadOpen.current = false;
+    });
+  };
+
   const changeType = (nextType: "income" | "expense") => {
+    setNumberPadOpen(false);
     setType(nextType);
     setCategoryId(
       categories.find(
@@ -87,6 +123,7 @@ export function TransactionForm({
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setNumberPadOpen(false);
     const amountMinor = parseMoneyInput(amount, locale);
     const nextErrors = {
       amount: amountMinor ? undefined : t("transaction.invalidAmount"),
@@ -168,7 +205,7 @@ export function TransactionForm({
         </button>
       </fieldset>
 
-      <div className="field">
+      <div className="field amount-field" ref={amountFieldRef}>
         <label htmlFor="transaction-amount">{t("transaction.amount")}</label>
         <div
           className={errors.amount ? "money-input field-error" : "money-input"}
@@ -177,15 +214,63 @@ export function TransactionForm({
             id="transaction-amount"
             ref={amountRef}
             required
-            inputMode="decimal"
+            inputMode={useCustomNumberPad ? "none" : "decimal"}
+            readOnly={useCustomNumberPad}
+            autoComplete="off"
             value={amount}
-            onChange={(event) => setAmount(event.target.value)}
+            onFocus={() => {
+              if (useCustomNumberPad && !suppressNumberPadOpen.current) {
+                setNumberPadOpen(true);
+              }
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Escape" && numberPadOpen) {
+                event.preventDefault();
+                setNumberPadOpen(false);
+              }
+            }}
+            onChange={(event) => {
+              setAmount(event.target.value);
+              setErrors((current) => ({ ...current, amount: undefined }));
+            }}
+            aria-expanded={useCustomNumberPad ? numberPadOpen : undefined}
+            aria-controls={
+              useCustomNumberPad && numberPadOpen
+                ? "transaction-amount-pad"
+                : undefined
+            }
             aria-invalid={Boolean(errors.amount)}
             aria-describedby={errors.amount ? "amount-error" : undefined}
             aria-errormessage={errors.amount ? "amount-error" : undefined}
           />
           <span>{currencySymbol}</span>
+          {useCustomNumberPad ? (
+            <button
+              className="amount-pad-toggle"
+              type="button"
+              aria-label={t("transaction.numberPadOpen")}
+              aria-expanded={numberPadOpen}
+              aria-controls="transaction-amount-pad"
+              onClick={() => setNumberPadOpen((open) => !open)}
+            >
+              <Keyboard size={20} aria-hidden="true" />
+            </button>
+          ) : null}
         </div>
+        {useCustomNumberPad && numberPadOpen ? (
+          <AmountNumberPad
+            value={amount}
+            onChange={(nextAmount) => {
+              setAmount(nextAmount);
+              setErrors((current) => ({ ...current, amount: undefined }));
+            }}
+            onDismiss={dismissNumberPad}
+            onDone={() => {
+              setNumberPadOpen(false);
+              categoryRef.current?.focus();
+            }}
+          />
+        ) : null}
         {errors.amount ? (
           <small className="error-message" id="amount-error" role="alert">
             {errors.amount}
@@ -199,6 +284,7 @@ export function TransactionForm({
         </label>
         <select
           id="transaction-category"
+          ref={categoryRef}
           required
           value={categoryId}
           onChange={(event) => setCategoryId(event.target.value)}

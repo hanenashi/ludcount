@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { expect, test, type Page } from "@playwright/test";
-import { clickVisible } from "./helpers";
+import { clickVisible, fillAmount } from "./helpers";
 
 function isFirebaseBackendRequest(urlValue: string): boolean {
   const url = new URL(urlValue);
@@ -93,7 +93,7 @@ test("runs the complete demo locally without Firebase access", async ({
   await expect(page.getByText("Duplikovaná ukázka")).toBeVisible();
 
   await clickVisible(page.getByRole("link", { name: "Přidat záznam" }));
-  await page.getByLabel("Částka").fill("123,45");
+  await fillAmount(page, "123,45");
   await page.getByLabel("Poznámka").fill("Dočasná změna");
   await page.getByRole("button", { name: "Uložit výdaj" }).click();
   await expect(page.getByText("Dočasná změna")).toBeVisible();

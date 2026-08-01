@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { clickVisible, seedExistingUser } from "./helpers";
+import { clickVisible, fillAmount, seedExistingUser } from "./helpers";
 
 test("persists an invited user's household, transactions, and locale through Firestore", async ({
   page,
@@ -37,7 +37,7 @@ test("persists an invited user's household, transactions, and locale through Fir
   await clickVisible(page.getByRole("link", { name: "Záznamy" }));
   await clickVisible(page.getByRole("link", { name: "Přidat záznam" }));
 
-  await page.getByLabel("Částka").fill("850,50");
+  await fillAmount(page, "850,50");
   await page.getByLabel("Kategorie").selectOption({ label: "Mazlíčci" });
   await page.getByLabel("Poznámka").fill("Týdenní nákup");
   await page.getByRole("button", { name: "Uložit výdaj" }).click();
@@ -51,7 +51,7 @@ test("persists an invited user's household, transactions, and locale through Fir
   ).toBeVisible();
 
   await clickVisible(page.getByRole("link", { name: "Upravit" }));
-  await page.getByLabel("Částka").fill("900,00");
+  await fillAmount(page, "900,00");
   await page.getByRole("button", { name: "Uložit změny" }).click();
   await expect(page.getByText(/900,00/).first()).toBeVisible();
 

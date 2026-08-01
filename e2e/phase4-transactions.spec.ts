@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { expect, test, type Page } from "@playwright/test";
-import { clickVisible, seedExistingUser } from "./helpers";
+import { clickVisible, fillAmount, seedExistingUser } from "./helpers";
 
 function localDateKey(date: Date): string {
   const year = date.getFullYear();
@@ -26,7 +26,7 @@ async function addTransaction(
   if (values.type === "income") {
     await page.getByRole("button", { name: "Příjem" }).click();
   }
-  await page.getByLabel("Částka").fill(values.amount);
+  await fillAmount(page, values.amount);
   await page.getByLabel("Datum").fill(values.dateKey);
   await page.getByLabel("Poznámka").fill(values.note);
   await page

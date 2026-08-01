@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { clickVisible } from "./helpers";
+import { clickVisible, fillAmount } from "./helpers";
 
 function isFirebaseRequest(urlValue: string) {
   const url = new URL(urlValue);
@@ -58,7 +58,13 @@ test("uses Japanese and manages custom demo categories locally", async ({
 
   await clickVisible(page.getByRole("link", { name: "取引" }));
   await clickVisible(page.getByRole("link", { name: "取引を追加" }));
-  await page.getByLabel("金額").fill("123.45");
+  await fillAmount(page, "123.45", {
+    amount: "金額",
+    pad: "金額の数字キーパッド",
+    decimal: "小数点",
+    backspace: "最後の数字を削除",
+    done: "完了",
+  });
   await page.getByLabel("カテゴリ").selectOption({ label: "ペット" });
   await page.getByLabel("メモ").fill("猫のごはん");
   await page.getByRole("button", { name: "支出を保存" }).click();

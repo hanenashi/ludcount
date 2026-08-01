@@ -212,6 +212,9 @@ not be run as part of ordinary local development.
   continues to report that stored currency accurately.
 - Transaction direction is represented by `income` or `expense`; stored amounts
   are always positive.
+- On touch devices, the amount field uses a compact in-app number pad and stays
+  read-only to prevent the operating-system keyboard from covering the form.
+  Desktop users retain ordinary editable and hardware-keyboard input.
 - User-selected dates use local `YYYY-MM-DD` date keys and `YYYY-MM` month keys.
 - The documented maximum transaction amount is `1,000,000,000` minor units.
 

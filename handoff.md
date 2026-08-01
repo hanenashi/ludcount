@@ -1,5 +1,32 @@
 # Ludcount Handoff
 
+## Compact touch amount pad
+
+The current work replaces native touch-keyboard amount entry with a compact
+in-app number pad. Touch amount fields are read-only and use `inputmode="none"`,
+so the operating-system keyboard cannot cover the form. The pad supports the
+locale's decimal separator, two fractional digits, backspace, Escape/outside
+dismissal, and a Done action that advances focus to Category. Desktop amount
+fields remain ordinarily editable for hardware keyboards and paste.
+
+Amount strings still pass through the existing locale-aware parser and are
+saved only as integer minor units. No Firebase schema, rules, indexes, queries,
+or stored data change.
+
+Local verification before release:
+
+- formatting, lint, and TypeScript: passing
+- unit tests: 69 passing
+- Firestore rules tests: 38 passing against isolated local Firestore
+- Playwright: 32 passing across desktop, standard mobile, 320px mobile, and
+  mobile landscape Chromium
+- production build: passing (with the existing Firebase vendor chunk-size
+  advisory)
+- rendered pad: 270 × 214 CSS pixels, no bottom-navigation overlap, no page
+  overflow, locale-aware Czech/Japanese entry, and zero demo Firebase requests
+
+This work has not yet been released. It changes only the Hosting application.
+
 ## Category pie charts
 
 This Hosting-only release was deployed on 2026-08-01 from application commit

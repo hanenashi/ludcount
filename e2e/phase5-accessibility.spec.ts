@@ -1,5 +1,5 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
-import { seedExistingUser } from "./helpers";
+import { fillAmount, seedExistingUser } from "./helpers";
 
 async function visible(locator: Locator): Promise<Locator> {
   await locator.first().waitFor({ state: "attached" });
@@ -61,7 +61,7 @@ test("supports keyboard navigation, dialog focus, and narrow layouts", async ({
   await addLink.focus();
   await page.keyboard.press("Enter");
   await expect(page.getByLabel("Částka")).toBeFocused();
-  await page.getByLabel("Částka").fill("125,50");
+  await fillAmount(page, "125,50");
   await page.getByLabel("Poznámka").fill("Klávesnicový test");
   const saveButton = page.getByRole("button", { name: "Uložit výdaj" });
   await saveButton.focus();

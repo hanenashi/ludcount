@@ -96,6 +96,8 @@ Only after explicit authorization for a future release:
    - sign in with a pre-created dedicated production test account
    - verify the personal household bootstrap
    - create, edit, duplicate, filter, export, and delete a small transaction
+   - on a touch viewport, verify the amount field opens the compact number pad,
+     does not invoke editable native input, and accepts decimals and backspace
    - switch Czech to English and Japanese and verify persistence
    - verify automatic `Kč`, `$`, and `¥` symbols follow those locales;
      save a manual override, reload, and verify only the symbol changes
