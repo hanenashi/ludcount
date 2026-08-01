@@ -13,7 +13,7 @@ tested releases. The current application version is `0.2.0`.
 - Primary URL: <https://ludcount-hanenashi.web.app/>
 - Alternate URL: <https://ludcount-hanenashi.firebaseapp.com/>
 - Firebase project: `ludcount-hanenashi`
-- Current deployed application commit: `75da4250e413bf3b2b38eea67c35064f1803c62b`
+- Current deployed application commit: `df11f7b20b2d1a81fffba3b259bbafa40aad6c20`
 - Current repository HEAD: [`main`](https://github.com/hanenashi/ludcount/commits/main)
 
 The live `main` link is the source of truth for repository HEAD because a Git

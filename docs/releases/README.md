@@ -4,6 +4,29 @@ This archive preserves verified deployment and implementation history in
 newest-first order. For the concise current project state, see
 [`../../handoff.md`](../../handoff.md).
 
+## 2026-08-02 — Large-import rules-limit correction
+
+This Hosting-only correction was deployed from application commit
+`df11f7b20b2d1a81fffba3b259bbafa40aad6c20`.
+
+- Fixed multi-thousand-row imports failing partway with `permission-denied`.
+  The old 100-row chronological chunks could contain all 18 real Okanereco
+  categories, making strict rules inspect too many distinct membership/category
+  documents in one atomic operation.
+- Transactions are now grouped by category before being divided into at most
+  100 writes. Each strict-rules chunk therefore reuses one category lookup and
+  stays safely below Firestore's aggregate access-call limit.
+- Progress now advances after each committed chunk rather than only after the
+  complete category or transaction phase. Deterministic IDs continue to make a
+  retry skip documents saved before a prior failure.
+- Verified the exact private 3,840-row converted CSV end-to-end using Firebase
+  Authentication and Firestore emulators loaded with the production rules. All
+  3,840 transactions imported successfully and the repeat-import action became
+  disabled afterward.
+- Formatting, lint, TypeScript, 84 unit tests, 39 strict rules tests, and the
+  production build passed. Rules and indexes were unchanged; only Hosting was
+  deployed.
+
 ## 2026-08-02 — Signed Okanereco category compatibility
 
 This Hosting-only correction was deployed from application commit
