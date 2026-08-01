@@ -272,6 +272,13 @@ IDs. Signed numeric source-category IDs are supported because Okanereco uses
 negative IDs for some system categories. Import is unavailable in the
 backend-free demo and to non-owner members.
 
+Firestore writes are grouped by category and capped at 100 documents per
+transaction. This keeps strict membership/category rule lookups below
+Firestore's aggregate access-call limit even for multi-thousand-row imports.
+Progress advances after every committed chunk. If a connection or write fails,
+selecting the same file again skips deterministic documents already saved and
+continues with the remainder.
+
 The source time is retained in the CSV for audit purposes but is not part of
 Ludcount's transaction schema. Ludcount preserves the source local calendar
 date and records the actual import time in Firestore `createdAt`/`updatedAt`.

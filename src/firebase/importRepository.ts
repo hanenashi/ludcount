@@ -10,26 +10,29 @@ import type {
   DataImportRepository,
   ImportProgress,
 } from "../features/import/repository";
+import {
+  IMPORT_WRITE_CHUNK_SIZE,
+  transactionImportChunks,
+} from "../features/import/repository";
 import { assertOnline, normalizeDataError } from "./errors";
-
-const IMPORT_CHUNK_SIZE = 100;
 
 function chunks<T>(values: readonly T[]): T[][] {
   const result: T[][] = [];
-  for (let index = 0; index < values.length; index += IMPORT_CHUNK_SIZE) {
-    result.push(values.slice(index, index + IMPORT_CHUNK_SIZE));
+  for (let index = 0; index < values.length; index += IMPORT_WRITE_CHUNK_SIZE) {
+    result.push(values.slice(index, index + IMPORT_WRITE_CHUNK_SIZE));
   }
   return result;
 }
 
 async function createMissingDocuments<T>(
   firestore: Firestore,
-  values: readonly T[],
+  groups: readonly (readonly T[])[],
   referenceFor: (value: T) => DocumentReference,
   dataFor: (value: T) => Record<string, unknown>,
+  onProcessed: (count: number) => void,
 ): Promise<number> {
   let created = 0;
-  for (const group of chunks(values)) {
+  for (const group of groups) {
     created += await runTransaction(firestore, async (transaction) => {
       const references = group.map(referenceFor);
       const snapshots = await Promise.all(
@@ -44,6 +47,7 @@ async function createMissingDocuments<T>(
       });
       return groupCreated;
     });
+    onProcessed(group.length);
   }
   return created;
 }
@@ -75,7 +79,7 @@ export function createFirestoreImportRepository(
       try {
         const createdCategories = await createMissingDocuments(
           firestore,
-          preview.categoriesToCreate,
+          chunks(preview.categoriesToCreate),
           (category) => doc(categories, category.id),
           (category) => ({
             name: category.name,
@@ -86,12 +90,12 @@ export function createFirestoreImportRepository(
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp(),
           }),
+          report,
         );
-        report(preview.categoriesToCreate.length);
 
         const createdTransactions = await createMissingDocuments(
           firestore,
-          preview.transactionsToCreate,
+          transactionImportChunks(preview.transactionsToCreate),
           (item) => doc(transactions, item.id),
           (item) => ({
             type: item.type,
@@ -106,8 +110,8 @@ export function createFirestoreImportRepository(
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp(),
           }),
+          report,
         );
-        report(preview.transactionsToCreate.length);
 
         return {
           createdCategories,
