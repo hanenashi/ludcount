@@ -1,7 +1,11 @@
 import { Timestamp, type QueryDocumentSnapshot } from "firebase/firestore";
 import { describe, expect, it } from "vitest";
 import { DataOperationError } from "./errors";
-import { transactionConverter, userProfileConverter } from "./converters";
+import {
+  customCategoryConverter,
+  transactionConverter,
+  userProfileConverter,
+} from "./converters";
 
 function createSnapshot(
   id: string,
@@ -79,7 +83,7 @@ describe("Firestore converters", () => {
     const snapshot = createSnapshot("user-1", "users/user-1", {
       displayName: "Ludva",
       email: "ludva@example.test",
-      locale: "cs",
+      locale: "ja",
       activeHouseholdId: "home-1",
       createdAt: Timestamp.fromMillis(1000),
       updatedAt: Timestamp.fromMillis(2000),
@@ -87,8 +91,35 @@ describe("Firestore converters", () => {
 
     expect(userProfileConverter.fromFirestore(snapshot)).toMatchObject({
       id: "user-1",
-      locale: "cs",
+      locale: "ja",
       activeHouseholdId: "home-1",
+    });
+  });
+
+  it("converts a valid custom category", () => {
+    const snapshot = createSnapshot(
+      "custom-1",
+      "households/home/categories/custom-1",
+      {
+        name: "ペット",
+        type: "expense",
+        sortOrder: 1000,
+        archived: false,
+        createdBy: "user-1",
+        createdAt: Timestamp.fromMillis(1000),
+        updatedAt: Timestamp.fromMillis(2000),
+      },
+    );
+    expect(customCategoryConverter.fromFirestore(snapshot)).toEqual({
+      id: "custom-1",
+      name: "ペット",
+      type: "expense",
+      sortOrder: 1000,
+      archived: false,
+      source: "custom",
+      createdBy: "user-1",
+      createdAt: 1000,
+      updatedAt: 2000,
     });
   });
 });

@@ -23,9 +23,22 @@ test("persists an invited user's household, transactions, and locale through Fir
   await expect(
     page.getByRole("link", { name: "Přidat záznam" }).first(),
   ).toBeAttached({ timeout: 15_000 });
+
+  await clickVisible(page.getByRole("link", { name: "Nastavení" }));
+  await page.getByRole("link", { name: "Spravovat kategorie" }).click();
+  await page.getByLabel("Název kategorie").fill("Mazlíčci");
+  await page.getByRole("button", { name: "Vytvořit kategorii" }).click();
+  await expect(
+    page.getByRole("listitem").getByRole("textbox", {
+      name: "Název kategorie",
+    }),
+  ).toHaveValue("Mazlíčci");
+
+  await clickVisible(page.getByRole("link", { name: "Záznamy" }));
   await clickVisible(page.getByRole("link", { name: "Přidat záznam" }));
 
   await page.getByLabel("Částka").fill("850,50");
+  await page.getByLabel("Kategorie").selectOption({ label: "Mazlíčci" });
   await page.getByLabel("Poznámka").fill("Týdenní nákup");
   await page.getByRole("button", { name: "Uložit výdaj" }).click();
   await expect(page).toHaveURL(/\/app\/transactions$/);
@@ -33,6 +46,9 @@ test("persists an invited user's household, transactions, and locale through Fir
 
   await page.reload();
   await expect(page.getByText(/850,50/).first()).toBeVisible();
+  await expect(
+    page.locator(".transaction-row").getByText("Mazlíčci"),
+  ).toBeVisible();
 
   await clickVisible(page.getByRole("link", { name: "Upravit" }));
   await page.getByLabel("Částka").fill("900,00");
@@ -40,21 +56,19 @@ test("persists an invited user's household, transactions, and locale through Fir
   await expect(page.getByText(/900,00/).first()).toBeVisible();
 
   await clickVisible(page.getByRole("link", { name: "Nastavení" }));
-  await page.getByRole("button", { name: "Angličtina" }).click();
-  await expect(page.getByRole("heading", { name: "Settings" })).toBeVisible();
+  await page.getByRole("button", { name: "Japonština" }).click();
+  await expect(page.getByRole("heading", { name: "設定" })).toBeVisible();
 
   await page.evaluate(() => localStorage.removeItem("ludcount.locale"));
   await page.reload();
-  await expect(page.getByRole("heading", { name: "Settings" })).toBeVisible();
-  await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  await expect(page.getByRole("heading", { name: "設定" })).toBeVisible();
+  await expect(page.locator("html")).toHaveAttribute("lang", "ja");
 
-  await clickVisible(page.getByRole("link", { name: "Transactions" }));
+  await clickVisible(page.getByRole("link", { name: "取引" }));
   await expect(page.getByText(/900.00/).first()).toBeVisible();
-  await page.getByRole("button", { name: "Delete" }).click();
-  await page.getByRole("button", { name: "Delete" }).last().click();
-  await expect(
-    page.getByText("There are no transactions to show."),
-  ).toBeVisible();
+  await page.getByRole("button", { name: /削除/ }).click();
+  await page.getByRole("button", { name: "削除", exact: true }).click();
+  await expect(page.getByText("表示する取引がありません。")).toBeVisible();
 
   expect(consoleErrors).toEqual([]);
   await page.screenshot({

@@ -89,6 +89,21 @@ function transactionData(
   };
 }
 
+function categoryData(
+  overrides: Record<string, unknown> = {},
+): Record<string, unknown> {
+  return {
+    name: "Pets",
+    type: "expense",
+    sortOrder: 1000,
+    archived: false,
+    createdBy: ownerId,
+    createdAt,
+    updatedAt: createdAt,
+    ...overrides,
+  };
+}
+
 function authenticatedFirestore(userId: string) {
   return testEnvironment
     .authenticatedContext(userId, {
@@ -157,6 +172,26 @@ async function seedBaseData(): Promise<void> {
           "member-transaction",
         ),
         transactionData(memberId),
+      ),
+      setDoc(
+        doc(
+          firestore,
+          "households",
+          primaryHouseholdId,
+          "categories",
+          "custom-pets",
+        ),
+        categoryData(),
+      ),
+      setDoc(
+        doc(
+          firestore,
+          "households",
+          primaryHouseholdId,
+          "categories",
+          "archived-custom",
+        ),
+        categoryData({ name: "Old category", archived: true }),
       ),
     ]);
   });
@@ -272,6 +307,12 @@ describe("authentication and user profiles", () => {
       updateDoc(doc(firestore, "users", memberId), {
         locale: "en",
         activeHouseholdId: secondaryHouseholdId,
+        updatedAt: serverTimestamp(),
+      }),
+    );
+    await assertSucceeds(
+      updateDoc(doc(firestore, "users", memberId), {
+        locale: "ja",
         updatedAt: serverTimestamp(),
       }),
     );
@@ -543,6 +584,103 @@ describe("households and memberships", () => {
   });
 });
 
+describe("custom categories", () => {
+  it("allows household members to read categories and denies outsiders", async () => {
+    const path = [
+      "households",
+      primaryHouseholdId,
+      "categories",
+      "custom-pets",
+    ] as const;
+    await assertSucceeds(
+      getDoc(doc(authenticatedFirestore(memberId), ...path)),
+    );
+    await assertFails(getDoc(doc(authenticatedFirestore(outsiderId), ...path)));
+  });
+
+  it("allows only owners to create valid active categories", async () => {
+    await assertSucceeds(
+      setDoc(
+        doc(
+          authenticatedFirestore(ownerId),
+          "households",
+          primaryHouseholdId,
+          "categories",
+          "owner-created",
+        ),
+        {
+          ...categoryData(),
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        },
+      ),
+    );
+    await assertFails(
+      setDoc(
+        doc(
+          authenticatedFirestore(memberId),
+          "households",
+          primaryHouseholdId,
+          "categories",
+          "member-created",
+        ),
+        {
+          ...categoryData({ createdBy: memberId }),
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        },
+      ),
+    );
+    await assertFails(
+      setDoc(
+        doc(
+          authenticatedFirestore(ownerId),
+          "households",
+          primaryHouseholdId,
+          "categories",
+          "created-archived",
+        ),
+        {
+          ...categoryData({ archived: true }),
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        },
+      ),
+    );
+  });
+
+  it("validates fields and immutable category identity", async () => {
+    const firestore = authenticatedFirestore(ownerId);
+    const reference = doc(
+      firestore,
+      "households",
+      primaryHouseholdId,
+      "categories",
+      "custom-pets",
+    );
+    await assertSucceeds(
+      updateDoc(reference, {
+        name: "Pet care",
+        archived: true,
+        updatedAt: serverTimestamp(),
+      }),
+    );
+    await assertFails(
+      updateDoc(reference, { type: "income", updatedAt: serverTimestamp() }),
+    );
+    await assertFails(
+      updateDoc(reference, {
+        createdBy: memberId,
+        updatedAt: serverTimestamp(),
+      }),
+    );
+    await assertFails(
+      updateDoc(reference, { unexpected: true, updatedAt: serverTimestamp() }),
+    );
+    await assertFails(deleteDoc(reference));
+  });
+});
+
 describe("transactions", () => {
   it("allows members to read and denies non-members", async () => {
     await assertSucceeds(
@@ -603,6 +741,71 @@ describe("transactions", () => {
           updatedAt: serverTimestamp(),
         },
       ),
+    );
+  });
+
+  it("allows active matching custom categories and rejects invalid category use", async () => {
+    const firestore = authenticatedFirestore(memberId);
+    const createWithCategory = (
+      id: string,
+      categoryId: string,
+      type = "expense",
+    ) =>
+      setDoc(
+        doc(firestore, "households", primaryHouseholdId, "transactions", id),
+        {
+          ...transactionData(memberId, { categoryId, type }),
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        },
+      );
+
+    await assertSucceeds(createWithCategory("active-custom", "custom-pets"));
+    await assertFails(createWithCategory("archived-custom", "archived-custom"));
+    await assertFails(createWithCategory("missing-custom", "missing-category"));
+    await assertFails(
+      createWithCategory("wrong-type-built-in", "income.salary"),
+    );
+    await assertFails(
+      createWithCategory("wrong-type-custom", "custom-pets", "income"),
+    );
+  });
+
+  it("allows an archived custom category to remain on historical edits", async () => {
+    await testEnvironment.withSecurityRulesDisabled(async (context) => {
+      await setDoc(
+        doc(
+          context.firestore(),
+          "households",
+          primaryHouseholdId,
+          "transactions",
+          "archived-history",
+        ),
+        transactionData(ownerId, {
+          categoryId: "archived-custom",
+          categoryLabelSnapshot: "Old category",
+        }),
+      );
+    });
+    const reference = doc(
+      authenticatedFirestore(ownerId),
+      "households",
+      primaryHouseholdId,
+      "transactions",
+      "archived-history",
+    );
+    await assertSucceeds(
+      updateDoc(reference, {
+        note: "Updated note",
+        updatedAt: serverTimestamp(),
+      }),
+    );
+    await assertFails(
+      updateDoc(reference, {
+        categoryId: "archived-custom",
+        type: "income",
+        updatedAt: serverTimestamp(),
+      }),
     );
   });
 

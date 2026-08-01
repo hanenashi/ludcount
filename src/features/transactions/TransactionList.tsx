@@ -4,7 +4,8 @@ import { useAppRuntime } from "../../app/AppRuntime";
 import { useI18n } from "../../i18n";
 import { formatDateKey } from "../../lib/dates";
 import { formatMoney } from "../../lib/money";
-import { getCategory, type Transaction } from "./model";
+import { useCategories } from "../categories/CategoryProvider";
+import type { Transaction } from "./model";
 
 interface TransactionListProps {
   transactions: readonly Transaction[];
@@ -21,6 +22,7 @@ export function TransactionList({
 }: TransactionListProps) {
   const { locale, t } = useI18n();
   const { basePath } = useAppRuntime();
+  const { categoryFor, labelFor } = useCategories();
 
   if (transactions.length === 0) {
     return (
@@ -42,9 +44,9 @@ export function TransactionList({
       aria-label={t("transaction.listHeading")}
     >
       {transactions.map((transaction) => {
-        const category = getCategory(transaction.categoryId);
+        const category = categoryFor(transaction.categoryId);
         const categoryName = category
-          ? t(category.labelKey)
+          ? labelFor(category)
           : transaction.categoryLabelSnapshot;
         const date = formatDateKey(transaction.dateKey, locale);
         const amount = formatMoney(transaction.amountMinor, locale);

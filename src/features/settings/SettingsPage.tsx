@@ -1,19 +1,19 @@
-import { LogOut, RotateCcw } from "lucide-react";
+import { LogOut, RotateCcw, Tags } from "lucide-react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAppRuntime } from "../../app/AppRuntime";
-import { useI18n } from "../../i18n";
+import { useI18n, type Locale } from "../../i18n";
 
 export function SettingsPage() {
   const { locale, setLocale, t } = useI18n();
   const runtime = useAppRuntime();
-  const [savingLocale, setSavingLocale] = useState<"cs" | "en" | null>(null);
+  const [savingLocale, setSavingLocale] = useState<Locale | null>(null);
   const [signingOut, setSigningOut] = useState(false);
   const [signOutError, setSignOutError] = useState(false);
   const [demoReset, setDemoReset] = useState(false);
   const navigate = useNavigate();
 
-  const changeLocale = async (nextLocale: "cs" | "en") => {
+  const changeLocale = async (nextLocale: Locale) => {
     if (nextLocale === locale || savingLocale) {
       return;
     }
@@ -68,6 +68,19 @@ export function SettingsPage() {
           >
             {t("settings.english")}
           </button>
+          <button
+            className={
+              locale === "ja"
+                ? "language-button language-button-active"
+                : "language-button"
+            }
+            type="button"
+            aria-pressed={locale === "ja"}
+            disabled={savingLocale !== null}
+            onClick={() => void changeLocale("ja")}
+          >
+            {t("settings.japanese")}
+          </button>
         </div>
         {runtime.preferenceError ? (
           <p className="settings-inline-error" role="alert">
@@ -79,6 +92,20 @@ export function SettingsPage() {
             {t("settings.savingLanguage")}
           </p>
         ) : null}
+      </section>
+
+      <section className="settings-section">
+        <div>
+          <h2>{t("settings.categories")}</h2>
+          <p>{t("settings.categoriesDescription")}</p>
+        </div>
+        <Link
+          className="button button-secondary"
+          to={`${runtime.basePath}/settings/categories`}
+        >
+          <Tags size={18} aria-hidden="true" />
+          {t("settings.manageCategories")}
+        </Link>
       </section>
 
       <section className="settings-section">

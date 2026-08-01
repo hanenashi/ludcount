@@ -8,7 +8,7 @@ service cloud.firestore {
     }
 
     function isValidLocale(locale) {
-      return locale is string && locale in ['cs', 'en'];
+      return locale is string && locale in ['cs', 'en', 'ja'];
     }
 
     function isValidRequiredString(value, maximumLength) {
@@ -31,6 +31,10 @@ service cloud.firestore {
 
     function householdPath(householdId) {
       return /databases/$(database)/documents/households/$(householdId);
+    }
+
+    function categoryPath(householdId, categoryId) {
+      return /databases/$(database)/documents/households/$(householdId)/categories/$(categoryId);
     }
 
     function isHouseholdMember(householdId) {
@@ -95,6 +99,103 @@ service cloud.firestore {
         && data.role in ['owner', 'member']
         && isValidOptionalString(data.displayName, 100)
         && data.joinedAt is timestamp;
+    }
+
+    function isValidCustomCategory(data) {
+      return data.keys().hasAll([
+          'name',
+          'type',
+          'sortOrder',
+          'archived',
+          'createdBy',
+          'createdAt',
+          'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'name',
+          'type',
+          'sortOrder',
+          'archived',
+          'createdBy',
+          'createdAt',
+          'updatedAt'
+        ])
+        && isValidRequiredString(data.name, 60)
+        && data.type in ['income', 'expense']
+        && data.sortOrder is int
+        && data.sortOrder >= 0
+        && data.sortOrder <= 100000
+        && data.archived is bool
+        && isValidRequiredString(data.createdBy, 128)
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isBuiltInCategoryForType(categoryId, type) {
+      return (
+          type == 'expense'
+          && categoryId in [
+            'expense.groceries',
+            'expense.housing',
+            'expense.utilities',
+            'expense.transport',
+            'expense.health',
+            'expense.drugstore',
+            'expense.clothing',
+            'expense.restaurants',
+            'expense.entertainment',
+            'expense.gifts',
+            'expense.other'
+          ]
+        ) || (
+          type == 'income'
+          && categoryId in [
+            'income.salary',
+            'income.pension',
+            'income.benefits',
+            'income.sale',
+            'income.refund',
+            'income.other'
+          ]
+        );
+    }
+
+    function isActiveCustomCategoryForType(householdId, categoryId, type) {
+      return exists(categoryPath(householdId, categoryId))
+        && get(categoryPath(householdId, categoryId)).data.type == type
+        && get(categoryPath(householdId, categoryId)).data.archived == false;
+    }
+
+    function isExistingCustomCategoryForType(householdId, categoryId, type) {
+      return exists(categoryPath(householdId, categoryId))
+        && get(categoryPath(householdId, categoryId)).data.type == type;
+    }
+
+    function isValidCategoryOnCreate(householdId, data) {
+      return isBuiltInCategoryForType(data.categoryId, data.type)
+        || isActiveCustomCategoryForType(
+          householdId,
+          data.categoryId,
+          data.type
+        );
+    }
+
+    function isValidCategoryOnUpdate(householdId, data, existingData) {
+      return isBuiltInCategoryForType(data.categoryId, data.type)
+        || isActiveCustomCategoryForType(
+          householdId,
+          data.categoryId,
+          data.type
+        )
+        || (
+          data.categoryId == existingData.categoryId
+          && data.type == existingData.type
+          && isExistingCustomCategoryForType(
+            householdId,
+            data.categoryId,
+            data.type
+          )
+        );
     }
 
     function isValidDateKey(dateKey) {
@@ -245,11 +346,38 @@ service cloud.firestore {
           && resource.data.role == 'member';
       }
 
+      match /categories/{categoryId} {
+        allow read: if isHouseholdMember(householdId);
+
+        allow create: if isHouseholdOwner(householdId)
+          && isValidCustomCategory(request.resource.data)
+          && request.resource.data.createdBy == request.auth.uid
+          && request.resource.data.archived == false
+          && isCurrentTimestamp(request.resource.data.createdAt)
+          && isCurrentTimestamp(request.resource.data.updatedAt);
+
+        allow update: if isHouseholdOwner(householdId)
+          && isValidCustomCategory(request.resource.data)
+          && request.resource.data.type == resource.data.type
+          && request.resource.data.createdBy == resource.data.createdBy
+          && request.resource.data.createdAt == resource.data.createdAt
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'name',
+            'sortOrder',
+            'archived',
+            'updatedAt'
+          ])
+          && isCurrentTimestamp(request.resource.data.updatedAt);
+
+        allow delete: if false;
+      }
+
       match /transactions/{transactionId} {
         allow read: if isHouseholdMember(householdId);
 
         allow create: if isHouseholdMember(householdId)
           && isValidTransaction(request.resource.data)
+          && isValidCategoryOnCreate(householdId, request.resource.data)
           && request.resource.data.createdBy == request.auth.uid
           && isCurrentTimestamp(request.resource.data.createdAt)
           && isCurrentTimestamp(request.resource.data.updatedAt);
@@ -257,6 +385,11 @@ service cloud.firestore {
         allow update: if isHouseholdMember(householdId)
           && resource.data.createdBy == request.auth.uid
           && isValidTransaction(request.resource.data)
+          && isValidCategoryOnUpdate(
+            householdId,
+            request.resource.data,
+            resource.data
+          )
           && request.resource.data.createdBy == resource.data.createdBy
           && request.resource.data.createdAt == resource.data.createdAt
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly([

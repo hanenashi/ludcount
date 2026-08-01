@@ -9,11 +9,12 @@ import {
 } from "react";
 import { cs } from "./cs";
 import { en, type TranslationKey, type Translations } from "./en";
+import { ja } from "./ja";
 
-export type Locale = "cs" | "en";
+export type Locale = "cs" | "en" | "ja";
 
 const LOCALE_STORAGE_KEY = "ludcount.locale";
-const dictionaries: Record<Locale, Translations> = { cs, en };
+const dictionaries: Record<Locale, Translations> = { cs, en, ja };
 
 interface I18nContextValue {
   locale: Locale;
@@ -25,7 +26,7 @@ const I18nContext = createContext<I18nContextValue | null>(null);
 
 function getInitialLocale(): Locale {
   const stored = window.localStorage.getItem(LOCALE_STORAGE_KEY);
-  return stored === "en" || stored === "cs" ? stored : "cs";
+  return stored === "en" || stored === "cs" || stored === "ja" ? stored : "cs";
 }
 
 export function I18nProvider({ children }: { children: ReactNode }) {

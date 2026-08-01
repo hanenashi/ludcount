@@ -1,5 +1,5 @@
 import { ListFilter } from "lucide-react";
-import { categories } from "./model";
+import { useCategories } from "../categories/CategoryProvider";
 import type {
   TransactionFilters as FilterValues,
   TransactionTypeFilter,
@@ -24,6 +24,7 @@ export function TransactionFilters({
   onReset,
 }: TransactionFiltersProps) {
   const { t } = useI18n();
+  const { categories, labelFor } = useCategories();
 
   return (
     <details className="transaction-filters">
@@ -66,7 +67,7 @@ export function TransactionFilters({
             <option value="all">{t("transaction.filterAllCategories")}</option>
             {categories.map((category) => (
               <option key={category.id} value={category.id}>
-                {t(category.labelKey)}
+                {labelFor(category)}
               </option>
             ))}
           </select>

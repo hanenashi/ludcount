@@ -23,13 +23,32 @@ export type TransactionDraft = Pick<
   "type" | "amountMinor" | "categoryId" | "dateKey" | "monthKey" | "note"
 >;
 
-export interface Category {
+export interface BuiltInCategory {
   id: string;
   type: TransactionType;
   labelKey: TranslationKey;
+  source: "built-in";
+  archived: false;
+  sortOrder: number;
 }
 
-export const categories: readonly Category[] = [
+export interface CustomCategory {
+  id: string;
+  type: TransactionType;
+  name: string;
+  source: "custom";
+  archived: boolean;
+  sortOrder: number;
+  createdBy: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export type Category = BuiltInCategory | CustomCategory;
+
+const builtInDefinitions: ReadonlyArray<
+  Pick<BuiltInCategory, "id" | "type" | "labelKey">
+> = [
   {
     id: "expense.groceries",
     type: "expense",
@@ -117,6 +136,18 @@ export const categories: readonly Category[] = [
   },
 ];
 
-export function getCategory(categoryId: string): Category | undefined {
-  return categories.find((category) => category.id === categoryId);
+export const builtInCategories: readonly BuiltInCategory[] =
+  builtInDefinitions.map((category, sortOrder) => ({
+    ...category,
+    source: "built-in",
+    archived: false,
+    sortOrder,
+  }));
+
+export const categories = builtInCategories;
+
+export function getBuiltInCategory(
+  categoryId: string,
+): BuiltInCategory | undefined {
+  return builtInCategories.find((category) => category.id === categoryId);
 }

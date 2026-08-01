@@ -9,6 +9,7 @@ import {
 import { isValidDateKey } from "../lib/dates";
 import { asMoneyAmount, MAX_AMOUNT_MINOR } from "../lib/money";
 import type {
+  CustomCategory,
   Transaction,
   TransactionType,
 } from "../features/transactions/model";
@@ -47,6 +48,22 @@ function readTimestamp(
   return value.toMillis();
 }
 
+function readBoolean(data: DocumentData, field: string, path: string): boolean {
+  const value = data[field];
+  if (typeof value !== "boolean") {
+    invalidData(path, `${field} must be a boolean.`);
+  }
+  return value;
+}
+
+function readInteger(data: DocumentData, field: string, path: string): number {
+  const value = data[field];
+  if (!Number.isInteger(value)) {
+    invalidData(path, `${field} must be an integer.`);
+  }
+  return value;
+}
+
 function writeTimestamp(
   value: number | FieldValue | undefined,
   field: string,
@@ -60,10 +77,10 @@ function writeTimestamp(
   return Timestamp.fromMillis(value);
 }
 
-function readLocale(data: DocumentData, path: string): "cs" | "en" {
+function readLocale(data: DocumentData, path: string): "cs" | "en" | "ja" {
   const locale = readString(data, "locale", path);
-  if (locale !== "cs" && locale !== "en") {
-    invalidData(path, "locale must be cs or en.");
+  if (locale !== "cs" && locale !== "en" && locale !== "ja") {
+    invalidData(path, "locale must be cs, en, or ja.");
   }
   return locale;
 }
@@ -167,6 +184,41 @@ export const householdMemberConverter: FirestoreDataConverter<HouseholdMember> =
       };
     },
   };
+
+export const customCategoryConverter: FirestoreDataConverter<CustomCategory> = {
+  toFirestore(category) {
+    return {
+      name: category.name,
+      type: category.type,
+      sortOrder: category.sortOrder,
+      archived: category.archived,
+      createdBy: category.createdBy,
+      createdAt: writeTimestamp(category.createdAt, "createdAt"),
+      updatedAt: writeTimestamp(category.updatedAt, "updatedAt"),
+    };
+  },
+  fromFirestore(snapshot, options) {
+    const { data, path } = snapshotData(snapshot, options);
+    const name = readString(data, "name", path);
+    if (name.length > 60)
+      invalidData(path, "name must be at most 60 characters.");
+    const sortOrder = readInteger(data, "sortOrder", path);
+    if (sortOrder < 0 || sortOrder > 100000) {
+      invalidData(path, "sortOrder is out of range.");
+    }
+    return {
+      id: snapshot.id,
+      name,
+      type: readTransactionType(data, path),
+      sortOrder,
+      archived: readBoolean(data, "archived", path),
+      source: "custom",
+      createdBy: readString(data, "createdBy", path),
+      createdAt: readTimestamp(data, "createdAt", path),
+      updatedAt: readTimestamp(data, "updatedAt", path),
+    };
+  },
+};
 
 export const transactionConverter: FirestoreDataConverter<Transaction> = {
   toFirestore(transaction) {

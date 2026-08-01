@@ -15,7 +15,7 @@ export function asMoneyAmount(value: number): MoneyAmount {
 
 export function parseMoneyInput(
   input: string,
-  locale: "cs" | "en",
+  locale: "cs" | "en" | "ja",
 ): MoneyAmount | null {
   const normalized = input.trim().replace(/[\s\u00a0\u202f]/g, "");
   const pattern =
@@ -41,10 +41,12 @@ export function parseMoneyInput(
 
 export function formatMoney(
   amountMinor: MoneyAmount,
-  locale: "cs" | "en",
+  locale: "cs" | "en" | "ja",
   currency = "CZK",
 ): string {
-  return new Intl.NumberFormat(locale === "cs" ? "cs-CZ" : "en-GB", {
+  const numberLocale =
+    locale === "cs" ? "cs-CZ" : locale === "ja" ? "ja-JP" : "en-GB";
+  return new Intl.NumberFormat(numberLocale, {
     style: "currency",
     currency,
     minimumFractionDigits: 2,

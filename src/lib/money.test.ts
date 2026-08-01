@@ -8,9 +8,10 @@ import {
 } from "./money";
 
 describe("money helpers", () => {
-  it("parses Czech and English decimal inputs into minor units", () => {
+  it("parses Czech, English, and Japanese decimal inputs into minor units", () => {
     expect(parseMoneyInput("1 234,56", "cs")).toBe(123456);
     expect(parseMoneyInput("1234.56", "en")).toBe(123456);
+    expect(parseMoneyInput("1234.56", "ja")).toBe(123456);
   });
 
   it("rejects zero, negative, malformed, and excessive amounts", () => {
@@ -29,5 +30,6 @@ describe("money helpers", () => {
   it("formats only at the display boundary", () => {
     expect(formatMoney(asMoneyAmount(12550), "cs")).toContain("125,50");
     expect(formatMoney(asMoneyAmount(12550), "en")).toContain("125.50");
+    expect(formatMoney(asMoneyAmount(12550), "ja")).toContain("125.50");
   });
 });

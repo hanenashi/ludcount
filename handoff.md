@@ -1,5 +1,41 @@
 # Ludcount Handoff
 
+## Japanese and custom-category release
+
+The next release adds complete Japanese UI localization and persistent,
+household-scoped custom categories without changing the Czech-first default.
+
+- Locale persistence and profile rules now accept `cs`, `en`, and `ja`.
+- Built-in categories remain code-defined and translate with the UI locale.
+- Custom category names are literal household data stored under
+  `households/{householdId}/categories/{categoryId}`.
+- Members can read and use active custom categories. Only the household owner
+  can create, rename, archive, or restore them.
+- Archived categories remain visible on historical transactions and in filters,
+  but are excluded from new and duplicated transactions. Physical deletion is
+  denied.
+- Demo categories use a separate in-memory repository and reset on reload or
+  through the existing demo reset action, with zero Firebase traffic.
+- The category subscription is sorted client-side, so no new composite index is
+  required.
+- The exact schema and rule boundaries are documented in
+  `docs/category-management.md`.
+
+Local verification for this release:
+
+- `npm run format:check`: passing
+- `npm run lint`: passing
+- `npm run typecheck`: passing
+- `npm test`: 54 tests passing
+- `npm run test:rules`: 38 tests passing against isolated local Firestore
+- `npm run test:browser`: 24 tests passing across desktop, standard mobile,
+  320px mobile, and mobile landscape Chromium
+- `npm run build`: passing (with the existing Firebase vendor chunk-size
+  advisory)
+
+Production deployment details will be recorded here after the authorized rules
+and Hosting deployment completes. App Check enforcement remains off.
+
 ## Post-release invitation and public-demo hardening
 
 The invitation-only release was deployed to Firebase Hosting on 2026-07-29
@@ -206,7 +242,7 @@ application commit `11a1ecf2051749d02d299be40ad1ff54821d2c07`.
 - Initial profile creation must be part of a valid atomic personal-household
   bootstrap and the stored email must match the authentication token.
 - Only `locale`, `activeHouseholdId`, and `updatedAt` may change.
-- Locale is limited to `cs` or `en`.
+- Locale is limited to `cs`, `en`, or `ja`.
 - An active household must contain that user as a member.
 - Display name, email, creation timestamp, and arbitrary extra fields cannot be
   changed.
@@ -288,8 +324,8 @@ The invitation-only MVP is live. Remaining release follow-up:
    authorized cleanup
 2. add any future custom domain to Authentication authorized domains before
    serving sign-in there
-3. keep custom and archived categories deferred until their documented schema
-   and rule work is explicitly authorized
+3. treat category reordering and member-managed category writes as separate,
+   explicitly scoped future work
 
 ## Commands
 

@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { DataStatePanel, OfflineBanner } from "../components/DataState";
 import { SkipLink } from "../components/SkipLink";
+import { useCategories } from "../features/categories/CategoryProvider";
 import { useTransactions } from "../features/transactions/TransactionProvider";
 import { useI18n } from "../i18n";
 import { useOnlineStatus } from "../lib/useOnlineStatus";
@@ -48,23 +49,29 @@ export function AppShell() {
   const { t } = useI18n();
   const runtime = useAppRuntime();
   const transactionState = useTransactions();
+  const categoryState = useCategories();
   const isOnline = useOnlineStatus();
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const [signOutError, setSignOutError] = useState(false);
   const loading =
     runtime.status === "loading" ||
+    (runtime.status === "ready" && categoryState.status === "loading") ||
     (runtime.status === "ready" && transactionState.status === "loading");
   const blockingError =
     runtime.error ??
+    (categoryState.status === "error" ? categoryState.error : null) ??
     (transactionState.status === "error" ? transactionState.error : null);
   const dataReady =
     runtime.status === "ready" &&
+    (categoryState.status === "ready" || categoryState.status === "offline") &&
     (transactionState.status === "ready" ||
       transactionState.status === "offline");
   const offline =
     runtime.mode === "production" &&
-    (!isOnline || transactionState.status === "offline");
+    (!isOnline ||
+      categoryState.status === "offline" ||
+      transactionState.status === "offline");
   const showMobileAdd = dataReady && pathname.endsWith("/overview");
 
   const handleSignOut = async () => {
@@ -165,6 +172,7 @@ export function AppShell() {
             loading
             onRetry={() => {
               runtime.retry();
+              categoryState.retry();
               transactionState.retry();
             }}
           />
@@ -173,6 +181,7 @@ export function AppShell() {
             error={blockingError}
             onRetry={() => {
               runtime.retry();
+              categoryState.retry();
               transactionState.retry();
             }}
           />

@@ -95,7 +95,12 @@ Only after explicit authorization for a future release:
    - sign in with a pre-created dedicated production test account
    - verify the personal household bootstrap
    - create, edit, duplicate, filter, export, and delete a small transaction
-   - switch Czech to English and verify persistence
+   - switch Czech to English and Japanese and verify persistence
+   - as an owner, create and rename a custom category, use it for a transaction,
+     then archive it and confirm it remains visible in history but unavailable
+     for new transactions
+   - as a non-owner member, verify custom categories are readable but their
+     management controls are unavailable
    - verify a separate non-member account cannot read the household
    - confirm no raw Firebase error appears in the UI or browser console
    - confirm direct navigation to SPA routes resolves through Hosting rewrites

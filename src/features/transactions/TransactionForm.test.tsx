@@ -1,18 +1,36 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { DataOperationError } from "../../firebase/errors";
+import {
+  CategoryProvider,
+  useCategories,
+} from "../categories/CategoryProvider";
+import { DemoCategoryRepository } from "../demo/DemoCategoryRepository";
 import { I18nProvider } from "../../i18n";
 import { asMoneyAmount } from "../../lib/money";
 import { TransactionForm } from "./TransactionForm";
 
+function CategoryReady({ children }: { children: React.ReactNode }) {
+  return useCategories().status === "ready" ? children : null;
+}
+
+function renderForm(
+  form: React.ReactNode,
+  repository = new DemoCategoryRepository(),
+) {
+  return render(
+    <I18nProvider>
+      <CategoryProvider repository={repository} observeOnline={false} canManage>
+        <CategoryReady>{form}</CategoryReady>
+      </CategoryProvider>
+    </I18nProvider>,
+  );
+}
+
 describe("TransactionForm", () => {
   it("preserves values on validation failure and submits integer minor units", () => {
     const onSubmit = vi.fn().mockResolvedValue(undefined);
-    render(
-      <I18nProvider>
-        <TransactionForm onSubmit={onSubmit} onCancel={vi.fn()} />
-      </I18nProvider>,
-    );
+    renderForm(<TransactionForm onSubmit={onSubmit} onCancel={vi.fn()} />);
 
     const amount = screen.getByLabelText("Částka");
     fireEvent.change(amount, { target: { value: "abc" } });
@@ -42,11 +60,7 @@ describe("TransactionForm", () => {
     const onSubmit = vi
       .fn()
       .mockRejectedValue(new DataOperationError("offline", "offline"));
-    render(
-      <I18nProvider>
-        <TransactionForm onSubmit={onSubmit} onCancel={vi.fn()} />
-      </I18nProvider>,
-    );
+    renderForm(<TransactionForm onSubmit={onSubmit} onCancel={vi.fn()} />);
 
     const amount = screen.getByLabelText("Částka");
     fireEvent.change(amount, { target: { value: "850,50" } });
@@ -62,21 +76,19 @@ describe("TransactionForm", () => {
 
   it("prefills a duplicate draft without saving until explicitly submitted", () => {
     const onSubmit = vi.fn().mockResolvedValue(undefined);
-    render(
-      <I18nProvider>
-        <TransactionForm
-          initialDraft={{
-            type: "expense",
-            amountMinor: asMoneyAmount(85050),
-            categoryId: "expense.groceries",
-            dateKey: "2026-07-29",
-            monthKey: "2026-07",
-            note: "Týdenní nákup",
-          }}
-          onSubmit={onSubmit}
-          onCancel={vi.fn()}
-        />
-      </I18nProvider>,
+    renderForm(
+      <TransactionForm
+        initialDraft={{
+          type: "expense",
+          amountMinor: asMoneyAmount(85050),
+          categoryId: "expense.groceries",
+          dateKey: "2026-07-29",
+          monthKey: "2026-07",
+          note: "Týdenní nákup",
+        }}
+        onSubmit={onSubmit}
+        onCancel={vi.fn()}
+      />,
     );
 
     expect(
@@ -98,5 +110,50 @@ describe("TransactionForm", () => {
       monthKey: "2026-07",
       note: "Týdenní nákup",
     });
+  });
+
+  it("keeps an archived category for edits but not for duplicates", async () => {
+    const repository = new DemoCategoryRepository();
+    const categoryId = await repository.create("Mazlíčci", "expense", 1000);
+    await repository.setArchived(categoryId, true);
+    const draft = {
+      type: "expense" as const,
+      amountMinor: asMoneyAmount(85050),
+      categoryId,
+      dateKey: "2026-07-29",
+      monthKey: "2026-07",
+      note: "Veterina",
+    };
+
+    const duplicate = renderForm(
+      <TransactionForm
+        initialDraft={draft}
+        onSubmit={vi.fn()}
+        onCancel={vi.fn()}
+      />,
+      repository,
+    );
+    expect(screen.getByLabelText("Kategorie")).toHaveValue("expense.groceries");
+    expect(screen.queryByRole("option", { name: "Mazlíčci" })).toBeNull();
+    duplicate.unmount();
+
+    renderForm(
+      <TransactionForm
+        transaction={{
+          ...draft,
+          id: "transaction-1",
+          currency: "CZK",
+          categoryLabelSnapshot: "Mazlíčci",
+          createdBy: "demo-session",
+          createdAt: 1,
+          updatedAt: 1,
+        }}
+        onSubmit={vi.fn()}
+        onCancel={vi.fn()}
+      />,
+      repository,
+    );
+    expect(screen.getByLabelText("Kategorie")).toHaveValue(categoryId);
+    expect(screen.getByRole("option", { name: "Mazlíčci" })).toBeVisible();
   });
 });

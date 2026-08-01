@@ -7,7 +7,8 @@ import {
 import { useI18n } from "../../i18n";
 import { isValidDateKey, toDateKey, toMonthKey } from "../../lib/dates";
 import { parseMoneyInput } from "../../lib/money";
-import { categories, type Transaction, type TransactionDraft } from "./model";
+import { useCategories } from "../categories/CategoryProvider";
+import type { Transaction, TransactionDraft } from "./model";
 
 interface TransactionFormProps {
   transaction?: Transaction;
@@ -23,8 +24,18 @@ export function TransactionForm({
   onCancel,
 }: TransactionFormProps) {
   const { locale, t } = useI18n();
+  const { categories, labelFor } = useCategories();
   const initialValues = transaction ?? initialDraft;
   const initialType = initialValues?.type ?? "expense";
+  const initialCategory = categories.find(
+    (category) => category.id === initialValues?.categoryId,
+  );
+  const initialCategoryId =
+    initialCategory && (!initialCategory.archived || transaction)
+      ? initialCategory.id
+      : (categories.find(
+          (category) => category.type === initialType && !category.archived,
+        )?.id ?? "");
   const [type, setType] = useState(initialType);
   const [amount, setAmount] = useState(
     initialValues
@@ -33,11 +44,7 @@ export function TransactionForm({
           .replace(".", locale === "cs" ? "," : ".")
       : "",
   );
-  const [categoryId, setCategoryId] = useState(
-    initialValues?.categoryId ??
-      categories.find((category) => category.type === initialType)?.id ??
-      "",
-  );
+  const [categoryId, setCategoryId] = useState(initialCategoryId);
   const [dateKey, setDateKey] = useState(
     initialValues?.dateKey ?? toDateKey(new Date()),
   );
@@ -54,8 +61,13 @@ export function TransactionForm({
   const dateRef = useRef<HTMLInputElement>(null);
 
   const visibleCategories = useMemo(
-    () => categories.filter((category) => category.type === type),
-    [type],
+    () =>
+      categories.filter(
+        (category) =>
+          category.type === type &&
+          (!category.archived || category.id === transaction?.categoryId),
+      ),
+    [categories, transaction?.categoryId, type],
   );
 
   useEffect(() => {
@@ -65,7 +77,9 @@ export function TransactionForm({
   const changeType = (nextType: "income" | "expense") => {
     setType(nextType);
     setCategoryId(
-      categories.find((category) => category.type === nextType)?.id ?? "",
+      categories.find(
+        (category) => category.type === nextType && !category.archived,
+      )?.id ?? "",
     );
   };
 
@@ -189,7 +203,7 @@ export function TransactionForm({
         >
           {visibleCategories.map((category) => (
             <option key={category.id} value={category.id}>
-              {t(category.labelKey)}
+              {labelFor(category)}
             </option>
           ))}
         </select>

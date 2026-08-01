@@ -27,9 +27,14 @@ export function isValidDateKey(dateKey: string): boolean {
   );
 }
 
-export function formatDateKey(dateKey: string, locale: "cs" | "en"): string {
+export function formatDateKey(
+  dateKey: string,
+  locale: "cs" | "en" | "ja",
+): string {
   const [year, month, day] = dateKey.split("-").map(Number);
-  return new Intl.DateTimeFormat(locale === "cs" ? "cs-CZ" : "en-GB", {
+  const dateLocale =
+    locale === "cs" ? "cs-CZ" : locale === "ja" ? "ja-JP" : "en-GB";
+  return new Intl.DateTimeFormat(dateLocale, {
     day: "numeric",
     month: "numeric",
     year: "numeric",
@@ -46,9 +51,14 @@ export function moveMonth(monthKey: string, offset: number): string {
   return `${moved.getFullYear()}-${String(moved.getMonth() + 1).padStart(2, "0")}`;
 }
 
-export function formatMonthKey(monthKey: string, locale: "cs" | "en"): string {
+export function formatMonthKey(
+  monthKey: string,
+  locale: "cs" | "en" | "ja",
+): string {
   const [year, month] = monthKey.split("-").map(Number);
-  return new Intl.DateTimeFormat(locale === "cs" ? "cs-CZ" : "en-GB", {
+  const dateLocale =
+    locale === "cs" ? "cs-CZ" : locale === "ja" ? "ja-JP" : "en-GB";
+  return new Intl.DateTimeFormat(dateLocale, {
     month: "long",
     year: "numeric",
   }).format(new Date(year, month - 1, 1));

@@ -8,14 +8,10 @@ import {
   type ReactNode,
 } from "react";
 import { DataOperationError } from "../../firebase/errors";
-import { useI18n } from "../../i18n";
 import { useOnlineStatus } from "../../lib/useOnlineStatus";
-import { categories, type Transaction, type TransactionDraft } from "./model";
+import { useCategories } from "../categories/CategoryProvider";
+import type { Transaction, TransactionDraft } from "./model";
 import type { TransactionRepository } from "./repository";
-
-const categoriesById = new Map(
-  categories.map((category) => [category.id, category]),
-);
 
 interface TransactionContextValue {
   transactions: readonly Transaction[];
@@ -41,7 +37,7 @@ export function TransactionProvider({
   observeOnline?: boolean;
   children: ReactNode;
 }) {
-  const { t } = useI18n();
+  const { categoryFor, labelFor } = useCategories();
   const isOnline = useOnlineStatus();
   const [transactions, setTransactions] = useState<readonly Transaction[]>([]);
   const [status, setStatus] =
@@ -91,10 +87,10 @@ export function TransactionProvider({
 
   const categorySnapshot = useCallback(
     (draft: TransactionDraft): string => {
-      const category = categoriesById.get(draft.categoryId);
-      return category ? t(category.labelKey) : draft.categoryId;
+      const category = categoryFor(draft.categoryId);
+      return category ? labelFor(category) : draft.categoryId;
     },
-    [t],
+    [categoryFor, labelFor],
   );
 
   const effectiveStatus = !repository

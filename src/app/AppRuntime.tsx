@@ -1,7 +1,6 @@
 import { createContext, useContext, useMemo, type ReactNode } from "react";
 import type { DataOperationError } from "../firebase/errors";
 import { useAuth } from "../features/auth/AuthProvider";
-import type { DemoTransactionRepository } from "../features/demo/DemoTransactionRepository";
 import { useHousehold } from "../features/household/HouseholdProvider";
 import type { Locale } from "../i18n";
 
@@ -53,11 +52,11 @@ export function ProductionRuntimeProvider({
 }
 
 export function DemoRuntimeProvider({
-  repository,
+  onReset,
   userLabel,
   children,
 }: {
-  repository: DemoTransactionRepository;
+  onReset: () => void;
   userLabel: string;
   children: ReactNode;
 }) {
@@ -72,9 +71,9 @@ export function DemoRuntimeProvider({
       saveLocale: async () => undefined,
       exit: async () => undefined,
       retry: () => undefined,
-      resetDemo: () => repository.reset(),
+      resetDemo: onReset,
     }),
-    [repository, userLabel],
+    [onReset, userLabel],
   );
 
   return (

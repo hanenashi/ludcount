@@ -1,11 +1,14 @@
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { AppShell } from "./AppShell";
 import { DemoRuntimeProvider, ProductionRuntimeProvider } from "./AppRuntime";
 import { useAuth } from "../features/auth/AuthProvider";
 import { AuthProvider } from "../features/auth/AuthProvider";
 import { SignInPage } from "../features/auth/SignInPage";
+import { CategoryProvider } from "../features/categories/CategoryProvider";
+import { CategoryManagementPage } from "../features/categories/CategoryManagementPage";
 import { OverviewPage } from "../features/dashboard/OverviewPage";
+import { DemoCategoryRepository } from "../features/demo/DemoCategoryRepository";
 import { DemoTransactionRepository } from "../features/demo/DemoTransactionRepository";
 import { HouseholdProvider } from "../features/household/HouseholdProvider";
 import { SettingsPage } from "../features/settings/SettingsPage";
@@ -13,6 +16,7 @@ import { TransactionFormPage } from "../features/transactions/TransactionFormPag
 import { TransactionProvider } from "../features/transactions/TransactionProvider";
 import { TransactionsPage } from "../features/transactions/TransactionsPage";
 import { createFirestoreTransactionRepository } from "../firebase/transactionRepository";
+import { createFirestoreCategoryRepository } from "../firebase/categoryRepository";
 import { useI18n } from "../i18n";
 import { getFirebaseServices } from "../lib/firebase";
 import { useHousehold } from "../features/household/HouseholdProvider";
@@ -40,16 +44,36 @@ function ProductionDataProviders() {
         : null,
     [householdId, user],
   );
+  const categoryRepository = useMemo(
+    () =>
+      user && householdId
+        ? createFirestoreCategoryRepository(
+            getFirebaseServices().firestore,
+            householdId,
+            user.uid,
+          )
+        : null,
+    [householdId, user],
+  );
+  const canManageCategories = Boolean(
+    user && household.workspace?.household.ownerId === user.uid,
+  );
 
   return (
-    <TransactionProvider
-      repository={repository}
+    <CategoryProvider
+      repository={categoryRepository}
       waiting={household.status === "loading"}
+      canManage={canManageCategories}
     >
-      <ProductionRuntimeProvider>
-        <AppShell />
-      </ProductionRuntimeProvider>
-    </TransactionProvider>
+      <TransactionProvider
+        repository={repository}
+        waiting={household.status === "loading"}
+      >
+        <ProductionRuntimeProvider>
+          <AppShell />
+        </ProductionRuntimeProvider>
+      </TransactionProvider>
+    </CategoryProvider>
   );
 }
 
@@ -81,16 +105,24 @@ function ProtectedApp() {
 function DemoApp() {
   const { t } = useI18n();
   const repository = useMemo(() => new DemoTransactionRepository(), []);
+  const categoryRepository = useMemo(() => new DemoCategoryRepository(), []);
+  const resetDemo = useCallback(() => {
+    repository.reset();
+    categoryRepository.reset();
+  }, [categoryRepository, repository]);
 
   return (
-    <TransactionProvider repository={repository} observeOnline={false}>
-      <DemoRuntimeProvider
-        repository={repository}
-        userLabel={t("demo.identity")}
-      >
-        <AppShell />
-      </DemoRuntimeProvider>
-    </TransactionProvider>
+    <CategoryProvider
+      repository={categoryRepository}
+      observeOnline={false}
+      canManage
+    >
+      <TransactionProvider repository={repository} observeOnline={false}>
+        <DemoRuntimeProvider onReset={resetDemo} userLabel={t("demo.identity")}>
+          <AppShell />
+        </DemoRuntimeProvider>
+      </TransactionProvider>
+    </CategoryProvider>
   );
 }
 
@@ -111,7 +143,7 @@ export function AppRouter() {
           <Route path="settings" element={<SettingsPage />} />
           <Route
             path="settings/categories"
-            element={<Navigate to="/app/settings" replace />}
+            element={<CategoryManagementPage />}
           />
         </Route>
       </Route>
@@ -124,7 +156,7 @@ export function AppRouter() {
         <Route path="settings" element={<SettingsPage />} />
         <Route
           path="settings/categories"
-          element={<Navigate to="/demo/settings" replace />}
+          element={<CategoryManagementPage />}
         />
       </Route>
       <Route path="*" element={<Navigate to="/sign-in" replace />} />

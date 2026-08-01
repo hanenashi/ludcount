@@ -20,7 +20,8 @@ import {
   hasSecondaryFilters,
   type TransactionTypeFilter,
 } from "./filters";
-import { getCategory, type Transaction } from "./model";
+import { useCategories } from "../categories/CategoryProvider";
+import type { Transaction } from "./model";
 import { TransactionFilters } from "./TransactionFilters";
 import { TransactionList } from "./TransactionList";
 import { useTransactions } from "./TransactionProvider";
@@ -28,6 +29,7 @@ import { useTransactions } from "./TransactionProvider";
 export function TransactionsPage() {
   const { locale, t } = useI18n();
   const { transactions, deleteTransaction } = useTransactions();
+  const { categoryFor, labelFor } = useCategories();
   const currentMonthKey = monthKeyFromDate(new Date());
   const [monthKey, setMonthKey] = useState(currentMonthKey);
   const [type, setType] = useState<TransactionTypeFilter>("all");
@@ -85,9 +87,9 @@ export function TransactionsPage() {
       expense: t("transaction.type.expense"),
       income: t("transaction.type.income"),
       categoryFor: (transaction) => {
-        const category = getCategory(transaction.categoryId);
+        const category = categoryFor(transaction.categoryId);
         return category
-          ? t(category.labelKey)
+          ? labelFor(category)
           : transaction.categoryLabelSnapshot;
       },
     });

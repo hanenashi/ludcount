@@ -1,7 +1,7 @@
 # Ludcount
 
 Ludcount is a small household income and expense journal. The interface defaults
-to Czech and can be switched to English in Settings.
+to Czech and can be switched to English or Japanese in Settings.
 
 This repository implements the Phase 1-5 MVP from
 [`battleplan.md`](./battleplan.md). Firebase Authentication creates or loads a
@@ -176,6 +176,10 @@ The production rules enforce these boundaries:
   members have read-only access to them
 - transaction fields, integer amounts, CZK currency, local date/month keys,
   timestamps, and exact field sets are validated
+- household members may read custom categories; only the owner may create,
+  rename, archive, or restore them
+- new transactions may use only a matching built-in category or an active
+  custom category from the same household
 
 ## Quality commands
 
@@ -231,12 +235,15 @@ not be run as part of ordinary local development.
 
 ## Categories
 
-Categories remain the built-in, localized catalog defined in source. Stable IDs
-such as `expense.groceries` are stored with a label snapshot on transactions.
-No category collection has been created.
+The built-in catalog remains defined in source with stable IDs such as
+`expense.groceries` and localized Czech, English, and Japanese labels. Household
+owners can also create, rename, archive, and restore custom income or expense
+categories. Members can read and use active categories; custom names remain
+literal rather than translated. Archived categories stay visible in history but
+cannot be selected for new transactions.
 
-The exact schema, repository, index, security-rule, migration, and test changes
-required for custom and archived categories are documented in
+The Firestore schema, archive semantics, demo behavior, and owner/member rule
+boundaries are documented in
 [`docs/category-management.md`](./docs/category-management.md).
 
 ## Hosting and application metadata
@@ -258,12 +265,13 @@ Included:
 - explicit loading, offline, permission-denied, and write-failure states
 - Firebase email/password and Google authentication, password reset, and
   sign-out
-- Czech-first UI with persistent English selection
+- Czech-first UI with persistent English and Japanese selection
 - responsive overview, transaction list, and settings screens
-- transaction creation, editing, deletion, totals, and localized categories
+- transaction creation, editing, deletion, totals, built-in localized
+  categories, and owner-managed custom categories
 - combined transaction filters and case-insensitive note search
 - explicit-save transaction duplication with today's local date
-- Czech/English client-side CSV export of the filtered result set
+- Czech/English/Japanese client-side CSV export of the filtered result set
 - keyboard navigation, dialog focus management, accessible validation, and
   live status announcements
 - narrow-mobile and landscape responsive polish
@@ -271,15 +279,15 @@ Included:
 - Firebase Hosting SPA configuration and application metadata
 - Firebase Auth and Firestore emulator configuration
 - validated Firebase client initialization
-- production Firestore rules for profiles, households, memberships, and
-  transactions
-- 33 emulator-backed allow/deny rules tests using the Firebase Rules Unit
+- production Firestore rules for profiles, households, memberships, categories,
+  and transactions
+- 38 emulator-backed allow/deny rules tests using the Firebase Rules Unit
   Testing library
 - explicit invitation-only sign-in UX and a fully local fictional demo
 
 Deferred:
 
-- category management and archived-category handling
+- category reordering and member-managed categories
 - service-worker caching and full offline support
 - Cloud Functions, Storage, Analytics, App Check enforcement, and
   billing-dependent features

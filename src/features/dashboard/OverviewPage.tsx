@@ -6,7 +6,7 @@ import { useAppRuntime } from "../../app/AppRuntime";
 import { useI18n } from "../../i18n";
 import { monthKeyFromDate } from "../../lib/dates";
 import { asMoneyAmount, formatMoney } from "../../lib/money";
-import { getCategory } from "../transactions/model";
+import { useCategories } from "../categories/CategoryProvider";
 import { calculateTotals } from "../transactions/repository";
 import { TransactionList } from "../transactions/TransactionList";
 import { useTransactions } from "../transactions/TransactionProvider";
@@ -15,6 +15,7 @@ export function OverviewPage() {
   const { locale, t } = useI18n();
   const { basePath } = useAppRuntime();
   const { transactions } = useTransactions();
+  const { categoryFor, labelFor } = useCategories();
   const [monthKey, setMonthKey] = useState(monthKeyFromDate(new Date()));
   const monthlyTransactions = useMemo(
     () =>
@@ -101,10 +102,10 @@ export function OverviewPage() {
           ) : (
             <div className="category-totals">
               {expenseByCategory.map(([categoryId, amount]) => {
-                const category = getCategory(categoryId);
+                const category = categoryFor(categoryId);
                 return (
                   <div className="category-total" key={categoryId}>
-                    <span>{category ? t(category.labelKey) : categoryId}</span>
+                    <span>{category ? labelFor(category) : categoryId}</span>
                     <strong>
                       {formatMoney(asMoneyAmount(amount), locale)}
                     </strong>
