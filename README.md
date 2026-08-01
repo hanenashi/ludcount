@@ -9,7 +9,9 @@ personal household, and transactions and user preferences are synchronized
 through Cloud Firestore. Production Firestore access is protected by strict,
 emulator-tested membership and field-validation rules. Transaction history
 supports combined filters, note search, explicit-save duplication, and
-localized client-side CSV export. The invitation-only production application
+localized client-side CSV export. Overview, Transactions, and Graphs share a
+Month/Year/From–To period selector, and the graph compares income with expenses
+using daily or monthly buckets. The invitation-only production application
 also includes a fully local public demo at `/demo` and is available on Firebase
 Hosting at `https://ludcount-hanenashi.web.app`.
 
@@ -215,7 +217,8 @@ not be run as part of ordinary local development.
 
 ## Transaction history and CSV export
 
-- Month, type, category, and case-insensitive note filters combine locally over
+- Month, year, or custom From–To periods combine with type, category, and
+  case-insensitive note filters locally over
   the signed-in household's synchronized transactions.
 - Reset returns to the current month and clears type, category, and note
   filters.
@@ -226,6 +229,19 @@ not be run as part of ordinary local development.
 - CSV files are generated entirely in the browser with a UTF-8 BOM, semicolon
   delimiters, localized headers and category/type labels, and deterministic
   `ludcount-YYYY-MM.csv` filenames.
+
+## Periods and graphs
+
+- Clicking the current period on Overview, Transactions, or Graphs opens the
+  same accessible Month/Year/From–To chooser.
+- The selection is shared while navigating between those sections. Previous and
+  next controls move by one month, one year, or one custom-range duration.
+- The graph displays paired income and expense bars. Month and short custom
+  ranges use daily buckets; years and longer custom ranges use monthly buckets.
+- A visible interval-value list accompanies the chart for precise values and
+  assistive-technology access. Empty periods have a localized state.
+- All aggregation remains client-side over the household's synchronized
+  transactions; no Firestore query, schema, index, or rule change is required.
 
 ## Accessibility and responsive behavior
 
@@ -276,6 +292,7 @@ Included:
 - transaction creation, editing, deletion, totals, built-in localized
   categories, and owner-managed custom categories
 - combined transaction filters and case-insensitive note search
+- shared month, year, and custom-range selection with income/expense graphs
 - explicit-save transaction duplication with today's local date
 - Czech/English/Japanese client-side CSV export of the filtered result set
 - keyboard navigation, dialog focus management, accessible validation, and

@@ -1,10 +1,11 @@
 import { Plus } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Link } from "react-router-dom";
-import { MonthNavigator } from "../../components/MonthNavigator";
+import { PeriodSelector } from "../period/PeriodSelector";
 import { useAppRuntime } from "../../app/AppRuntime";
 import { useI18n } from "../../i18n";
-import { monthKeyFromDate } from "../../lib/dates";
+import { periodContainsDate } from "../period/period";
+import { usePeriod } from "../period/PeriodProvider";
 import { asMoneyAmount, formatMoney } from "../../lib/money";
 import { useCategories } from "../categories/CategoryProvider";
 import { calculateTotals } from "../transactions/repository";
@@ -15,17 +16,19 @@ export function OverviewPage() {
   const { locale, t } = useI18n();
   const { basePath, displayCurrency } = useAppRuntime();
   const { transactions } = useTransactions();
+  const { period, setPeriod } = usePeriod();
   const { categoryFor, labelFor } = useCategories();
-  const [monthKey, setMonthKey] = useState(monthKeyFromDate(new Date()));
-  const monthlyTransactions = useMemo(
+  const periodTransactions = useMemo(
     () =>
-      transactions.filter((transaction) => transaction.monthKey === monthKey),
-    [monthKey, transactions],
+      transactions.filter((transaction) =>
+        periodContainsDate(period, transaction.dateKey),
+      ),
+    [period, transactions],
   );
-  const totals = calculateTotals(monthlyTransactions);
+  const totals = calculateTotals(periodTransactions);
   const expenseByCategory = useMemo(() => {
     const amounts = new Map<string, number>();
-    for (const transaction of monthlyTransactions) {
+    for (const transaction of periodTransactions) {
       if (transaction.type === "expense") {
         amounts.set(
           transaction.categoryId,
@@ -34,13 +37,13 @@ export function OverviewPage() {
       }
     }
     return [...amounts.entries()].sort((left, right) => right[1] - left[1]);
-  }, [monthlyTransactions]);
+  }, [periodTransactions]);
   const balanceClass =
     totals.balanceMinor < 0 ? "summary-value-expense" : "summary-value-balance";
 
   return (
     <div className="page page-overview">
-      <MonthNavigator monthKey={monthKey} onChange={setMonthKey} />
+      <PeriodSelector period={period} onChange={setPeriod} />
 
       <section className="summary-band" aria-label={t("nav.overview")}>
         <div className="summary-item">
@@ -82,7 +85,7 @@ export function OverviewPage() {
             <h2>{t("overview.latest")}</h2>
             <Link to={`${basePath}/transactions`}>{t("overview.viewAll")}</Link>
           </div>
-          {monthlyTransactions.length === 0 ? (
+          {periodTransactions.length === 0 ? (
             <div className="empty-state" role="status" aria-live="polite">
               <p>{t("overview.empty")}</p>
               <Link className="text-link" to={`${basePath}/transactions/new`}>
@@ -92,7 +95,7 @@ export function OverviewPage() {
           ) : (
             <TransactionList
               compact
-              transactions={monthlyTransactions.slice(0, 5)}
+              transactions={periodTransactions.slice(0, 5)}
             />
           )}
         </section>

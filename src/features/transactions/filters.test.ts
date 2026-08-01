@@ -66,7 +66,7 @@ describe("transaction filters", () => {
   it("combines month, type, category, and note filters", () => {
     expect(
       filterTransactions(transactions, {
-        monthKey: "2026-07",
+        period: { mode: "month", monthKey: "2026-07" },
         type: "expense",
         categoryId: "expense.groceries",
         noteQuery: "NÁKUP",
@@ -77,7 +77,7 @@ describe("transaction filters", () => {
   it("filters month independently and combines incompatible filters to empty", () => {
     expect(
       filterTransactions(transactions, {
-        monthKey: "2026-06",
+        period: { mode: "month", monthKey: "2026-06" },
         type: "all",
         categoryId: "all",
         noteQuery: "",
@@ -86,7 +86,7 @@ describe("transaction filters", () => {
 
     expect(
       filterTransactions(transactions, {
-        monthKey: "2026-07",
+        period: { mode: "month", monthKey: "2026-07" },
         type: "income",
         categoryId: "expense.groceries",
         noteQuery: "",
@@ -97,12 +97,31 @@ describe("transaction filters", () => {
   it("searches notes case-insensitively with Czech characters", () => {
     expect(
       filterTransactions(transactions, {
-        monthKey: "2026-07",
+        period: { mode: "month", monthKey: "2026-07" },
         type: "all",
         categoryId: "all",
         noteQuery: "čErVeNcOvÁ",
       }).map((transaction) => transaction.id),
     ).toEqual(["salary"]);
+  });
+
+  it("combines year and custom date ranges with secondary filters", () => {
+    expect(
+      filterTransactions(transactions, {
+        period: { mode: "year", year: 2026 },
+        type: "income",
+        categoryId: "all",
+        noteQuery: "",
+      }).map((transaction) => transaction.id),
+    ).toEqual(["salary"]);
+    expect(
+      filterTransactions(transactions, {
+        period: { mode: "range", from: "2026-06-21", to: "2026-07-28" },
+        type: "expense",
+        categoryId: "all",
+        noteQuery: "",
+      }).map((transaction) => transaction.id),
+    ).toEqual(["transport"]);
   });
 
   it("detects filters that can be reset separately from month", () => {

@@ -8,6 +8,7 @@ import { SignInPage } from "../features/auth/SignInPage";
 import { CategoryProvider } from "../features/categories/CategoryProvider";
 import { CategoryManagementPage } from "../features/categories/CategoryManagementPage";
 import { OverviewPage } from "../features/dashboard/OverviewPage";
+import { GraphsPage } from "../features/graphs/GraphsPage";
 import { DemoCategoryRepository } from "../features/demo/DemoCategoryRepository";
 import { DemoTransactionRepository } from "../features/demo/DemoTransactionRepository";
 import { HouseholdProvider } from "../features/household/HouseholdProvider";
@@ -20,6 +21,7 @@ import { createFirestoreCategoryRepository } from "../firebase/categoryRepositor
 import { useI18n } from "../i18n";
 import { getFirebaseServices } from "../lib/firebase";
 import { useHousehold } from "../features/household/HouseholdProvider";
+import { PeriodProvider, usePeriod } from "../features/period/PeriodProvider";
 
 function ProductionAuthBoundary() {
   return (
@@ -69,9 +71,11 @@ function ProductionDataProviders() {
         repository={repository}
         waiting={household.status === "loading"}
       >
-        <ProductionRuntimeProvider>
-          <AppShell />
-        </ProductionRuntimeProvider>
+        <PeriodProvider>
+          <ProductionRuntimeProvider>
+            <AppShell />
+          </ProductionRuntimeProvider>
+        </PeriodProvider>
       </TransactionProvider>
     </CategoryProvider>
   );
@@ -102,6 +106,25 @@ function ProtectedApp() {
   );
 }
 
+function DemoRuntimeWithPeriod({
+  onReset,
+  userLabel,
+}: {
+  onReset: () => void;
+  userLabel: string;
+}) {
+  const { resetPeriod } = usePeriod();
+  const reset = useCallback(() => {
+    onReset();
+    resetPeriod();
+  }, [onReset, resetPeriod]);
+  return (
+    <DemoRuntimeProvider onReset={reset} userLabel={userLabel}>
+      <AppShell />
+    </DemoRuntimeProvider>
+  );
+}
+
 function DemoApp() {
   const { t } = useI18n();
   const repository = useMemo(() => new DemoTransactionRepository(), []);
@@ -118,9 +141,12 @@ function DemoApp() {
       canManage
     >
       <TransactionProvider repository={repository} observeOnline={false}>
-        <DemoRuntimeProvider onReset={resetDemo} userLabel={t("demo.identity")}>
-          <AppShell />
-        </DemoRuntimeProvider>
+        <PeriodProvider>
+          <DemoRuntimeWithPeriod
+            onReset={resetDemo}
+            userLabel={t("demo.identity")}
+          />
+        </PeriodProvider>
       </TransactionProvider>
     </CategoryProvider>
   );
@@ -135,6 +161,7 @@ export function AppRouter() {
           <Route index element={<Navigate to="overview" replace />} />
           <Route path="overview" element={<OverviewPage />} />
           <Route path="transactions" element={<TransactionsPage />} />
+          <Route path="graphs" element={<GraphsPage />} />
           <Route path="transactions/new" element={<TransactionFormPage />} />
           <Route
             path="transactions/:id/edit"
@@ -151,6 +178,7 @@ export function AppRouter() {
         <Route index element={<Navigate to="overview" replace />} />
         <Route path="overview" element={<OverviewPage />} />
         <Route path="transactions" element={<TransactionsPage />} />
+        <Route path="graphs" element={<GraphsPage />} />
         <Route path="transactions/new" element={<TransactionFormPage />} />
         <Route path="transactions/:id/edit" element={<TransactionFormPage />} />
         <Route path="settings" element={<SettingsPage />} />

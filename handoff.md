@@ -1,5 +1,32 @@
 # Ludcount Handoff
 
+## Shared periods and graphs
+
+The current work adds a Graphs route and a shared period selector to Overview,
+Transactions, and Graphs. Clicking the displayed period opens an accessible
+dialog with Month, Year, and custom From–To modes. Previous/next controls move
+by the selected period's natural duration, and the choice follows the user
+between all three routes for the current browser session.
+
+The graph compares income and expenses with paired bars and a precise visible
+value list. Month and custom ranges up to 62 days use daily buckets; years and
+longer custom ranges use monthly buckets. Empty periods are localized. All
+filtering and graph aggregation is client-side, so this feature changes no
+Firestore schema, rules, indexes, or stored data.
+
+Local verification before release:
+
+- `npm run format:check`, lint, and TypeScript: passing
+- unit tests: 64 passing
+- Firestore rules tests: 38 passing against the local emulator
+- Playwright: 28 passing across desktop, standard mobile, 320px mobile, and
+  mobile landscape Chromium
+- production build: passing (with the existing Firebase vendor chunk-size
+  advisory)
+
+This work changes no Firebase backend resource. Only Hosting needs to be
+released after the application commit is pushed.
+
 ## Display-symbol preference
 
 This release was deployed on 2026-08-01 from application commit

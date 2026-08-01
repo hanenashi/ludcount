@@ -1,9 +1,10 @@
 import type { Transaction, TransactionType } from "./model";
+import { periodContainsDate, type PeriodSelection } from "../period/period";
 
 export type TransactionTypeFilter = TransactionType | "all";
 
 export interface TransactionFilters {
-  monthKey: string;
+  period: PeriodSelection;
   type: TransactionTypeFilter;
   categoryId: string;
   noteQuery: string;
@@ -21,7 +22,7 @@ export function filterTransactions(
 
   return transactions.filter(
     (transaction) =>
-      transaction.monthKey === filters.monthKey &&
+      periodContainsDate(filters.period, transaction.dateKey) &&
       (filters.type === "all" || transaction.type === filters.type) &&
       (filters.categoryId === "all" ||
         transaction.categoryId === filters.categoryId) &&

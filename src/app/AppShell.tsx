@@ -1,4 +1,11 @@
-import { Home, List, LogOut, Plus, Settings } from "lucide-react";
+import {
+  ChartNoAxesCombined,
+  Home,
+  List,
+  LogOut,
+  Plus,
+  Settings,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { DataStatePanel, OfflineBanner } from "../components/DataState";
@@ -12,6 +19,7 @@ import { useAppRuntime } from "./AppRuntime";
 const navigation = [
   { path: "overview", key: "nav.overview", icon: Home },
   { path: "transactions", key: "nav.transactions", icon: List },
+  { path: "graphs", key: "nav.graphs", icon: ChartNoAxesCombined },
   { path: "settings", key: "nav.settings", icon: Settings },
 ] as const;
 

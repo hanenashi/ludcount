@@ -1,7 +1,7 @@
 import { Download, Plus } from "lucide-react";
 import { useCallback, useDeferredValue, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { MonthNavigator } from "../../components/MonthNavigator";
+import { PeriodSelector } from "../period/PeriodSelector";
 import { DataWriteError } from "../../components/DataState";
 import { ModalDialog } from "../../components/ModalDialog";
 import {
@@ -9,7 +9,8 @@ import {
   type DataOperationError,
 } from "../../firebase/errors";
 import { useI18n } from "../../i18n";
-import { monthKeyFromDate } from "../../lib/dates";
+import { periodExportKey } from "../period/period";
+import { usePeriod } from "../period/PeriodProvider";
 import {
   createTransactionsCsv,
   createTransactionsCsvFilename,
@@ -29,9 +30,8 @@ import { useTransactions } from "./TransactionProvider";
 export function TransactionsPage() {
   const { locale, t } = useI18n();
   const { transactions, deleteTransaction } = useTransactions();
+  const { period, setPeriod, resetPeriod } = usePeriod();
   const { categoryFor, labelFor } = useCategories();
-  const currentMonthKey = monthKeyFromDate(new Date());
-  const [monthKey, setMonthKey] = useState(currentMonthKey);
   const [type, setType] = useState<TransactionTypeFilter>("all");
   const [categoryId, setCategoryId] = useState("all");
   const [noteQuery, setNoteQuery] = useState("");
@@ -43,12 +43,12 @@ export function TransactionsPage() {
   );
   const filters = useMemo(
     () => ({
-      monthKey,
+      period,
       type,
       categoryId,
       noteQuery: deferredNoteQuery,
     }),
-    [categoryId, deferredNoteQuery, monthKey, type],
+    [categoryId, deferredNoteQuery, period, type],
   );
   const visibleTransactions = useMemo(
     () => filterTransactions(transactions, filters),
@@ -65,7 +65,7 @@ export function TransactionsPage() {
     Number(noteQuery.trim() !== "");
 
   const resetFilters = () => {
-    setMonthKey(currentMonthKey);
+    resetPeriod();
     setType("all");
     setCategoryId("all");
     setNoteQuery("");
@@ -93,7 +93,10 @@ export function TransactionsPage() {
           : transaction.categoryLabelSnapshot;
       },
     });
-    downloadTransactionsCsv(csv, createTransactionsCsvFilename(monthKey));
+    downloadTransactionsCsv(
+      csv,
+      createTransactionsCsvFilename(periodExportKey(period)),
+    );
   };
 
   const confirmDelete = async () => {
@@ -114,7 +117,7 @@ export function TransactionsPage() {
   return (
     <div className="page">
       <div className="page-heading-row">
-        <MonthNavigator monthKey={monthKey} onChange={setMonthKey} />
+        <PeriodSelector period={period} onChange={setPeriod} />
         <Link className="button button-primary page-add-button" to="new">
           <Plus size={19} aria-hidden="true" />
           {t("transaction.add")}

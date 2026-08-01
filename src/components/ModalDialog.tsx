@@ -12,6 +12,7 @@ const FOCUSABLE_SELECTOR = [
 interface ModalDialogProps {
   labelledBy: string;
   describedBy?: string;
+  role?: "alertdialog" | "dialog";
   onDismiss: () => void;
   children: ReactNode;
 }
@@ -19,6 +20,7 @@ interface ModalDialogProps {
 export function ModalDialog({
   labelledBy,
   describedBy,
+  role = "alertdialog",
   onDismiss,
   children,
 }: ModalDialogProps) {
@@ -82,7 +84,7 @@ export function ModalDialog({
       <div
         ref={dialogRef}
         className="confirm-dialog"
-        role="alertdialog"
+        role={role}
         aria-modal="true"
         aria-labelledby={labelledBy}
         aria-describedby={describedBy}
