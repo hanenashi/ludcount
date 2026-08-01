@@ -41,6 +41,19 @@ test("uses a compact amount number pad on touch devices", async ({
       name: "Číselná klávesnice pro částku",
     });
     await expect(pad).toBeVisible();
+    await expect
+      .poll(async () => {
+        const currentPadBounds = await pad.boundingBox();
+        const currentNavigationBounds = await page
+          .locator(".mobile-navigation")
+          .boundingBox();
+        return (
+          (currentPadBounds?.y ?? 0) +
+          (currentPadBounds?.height ?? 0) -
+          (currentNavigationBounds?.y ?? 0)
+        );
+      })
+      .toBeLessThanOrEqual(0);
     const bounds = await pad.boundingBox();
     expect(bounds).not.toBeNull();
     expect(bounds?.width).toBeLessThanOrEqual(270);

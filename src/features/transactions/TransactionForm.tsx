@@ -93,7 +93,7 @@ export function TransactionForm({
 
   useEffect(() => {
     if (!numberPadOpen) return;
-    const frame = window.requestAnimationFrame(() => {
+    const keepPadAboveNavigation = () => {
       const pad = document.getElementById("transaction-amount-pad");
       const mobileNavigation = document.querySelector(".mobile-navigation");
       if (!pad) return;
@@ -103,7 +103,9 @@ export function TransactionForm({
         : window.innerHeight;
       const overlap = padBottom - availableBottom + 8;
       if (overlap > 0) window.scrollBy({ top: overlap, behavior: "auto" });
-    });
+    };
+    const frame = window.requestAnimationFrame(keepPadAboveNavigation);
+    const layoutCheck = window.setTimeout(keepPadAboveNavigation, 150);
     const closeOutside = (event: PointerEvent) => {
       if (!amountFieldRef.current?.contains(event.target as Node)) {
         setNumberPadOpen(false);
@@ -112,6 +114,7 @@ export function TransactionForm({
     document.addEventListener("pointerdown", closeOutside);
     return () => {
       window.cancelAnimationFrame(frame);
+      window.clearTimeout(layoutCheck);
       document.removeEventListener("pointerdown", closeOutside);
     };
   }, [numberPadOpen]);
