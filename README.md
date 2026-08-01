@@ -326,7 +326,7 @@ Deferred:
 
 The invitation-only production release is live. The current Hosting build was
 deployed on 2026-08-01 from application commit
-`125e8417aa1183ac63854e207e80b42ba26632b0`. End-user account creation is
+`ce40e9723e791d678b5216f2846d5f6c8b2b9525`. End-user account creation is
 disabled in Firebase Authentication.
 
 - Hosting: `https://ludcount-hanenashi.web.app`

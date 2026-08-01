@@ -13,10 +13,8 @@ tested Hosting releases.
 - Primary URL: <https://ludcount-hanenashi.web.app/>
 - Alternate URL: <https://ludcount-hanenashi.firebaseapp.com/>
 - Firebase project: `ludcount-hanenashi`
-- Current deployed application commit: `125e8417aa1183ac63854e207e80b42ba26632b0`
+- Current deployed application commit: `ce40e9723e791d678b5216f2846d5f6c8b2b9525`
 - Current repository HEAD: [`main`](https://github.com/hanenashi/ludcount/commits/main)
-- Repository baseline before the current focus/documentation task:
-  `c18b54d52ac59ef731e66b996c7c6a4ba14c3e98`
 
 The live `main` link is the source of truth for repository HEAD because a Git
 commit cannot embed its own final SHA. Application and later documentation-only
@@ -83,7 +81,7 @@ households/{householdId}/categories/{categoryId}
 
 ## Verification
 
-Current expected full-suite counts before the present focused visual fix:
+Current verified full-suite counts:
 
 - unit tests: 69 passing
 - Firestore rules tests: 38 passing against isolated local Firestore
@@ -120,13 +118,11 @@ starts Vite but expects the Authentication and Firestore emulators from
 
 ## Exact next recommended work
 
-1. Complete the focused amount-control divider fix and archive split described
-   by the current task, then record its deployed application SHA.
-2. Decide separately whether to remove the three empty smoke-test users and
+1. Decide separately whether to remove the three empty smoke-test users and
    workspaces; inspect exact targets before any destructive action.
-3. If additional category work is desired, scope category reordering and
+2. If additional category work is desired, scope category reordering and
    member permissions together with rules and emulator tests.
-4. Roll out App Check only through the documented verify-before-enforce order
+3. Roll out App Check only through the documented verify-before-enforce order
    and explicit authorization.
 
 ## Documentation

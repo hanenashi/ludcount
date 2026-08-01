@@ -4,6 +4,36 @@ This archive preserves verified deployment and implementation history in
 newest-first order. For the concise current project state, see
 [`../../handoff.md`](../../handoff.md).
 
+## 2026-08-01 — Combined amount focus and handoff archive
+
+This Hosting-only release was deployed from application commit
+`ce40e9723e791d678b5216f2846d5f6c8b2b9525`.
+
+- Removed the accidental navy divider inside the focused amount control. The
+  global inner-input focus outline had been clipped by the segmented wrapper;
+  focus styling now belongs to the complete `.money-input` control.
+- Preserved a visible red wrapper focus indicator, the intentional currency to
+  keypad separator, validation styling, desktop editing and paste, and the
+  existing touch amount-pad behavior.
+- Added computed-style and geometry assertions for focused, unfocused,
+  read-only, invalid, Expense, Income, Czech, English, Japanese, demo, and
+  authenticated-emulator paths.
+- Replaced the chronological root handoff with a concise current-state handoff
+  and moved the original material into this newest-first archive without
+  discarding security or deployment history.
+- Local verification passed formatting, lint, TypeScript, 69 unit tests, 38
+  isolated Firestore rules tests, 32 Playwright tests across four Chromium
+  viewports, and the production build. The existing Firebase vendor chunk-size
+  advisory remains.
+- Live checks on both default Hosting domains returned HTTP 200. Desktop and
+  390px demo checks showed no internal divider, overflow, navigation overlap,
+  console errors, or demo Firebase requests.
+- Only Hosting was deployed. Firestore rules, indexes, Authentication, App
+  Check enforcement, and all other Firebase services were unchanged.
+
+A later documentation-only commit synchronized the deployed SHA and release
+notes; it changed no application build.
+
 ## 2026-08-01 — Compact touch amount pad
 
 The current work replaces native touch-keyboard amount entry with a compact
