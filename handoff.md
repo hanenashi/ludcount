@@ -1,5 +1,30 @@
 # Ludcount Handoff
 
+## Category pie charts
+
+The current Graphs work adds separate income and expense category pies for the
+shared Month/Year/From–To period. Each chart has an exact localized amount and
+percentage legend. Categories below 5% are combined into a localized Other
+slice; overflow is also grouped so a pie never exceeds six slices.
+
+The aggregation is entirely client-side and resolves current built-in/custom
+category labels with stored snapshots as a fallback. No Firestore schema,
+rules, index, query, or stored document changes are required.
+
+Local verification before release:
+
+- formatting, lint, and TypeScript: passing
+- unit tests: 66 passing
+- Firestore rules tests: 38 passing against isolated local Firestore
+- Playwright: 28 passing across desktop, standard mobile, 320px mobile, and
+  mobile landscape Chromium
+- production build: passing (with the existing Firebase vendor chunk-size
+  advisory)
+- local demo category-pie checks: localized grouping, empty states, exact
+  legends, zero Firebase requests, no console errors, and no page overflow
+
+This work has not yet been released. It changes only the Hosting application.
+
 ## Shared periods and graphs
 
 This Hosting-only release was deployed on 2026-08-01 from application commit

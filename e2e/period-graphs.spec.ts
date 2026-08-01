@@ -33,6 +33,8 @@ test("shares month, year, and custom periods with an accessible graph", async ({
         "firestore.googleapis.com",
         "identitytoolkit.googleapis.com",
         "securetoken.googleapis.com",
+        "firebaseappcheck.googleapis.com",
+        "firebaseinstallations.googleapis.com",
       ].includes(host)
     ) {
       firebaseRequests.push(request.url());
@@ -47,6 +49,23 @@ test("shares month, year, and custom periods with an accessible graph", async ({
     page.getByRole("heading", { name: "Příjmy a výdaje" }),
   ).toBeVisible();
   await expect(page.locator(".chart-bucket")).toHaveCount(6);
+  await expect(
+    page.getByRole("heading", { name: "Kategorie", exact: true }),
+  ).toBeVisible();
+  await expect(page.locator(".category-pie")).toHaveCount(2);
+  const incomePie = page
+    .locator(".category-pie-card")
+    .filter({ hasText: "Příjmy podle kategorií" });
+  const expensePie = page
+    .locator(".category-pie-card")
+    .filter({ hasText: "Výdaje podle kategorií" });
+  await expect(incomePie.locator(".category-pie-legend li")).toHaveCount(1);
+  await expect(expensePie.locator(".category-pie-legend li")).toHaveCount(4);
+  await expect(expensePie.getByText("Ostatní", { exact: true })).toBeVisible();
+  await page.screenshot({
+    path: `/tmp/ludcount-period-graphs-${testInfo.project.name}.png`,
+    fullPage: true,
+  });
 
   await openPeriodDialog(page);
   await page.getByRole("button", { name: "Rok", exact: true }).click();
@@ -85,6 +104,12 @@ test("shares month, year, and custom periods with an accessible graph", async ({
   await expect(
     page.getByText("Pro toto období nejsou k dispozici data pro graf."),
   ).toBeVisible();
+  await expect(
+    page.getByText("V tomto období nejsou žádné příjmy."),
+  ).toBeVisible();
+  await expect(
+    page.getByText("V tomto období nejsou žádné výdaje."),
+  ).toBeVisible();
 
   await openPeriodDialog(page);
   await page.keyboard.press("Escape");
@@ -96,8 +121,4 @@ test("shares month, year, and custom periods with an accessible graph", async ({
   ).toBe(true);
   expect(firebaseRequests).toEqual([]);
   expect(consoleErrors).toEqual([]);
-  await page.screenshot({
-    path: `/tmp/ludcount-period-graphs-${testInfo.project.name}.png`,
-    fullPage: false,
-  });
 });

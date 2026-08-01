@@ -105,8 +105,8 @@ Only after explicit authorization for a future release:
    - as a non-owner member, verify custom categories are readable but their
      management controls are unavailable
    - switch Overview, Transactions, and Graphs between month, year, and a custom
-     From–To range; verify the selected period is shared and graph buckets match
-     the visible transactions
+     From–To range; verify the selected period is shared and the interval bars
+     and income/expense category pies match the visible transactions
    - verify a separate non-member account cannot read the household
    - confirm no raw Firebase error appears in the UI or browser console
    - confirm direct navigation to SPA routes resolves through Hosting rewrites

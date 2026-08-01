@@ -238,8 +238,12 @@ not be run as part of ordinary local development.
   next controls move by one month, one year, or one custom-range duration.
 - The graph displays paired income and expense bars. Month and short custom
   ranges use daily buckets; years and longer custom ranges use monthly buckets.
+- Separate income and expense pie charts break the selected period down by
+  category. Slices below 5% are combined into a localized Other segment, and
+  crowded charts show at most six slices.
 - A visible interval-value list accompanies the chart for precise values and
-  assistive-technology access. Empty periods have a localized state.
+  each pie has an exact amount-and-percentage legend for assistive-technology
+  access. Empty periods have localized states.
 - All aggregation remains client-side over the household's synchronized
   transactions; no Firestore query, schema, index, or rule change is required.
 

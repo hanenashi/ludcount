@@ -2,19 +2,37 @@ import { useMemo } from "react";
 import { useAppRuntime } from "../../app/AppRuntime";
 import { useI18n } from "../../i18n";
 import { asMoneyAmount, formatMoney } from "../../lib/money";
+import { useCategories } from "../categories/CategoryProvider";
 import { PeriodSelector } from "../period/PeriodSelector";
 import { usePeriod } from "../period/PeriodProvider";
 import { useTransactions } from "../transactions/TransactionProvider";
-import { createGraphBuckets } from "./graphData";
+import { CategoryPieChart } from "./CategoryPieChart";
+import { createCategoryBreakdowns, createGraphBuckets } from "./graphData";
 
 export function GraphsPage() {
   const { locale, t } = useI18n();
   const { displayCurrency } = useAppRuntime();
+  const { categoryFor, labelFor } = useCategories();
   const { transactions } = useTransactions();
   const { period, setPeriod } = usePeriod();
   const buckets = useMemo(
     () => createGraphBuckets(transactions, period, locale),
     [locale, period, transactions],
+  );
+  const categoryBreakdowns = useMemo(
+    () =>
+      createCategoryBreakdowns(
+        transactions,
+        period,
+        (transaction) => {
+          const category = categoryFor(transaction.categoryId);
+          return category
+            ? labelFor(category)
+            : transaction.categoryLabelSnapshot;
+        },
+        t("graph.categoryOther"),
+      ),
+    [categoryFor, labelFor, period, t, transactions],
   );
   const maximum = Math.max(
     1,
@@ -97,6 +115,36 @@ export function GraphsPage() {
             </div>
           </>
         )}
+      </section>
+
+      <section
+        className="content-section category-graphs-section"
+        aria-labelledby="category-graphs-heading"
+      >
+        <div className="section-heading">
+          <div>
+            <h2 id="category-graphs-heading">{t("graph.categoryHeading")}</h2>
+            <p>{t("graph.categoryDescription")}</p>
+          </div>
+        </div>
+        <div className="category-pie-grid">
+          <CategoryPieChart
+            breakdown={categoryBreakdowns.income}
+            heading={t("graph.incomeByCategory")}
+            tone="income"
+            emptyMessage={t("graph.noIncome")}
+            locale={locale}
+            formatAmount={money}
+          />
+          <CategoryPieChart
+            breakdown={categoryBreakdowns.expense}
+            heading={t("graph.expenseByCategory")}
+            tone="expense"
+            emptyMessage={t("graph.noExpenses")}
+            locale={locale}
+            formatAmount={money}
+          />
+        </div>
       </section>
     </div>
   );
