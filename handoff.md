@@ -2,8 +2,10 @@
 
 ## Japanese and custom-category release
 
-The next release adds complete Japanese UI localization and persistent,
-household-scoped custom categories without changing the Czech-first default.
+This release was deployed on 2026-08-01 from application commit
+`4274715281906312ca5f02af4db16e8dc128ae0a`. It adds complete Japanese UI
+localization and persistent, household-scoped custom categories without
+changing the Czech-first default.
 
 - Locale persistence and profile rules now accept `cs`, `en`, and `ja`.
 - Built-in categories remain code-defined and translate with the UI locale.
@@ -33,8 +35,17 @@ Local verification for this release:
 - `npm run build`: passing (with the existing Firebase vendor chunk-size
   advisory)
 
-Production deployment details will be recorded here after the authorized rules
-and Hosting deployment completes. App Check enforcement remains off.
+- The tested `firestore.rules` compiled and was released to `cloud.firestore`.
+- No Firestore index changed or was deployed.
+- Hosting released successfully at `https://ludcount-hanenashi.web.app` and
+  `https://ludcount-hanenashi.firebaseapp.com`.
+- A live 390px demo smoke test passed Japanese selection, local custom-category
+  creation and reload reset, zero Firebase Auth/Firestore/token/App Check/
+  Installations requests, and horizontal-overflow verification.
+- Both default Hosting domains returned HTTP 200.
+- The smoke test intentionally did not create production household/category
+  data. Existing invitation-only enrollment remains enabled and App Check
+  enforcement remains off.
 
 ## Post-release invitation and public-demo hardening
 
