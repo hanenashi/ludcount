@@ -251,8 +251,20 @@ The converter preserves the source row ID, local date and time, income/expense
 type, category, note, payment ID, and shop ID. Numeric values are converted to
 integer minor units without currency conversion. The `currency` column is
 `CZK`, matching Ludcount's current storage schema; a saved `¥` display
-preference remains presentation-only. The browser import workflow is separate
-follow-up work and must preview validation results before any Firestore writes.
+preference remains presentation-only.
+
+Signed-in household owners can import the canonical output from Settings. The
+browser validates and previews the file locally before showing an explicit
+confirmation. Imported categories and transactions use deterministic document
+IDs, and each write chunk checks Firestore for existing documents, so selecting
+the same file again safely skips previously imported rows. Categories are
+created before their transactions. The importer accepts at most 5 MiB and
+10,000 rows per file; larger migrations can be split without changing source
+IDs. Import is unavailable in the backend-free demo and to non-owner members.
+
+The source time is retained in the CSV for audit purposes but is not part of
+Ludcount's transaction schema. Ludcount preserves the source local calendar
+date and records the actual import time in Firestore `createdAt`/`updatedAt`.
 
 ## Periods and graphs
 
@@ -323,6 +335,7 @@ Included:
 - shared month, year, and custom-range selection with income/expense graphs
 - explicit-save transaction duplication with today's local date
 - Czech/English/Japanese client-side CSV export of the filtered result set
+- preview-first, idempotent owner import of canonical Okanereco CSV files
 - keyboard navigation, dialog focus management, accessible validation, and
   live status announcements
 - narrow-mobile and landscape responsive polish

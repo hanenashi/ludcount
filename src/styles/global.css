@@ -1392,6 +1392,76 @@ summary:focus-visible {
   font-size: 13px;
 }
 
+.import-settings-section {
+  align-items: start;
+}
+
+.import-file-button {
+  position: relative;
+  cursor: pointer;
+}
+
+.import-detail {
+  min-width: 0;
+  grid-column: 1 / -1;
+}
+
+.import-filename {
+  overflow-wrap: anywhere;
+  font-weight: 700;
+}
+
+.import-preview {
+  padding: 20px;
+  margin-top: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--soft);
+}
+
+.import-preview h3 {
+  margin: 0 0 16px;
+  color: var(--ink);
+  font-size: 16px;
+}
+
+.import-summary {
+  display: grid;
+  margin: 0;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.import-summary div {
+  min-width: 0;
+}
+
+.import-summary dt {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.import-summary dd {
+  margin: 4px 0 0;
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.import-preview .import-advisory {
+  margin-top: 18px;
+  font-size: 13px;
+}
+
+.import-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
 .page-description {
   max-width: 720px;
   margin: 10px 0 32px;
@@ -1969,6 +2039,14 @@ summary:focus-visible {
 
   .language-button {
     flex: 1;
+  }
+
+  .import-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .import-actions .button {
+    width: 100%;
   }
 }
 

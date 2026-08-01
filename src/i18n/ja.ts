@@ -198,6 +198,35 @@ export const ja: Translations = {
   "settings.categoriesDescription":
     "世帯で共有するカテゴリを作成し、使わないものをアーカイブできます。",
   "settings.manageCategories": "カテゴリを管理",
+  "import.heading": "Okanereco CSVをインポート",
+  "import.description":
+    "世帯の所有者は、Ludcount変換ツールで作成した標準CSVを確認してインポートできます。確認するまで保存されません。",
+  "import.chooseFile": "CSVファイルを選択",
+  "import.reading": "ファイルを読み込んで検証しています…",
+  "import.previewHeading": "インポートのプレビュー",
+  "import.rows": "取引",
+  "import.income": "収入",
+  "import.expenses": "支出",
+  "import.period": "期間",
+  "import.newCategories": "新しいカテゴリ",
+  "import.alreadyImported": "インポート済み",
+  "import.dateAdvisory":
+    "現地の暦日を保持します。元の時刻はCSVに残り、Firestoreにはインポート時刻が記録されます。",
+  "import.confirm": "取引をインポート",
+  "import.clear": "別のファイルを選択",
+  "import.importing": "インポート中…",
+  "import.progress": "インポートの進行状況：",
+  "import.complete": "インポートした取引：",
+  "import.skipped": "スキップ：",
+  "import.row": "行",
+  "import.error.columns":
+    "Okanerecoのインポートに必要な列がファイルにありません。",
+  "import.error.tooMany": "安全にインポートするにはファイルが大きすぎます。",
+  "import.error.invalid": "CSVに無効または重複した行があります。",
+  "import.error.categoryConflict":
+    "インポートするカテゴリが、既存のアーカイブ済みカテゴリまたは別の種類と競合しています。インポート前に復元または解決してください。",
+  "import.error.write":
+    "インポートを保存できませんでした。もう一度お試しください。",
   "category.manageHeading": "カテゴリ管理",
   "category.manageDescription":
     "カスタム名は世帯で共有されます。アーカイブ後も過去の取引には表示されます。",

@@ -204,6 +204,34 @@ export const en = {
   "settings.categoriesDescription":
     "Create reusable household categories and archive ones you no longer use.",
   "settings.manageCategories": "Manage categories",
+  "import.heading": "Import Okanereco CSV",
+  "import.description":
+    "Household owners can preview and import the canonical CSV produced by the Ludcount conversion tool. Nothing is saved before confirmation.",
+  "import.chooseFile": "Choose CSV file",
+  "import.reading": "Reading and validating the file…",
+  "import.previewHeading": "Import preview",
+  "import.rows": "Transactions",
+  "import.income": "Income entries",
+  "import.expenses": "Expense entries",
+  "import.period": "Date range",
+  "import.newCategories": "New categories",
+  "import.alreadyImported": "Already imported",
+  "import.dateAdvisory":
+    "Local calendar dates are preserved. Source times remain in the CSV, while Firestore records the import time.",
+  "import.confirm": "Import transactions",
+  "import.clear": "Choose another file",
+  "import.importing": "Importing…",
+  "import.progress": "Import progress:",
+  "import.complete": "Imported transactions:",
+  "import.skipped": "Skipped:",
+  "import.row": "Row",
+  "import.error.columns":
+    "This file does not contain all required Okanereco import columns.",
+  "import.error.tooMany": "The file is too large to import safely.",
+  "import.error.invalid": "The CSV contains an invalid or duplicate row.",
+  "import.error.categoryConflict":
+    "An imported category conflicts with an existing archived or differently typed category. Restore or resolve it before importing.",
+  "import.error.write": "The import could not be saved. Please try again.",
   "category.manageHeading": "Manage categories",
   "category.manageDescription":
     "Custom names are shared by the household. Archived categories remain on historical transactions.",

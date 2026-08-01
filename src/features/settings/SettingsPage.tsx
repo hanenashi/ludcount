@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAppRuntime } from "../../app/AppRuntime";
 import { useI18n, type Locale } from "../../i18n";
+import { DataImportSection } from "../import/DataImportSection";
 import {
   defaultDisplayCurrency,
   displayCurrencySymbol,
@@ -120,6 +121,8 @@ export function SettingsPage() {
           </p>
         ) : null}
       </section>
+
+      <DataImportSection />
 
       <section className="settings-section">
         <div>

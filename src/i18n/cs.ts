@@ -207,6 +207,34 @@ export const cs = {
   "settings.categoriesDescription":
     "Vytvářejte vlastní kategorie domácnosti a archivujte ty, které už nepoužíváte.",
   "settings.manageCategories": "Spravovat kategorie",
+  "import.heading": "Import CSV z Okanereco",
+  "import.description":
+    "Vlastník domácnosti může zkontrolovat a importovat standardní CSV vytvořené převodním nástrojem Ludcount. Před potvrzením se nic neuloží.",
+  "import.chooseFile": "Vybrat soubor CSV",
+  "import.reading": "Načítám a kontroluji soubor…",
+  "import.previewHeading": "Náhled importu",
+  "import.rows": "Transakce",
+  "import.income": "Příjmy",
+  "import.expenses": "Výdaje",
+  "import.period": "Období",
+  "import.newCategories": "Nové kategorie",
+  "import.alreadyImported": "Již importováno",
+  "import.dateAdvisory":
+    "Místní kalendářní data zůstanou zachována. Zdrojové časy zůstávají v CSV, Firestore zaznamená čas importu.",
+  "import.confirm": "Importovat transakce",
+  "import.clear": "Vybrat jiný soubor",
+  "import.importing": "Importuji…",
+  "import.progress": "Průběh importu:",
+  "import.complete": "Importované transakce:",
+  "import.skipped": "Přeskočeno:",
+  "import.row": "Řádek",
+  "import.error.columns":
+    "Soubor neobsahuje všechny požadované sloupce pro import z Okanereco.",
+  "import.error.tooMany": "Soubor je příliš velký pro bezpečný import.",
+  "import.error.invalid": "CSV obsahuje neplatný nebo duplicitní řádek.",
+  "import.error.categoryConflict":
+    "Importovaná kategorie je v konfliktu s existující archivovanou kategorií nebo jiným typem. Před importem ji obnovte nebo upravte.",
+  "import.error.write": "Import se nepodařilo uložit. Zkuste to prosím znovu.",
   "category.manageHeading": "Správa kategorií",
   "category.manageDescription":
     "Vlastní názvy jsou sdílené v domácnosti. Archivované kategorie zůstávají u starších záznamů.",

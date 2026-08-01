@@ -78,16 +78,18 @@ households/{householdId}/categories/{categoryId}
 - localized client-side CSV export with UTF-8 BOM and semicolon delimiters
 - compact mobile amount pad; desktop retains hardware-keyboard entry and paste
 - read-only Okanereco SQLite-to-Ludcount CSV conversion with review reporting
+- owner-only, preview-first Okanereco CSV import with deterministic IDs and
+  idempotent chunked Firestore writes
 - responsive and accessibility coverage across desktop and mobile layouts
 
 ## Verification
 
 Current verified full-suite counts:
 
-- unit tests: 69 passing
+- unit tests: 79 passing
 - migration-tool tests: 2 passing with synthetic SQLite data
 - Firestore rules tests: 38 passing against isolated local Firestore
-- Playwright tests: 32 passing across desktop, 390px mobile, 320px mobile, and
+- Playwright tests: 36 passing across desktop, 390px mobile, 320px mobile, and
   mobile landscape Chromium
 - production build: passing
 
@@ -120,9 +122,9 @@ starts Vite but expects the Authentication and Firestore emulators from
 
 ## Exact next recommended work
 
-1. Add a preview-first, idempotent CSV import workflow for the canonical output
-   of `tools/okane_reco_to_ludcount_csv.py`, including deterministic category
-   and transaction IDs, chunked writes, anomaly reporting, and emulator tests.
+1. Use the owner-only Settings importer with the generated canonical CSV;
+   review its count/date/category preview before confirming the production
+   migration, then retain the source and review CSV files as the audit record.
 2. Decide separately whether to remove the three empty smoke-test users and
    workspaces; inspect exact targets before any destructive action.
 3. If additional category work is desired, scope category reordering and

@@ -7,9 +7,12 @@ import {
   type ReactNode,
 } from "react";
 import type { DataOperationError } from "../firebase/errors";
+import { createFirestoreImportRepository } from "../firebase/importRepository";
 import { useAuth } from "../features/auth/AuthProvider";
 import { useHousehold } from "../features/household/HouseholdProvider";
+import type { DataImportRepository } from "../features/import/repository";
 import { useI18n, type Locale } from "../i18n";
+import { getFirebaseServices } from "../lib/firebase";
 import {
   displayCurrencySymbol,
   resolveDisplayCurrency,
@@ -29,6 +32,7 @@ interface AppRuntimeContextValue {
   currencyPreference: DisplayCurrencyPreference;
   displayCurrency: DisplayCurrency;
   currencySymbol: string;
+  importRepository: DataImportRepository | null;
   saveLocale: (locale: Locale) => Promise<void>;
   saveCurrencyPreference: (
     preference: DisplayCurrencyPreference,
@@ -51,6 +55,19 @@ export function ProductionRuntimeProvider({
   const currencyPreference =
     household.workspace?.profile.displayCurrency ?? "auto";
   const displayCurrency = resolveDisplayCurrency(locale, currencyPreference);
+  const importRepository = useMemo(
+    () =>
+      user &&
+      household.workspace?.household.ownerId === user.uid &&
+      household.workspace.household.id
+        ? createFirestoreImportRepository(
+            getFirebaseServices().firestore,
+            household.workspace.household.id,
+            user.uid,
+          )
+        : null,
+    [household.workspace, user],
+  );
   const value = useMemo<AppRuntimeContextValue>(
     () => ({
       mode: "production",
@@ -62,13 +79,21 @@ export function ProductionRuntimeProvider({
       currencyPreference,
       displayCurrency,
       currencySymbol: displayCurrencySymbol(displayCurrency),
+      importRepository,
       saveLocale: household.saveLocale,
       saveCurrencyPreference: household.saveDisplayCurrency,
       exit: signOutUser,
       retry: household.retry,
       resetDemo: null,
     }),
-    [currencyPreference, displayCurrency, household, signOutUser, user],
+    [
+      currencyPreference,
+      displayCurrency,
+      household,
+      importRepository,
+      signOutUser,
+      user,
+    ],
   );
 
   return (
@@ -106,6 +131,7 @@ export function DemoRuntimeProvider({
       currencyPreference,
       displayCurrency,
       currencySymbol: displayCurrencySymbol(displayCurrency),
+      importRepository: null,
       saveLocale: async () => undefined,
       saveCurrencyPreference: async (preference) => {
         setCurrencyPreference(preference);
