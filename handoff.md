@@ -2,6 +2,9 @@
 
 ## Shared periods and graphs
 
+This Hosting-only release was deployed on 2026-08-01 from application commit
+`c172c81011c441e0308af6f3b7f42dae7ba32a09`.
+
 The current work adds a Graphs route and a shared period selector to Overview,
 Transactions, and Graphs. Clicking the displayed period opens an accessible
 dialog with Month, Year, and custom From–To modes. Previous/next controls move
@@ -24,8 +27,16 @@ Local verification before release:
 - production build: passing (with the existing Firebase vendor chunk-size
   advisory)
 
-This work changes no Firebase backend resource. Only Hosting needs to be
-released after the application commit is pushed.
+Release verification:
+
+- Hosting released successfully at `https://ludcount-hanenashi.web.app` and
+  `https://ludcount-hanenashi.firebaseapp.com`; both returned HTTP 200.
+- Live desktop and 390px demo checks covered current-month, year, and custom
+  From–To periods shared across Transactions and Graphs.
+- The live demo made zero Firebase Auth, Firestore, token, App Check, or
+  Installations requests and produced no console errors or page overflow.
+- Firestore rules, indexes, Authentication settings, and App Check enforcement
+  were unchanged.
 
 ## Display-symbol preference
 
