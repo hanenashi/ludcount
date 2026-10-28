@@ -6,14 +6,14 @@ Ludcount is a live, invitation-only household income and expense journal built
 with React, TypeScript, Vite, Firebase Authentication, Cloud Firestore, and
 Firebase Hosting. The UI defaults to Czech and also supports English and
 Japanese. Production is operational; development continues through focused,
-tested releases. The current application version is `0.2.0`.
+tested releases. The current application version is `0.2.1`.
 
 ## Production
 
 - Primary URL: <https://ludcount-hanenashi.web.app/>
 - Alternate URL: <https://ludcount-hanenashi.firebaseapp.com/>
 - Firebase project: `ludcount-hanenashi`
-- Current deployed application commit: `921fcb5e25125f9485a021f32346a58579f12082`
+- Current deployed application commit: `f1463b420c61ae62b0d884eb4a30cb7c5ee9258f`
 - Current repository HEAD: [`main`](https://github.com/hanenashi/ludcount/commits/main)
 
 The live `main` link is the source of truth for repository HEAD because a Git
@@ -71,7 +71,8 @@ households/{householdId}/categories/{categoryId}
 - backend-free fictional public demo with reset and exit actions
 - automatic personal household bootstrap for approved users
 - persistent income and expense create/edit/delete/duplicate workflows
-- built-in plus owner-managed custom and archived categories
+- built-in plus owner-managed custom and archived categories, with an
+  owner-controlled household preference to show only custom/imported choices
 - display-symbol preference (`Kč`, `$`, or `¥`) without currency conversion
 - shared month/year/custom From–To period selection
 - income/expense interval graphs and category pie charts with grouped Other
@@ -89,7 +90,7 @@ households/{householdId}/categories/{categoryId}
 
 Current verified full-suite counts:
 
-- unit tests: 84 passing
+- unit tests: 88 passing
 - migration-tool tests: 3 passing with legacy and Room SQLite schemas
 - Firestore rules tests: 39 passing against isolated local Firestore
 - Playwright tests: 36 passing across desktop, 390px mobile, 320px mobile, and
@@ -125,9 +126,9 @@ starts Vite but expects the Authentication and Firestore emulators from
 
 ## Exact next recommended work
 
-1. Use the owner-only Settings importer with the generated canonical CSV;
-   review its count/date/category preview before confirming the production
-   migration, then retain the source and review CSV files as the audit record.
+1. For households that use only imported/custom categories, select
+   **Custom/imported only** under Settings → Categories. The preference is
+   household-wide and does not rewrite old transactions.
 2. Decide separately whether to remove the three empty smoke-test users and
    workspaces; inspect exact targets before any destructive action.
 3. If additional category work is desired, scope category reordering and

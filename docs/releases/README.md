@@ -4,6 +4,30 @@ This archive preserves verified deployment and implementation history in
 newest-first order. For the concise current project state, see
 [`../../handoff.md`](../../handoff.md).
 
+## 2026-10-29 — Imported/custom-only category view and version 0.2.1
+
+This rules-and-Hosting release was deployed from application commit
+`f1463b420c61ae62b0d884eb4a30cb7c5ee9258f`.
+
+- Added an owner-controlled, household-wide Settings preference that hides
+  Ludcount's code-defined defaults from forms and filters while retaining all
+  imported/custom categories.
+- Kept hidden built-in categories resolvable for historical transactions. No
+  category or transaction document was deleted, rewritten, or migrated.
+- Defaulted legacy and newly created households to showing built-ins, so the
+  release did not change existing users until an owner selected
+  **Custom/imported only**.
+- Extended strict rules to allow only the household owner to save the boolean
+  preference; malformed values and member writes are denied.
+- Bumped the visible application version to `0.2.1` and added Czech, English,
+  and Japanese controls and error states.
+- Formatting, lint, TypeScript, 88 unit tests, 39 isolated Firestore rules
+  tests, 36 Playwright tests across four Chromium viewports, and the production
+  build passed. The existing Firebase bundle-size advisory remains.
+- Production rules compiled and were released before Hosting. Indexes,
+  Authentication, App Check enforcement, and other Firebase services were
+  unchanged. Both `/` and `/demo` returned HTTP 200 with the released asset.
+
 ## 2026-10-29 — Current Okanereco backup conversion
 
 This converter-and-documentation release was deployed from commit
