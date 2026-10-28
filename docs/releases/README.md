@@ -4,6 +4,25 @@ This archive preserves verified deployment and implementation history in
 newest-first order. For the concise current project state, see
 [`../../handoff.md`](../../handoff.md).
 
+## 2026-10-29 — Compact mobile chrome and version 0.2.3
+
+This Hosting-only release was deployed from application commit
+`d37bc48d360e95ef614985fbe201f8f8a4c1a6be`.
+
+- Reduced the portrait mobile header from 68px to 60px and bottom navigation
+  from 78px to 68px, reclaiming 18px of vertical content space.
+- Reduced short-landscape chrome to a 52px header and 58px navigation bar.
+- Adjusted the brand mark, avatar, floating Add button, page padding, sticky
+  form actions, banners, and scroll-safe regions to match the new geometry.
+- Preserved readable Standard/Large/Extra large text and navigation touch
+  targets of at least 44px.
+- Formatting, lint, TypeScript, 88 unit tests, 39 isolated Firestore rules
+  tests, 36 Playwright tests across four Chromium viewports, and the production
+  build passed. Computed geometry tests cover both portrait and landscape.
+- Only Hosting changed. Firestore rules, indexes, Authentication, App Check
+  enforcement, and other Firebase services were unchanged. Both `/` and
+  `/demo` returned HTTP 200 with the released assets.
+
 ## 2026-10-29 — Mobile readability and version 0.2.2
 
 This rules-and-Hosting release was deployed from application commit

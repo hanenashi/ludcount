@@ -6,14 +6,14 @@ Ludcount is a live, invitation-only household income and expense journal built
 with React, TypeScript, Vite, Firebase Authentication, Cloud Firestore, and
 Firebase Hosting. The UI defaults to Czech and also supports English and
 Japanese. Production is operational; development continues through focused,
-tested releases. The current application version is `0.2.2`.
+tested releases. The current application version is `0.2.3`.
 
 ## Production
 
 - Primary URL: <https://ludcount-hanenashi.web.app/>
 - Alternate URL: <https://ludcount-hanenashi.firebaseapp.com/>
 - Firebase project: `ludcount-hanenashi`
-- Current deployed application commit: `d1f5d4696d585a2bee49ab241b939ce4c0bff7f8`
+- Current deployed application commit: `d37bc48d360e95ef614985fbe201f8f8a4c1a6be`
 - Current repository HEAD: [`main`](https://github.com/hanenashi/ludcount/commits/main)
 
 The live `main` link is the source of truth for repository HEAD because a Git
@@ -76,6 +76,7 @@ households/{householdId}/categories/{categoryId}
 - display-symbol preference (`Kč`, `$`, or `¥`) without currency conversion
 - persistent per-user Standard, Large, and Extra large text sizing, with a
   modest mobile baseline increase and smaller mobile icon artwork
+- compact mobile header and bottom navigation with scroll-safe fixed chrome
 - shared month/year/custom From–To period selection
 - income/expense interval graphs and category pie charts with grouped Other
 - combined transaction filters and case-insensitive note search
