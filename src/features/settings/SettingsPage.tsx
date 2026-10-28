@@ -10,6 +10,7 @@ import {
   displayCurrencySymbol,
   type DisplayCurrencyPreference,
 } from "../../lib/money";
+import type { TextSizePreference } from "../../lib/textSize";
 
 export function SettingsPage() {
   const { locale, setLocale, t } = useI18n();
@@ -21,8 +22,10 @@ export function SettingsPage() {
   const [savingCurrency, setSavingCurrency] =
     useState<DisplayCurrencyPreference | null>(null);
   const [savingBuiltInCategories, setSavingBuiltInCategories] = useState(false);
+  const [savingTextSize, setSavingTextSize] =
+    useState<TextSizePreference | null>(null);
   const [preferenceFailure, setPreferenceFailure] = useState<
-    "locale" | "currency" | "categories" | null
+    "locale" | "currency" | "categories" | "textSize" | null
   >(null);
   const [signingOut, setSigningOut] = useState(false);
   const [signOutError, setSignOutError] = useState(false);
@@ -70,6 +73,19 @@ export function SettingsPage() {
       setPreferenceFailure("categories");
     } finally {
       setSavingBuiltInCategories(false);
+    }
+  };
+
+  const changeTextSize = async (textSize: TextSizePreference) => {
+    if (textSize === runtime.textSize || savingTextSize) return;
+    setSavingTextSize(textSize);
+    setPreferenceFailure(null);
+    try {
+      await runtime.saveTextSize(textSize);
+    } catch {
+      setPreferenceFailure("textSize");
+    } finally {
+      setSavingTextSize(null);
     }
   };
 
@@ -135,6 +151,51 @@ export function SettingsPage() {
         {savingLocale ? (
           <p className="sr-only" role="status" aria-live="polite">
             {t("settings.savingLanguage")}
+          </p>
+        ) : null}
+      </section>
+
+      <section className="settings-section">
+        <div>
+          <h2>{t("settings.textSize")}</h2>
+          <p>{t("settings.textSizeDescription")}</p>
+        </div>
+        <div
+          className="language-options text-size-options"
+          role="group"
+          aria-label={t("settings.textSize")}
+        >
+          {(
+            [
+              ["standard", t("settings.textSizeStandard")],
+              ["large", t("settings.textSizeLarge")],
+              ["extra-large", t("settings.textSizeExtraLarge")],
+            ] as const
+          ).map(([value, label]) => (
+            <button
+              className={
+                runtime.textSize === value
+                  ? "language-button language-button-active"
+                  : "language-button"
+              }
+              type="button"
+              key={value}
+              aria-pressed={runtime.textSize === value}
+              disabled={savingTextSize !== null}
+              onClick={() => void changeTextSize(value)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        {preferenceFailure === "textSize" ? (
+          <p className="settings-inline-error" role="alert">
+            {t("settings.textSizeSaveError")}
+          </p>
+        ) : null}
+        {savingTextSize ? (
+          <p className="sr-only" role="status" aria-live="polite">
+            {t("settings.savingTextSize")}
           </p>
         ) : null}
       </section>

@@ -9,6 +9,7 @@ import {
 } from "firebase/firestore";
 import type { Locale } from "../i18n";
 import type { DisplayCurrencyPreference } from "../lib/money";
+import type { TextSizePreference } from "../lib/textSize";
 import { householdConverter, userProfileConverter } from "./converters";
 import { assertOnline, DataOperationError, normalizeDataError } from "./errors";
 import type { UserWorkspace } from "./model";
@@ -26,6 +27,7 @@ export interface HouseholdRepository {
     userId: string,
     preference: DisplayCurrencyPreference,
   ): Promise<void>;
+  updateTextSize(userId: string, textSize: TextSizePreference): Promise<void>;
   updateShowBuiltInCategories(
     householdId: string,
     showBuiltInCategories: boolean,
@@ -95,6 +97,7 @@ export function createFirestoreHouseholdRepository(
             email,
             locale: fallbackLocale,
             displayCurrency: "auto",
+            textSize: "standard",
             activeHouseholdId: householdReference.id,
             createdAt: now,
             updatedAt: now,
@@ -121,6 +124,7 @@ export function createFirestoreHouseholdRepository(
               email,
               locale: fallbackLocale,
               displayCurrency: "auto",
+              textSize: "standard",
               activeHouseholdId: householdReference.id,
               createdAt: timestamp,
               updatedAt: timestamp,
@@ -169,6 +173,18 @@ export function createFirestoreHouseholdRepository(
       try {
         await updateDoc(doc(firestore, "users", userId), {
           displayCurrency,
+          updatedAt: serverTimestamp(),
+        });
+      } catch (error) {
+        throw normalizeDataError(error, "write-failure");
+      }
+    },
+
+    async updateTextSize(userId, textSize) {
+      assertOnline();
+      try {
+        await updateDoc(doc(firestore, "users", userId), {
+          textSize,
           updatedAt: serverTimestamp(),
         });
       } catch (error) {

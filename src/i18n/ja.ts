@@ -189,6 +189,14 @@ export const ja: Translations = {
   "settings.dataDescription": "取引と設定はCloud Firestoreで同期されます。",
   "settings.languageSaveError": "言語設定をアカウントに保存できませんでした。",
   "settings.savingLanguage": "言語設定を保存中…",
+  "settings.textSize": "文字サイズ",
+  "settings.textSizeDescription":
+    "タッチ操作の大きさを保ったまま、アプリ全体の文字を大きくします。",
+  "settings.textSizeStandard": "標準",
+  "settings.textSizeLarge": "大",
+  "settings.textSizeExtraLarge": "特大",
+  "settings.textSizeSaveError": "文字サイズを保存できませんでした。",
+  "settings.savingTextSize": "文字サイズを保存しています。",
   "settings.signOutError":
     "ログアウトできませんでした。もう一度お試しください。",
   "settings.account": "アカウント",

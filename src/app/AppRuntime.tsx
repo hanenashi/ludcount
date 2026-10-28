@@ -19,6 +19,7 @@ import {
   type DisplayCurrency,
   type DisplayCurrencyPreference,
 } from "../lib/money";
+import type { TextSizePreference } from "../lib/textSize";
 
 export type ApplicationMode = "production" | "demo";
 
@@ -35,11 +36,13 @@ interface AppRuntimeContextValue {
   importRepository: DataImportRepository | null;
   canManageHouseholdData: boolean;
   showBuiltInCategories: boolean;
+  textSize: TextSizePreference;
   saveLocale: (locale: Locale) => Promise<void>;
   saveCurrencyPreference: (
     preference: DisplayCurrencyPreference,
   ) => Promise<void>;
   saveShowBuiltInCategories: (show: boolean) => Promise<void>;
+  saveTextSize: (textSize: TextSizePreference) => Promise<void>;
   exit: () => Promise<void>;
   retry: () => void;
   resetDemo: (() => void) | null;
@@ -86,9 +89,11 @@ export function ProductionRuntimeProvider({
       canManageHouseholdData: importRepository !== null,
       showBuiltInCategories:
         household.workspace?.household.showBuiltInCategories ?? true,
+      textSize: household.workspace?.profile.textSize ?? "standard",
       saveLocale: household.saveLocale,
       saveCurrencyPreference: household.saveDisplayCurrency,
       saveShowBuiltInCategories: household.saveShowBuiltInCategories,
+      saveTextSize: household.saveTextSize,
       exit: signOutUser,
       retry: household.retry,
       resetDemo: null,
@@ -122,9 +127,11 @@ export function DemoRuntimeProvider({
   const { locale } = useI18n();
   const [currencyPreference, setCurrencyPreference] =
     useState<DisplayCurrencyPreference>("auto");
+  const [textSize, setTextSize] = useState<TextSizePreference>("standard");
   const displayCurrency = resolveDisplayCurrency(locale, currencyPreference);
   const resetDemo = useCallback(() => {
     setCurrencyPreference("auto");
+    setTextSize("standard");
     onReset();
   }, [onReset]);
   const value = useMemo<AppRuntimeContextValue>(
@@ -141,16 +148,20 @@ export function DemoRuntimeProvider({
       importRepository: null,
       canManageHouseholdData: false,
       showBuiltInCategories: true,
+      textSize,
       saveLocale: async () => undefined,
       saveCurrencyPreference: async (preference) => {
         setCurrencyPreference(preference);
       },
       saveShowBuiltInCategories: async () => undefined,
+      saveTextSize: async (nextTextSize) => {
+        setTextSize(nextTextSize);
+      },
       exit: async () => undefined,
       retry: () => undefined,
       resetDemo,
     }),
-    [currencyPreference, displayCurrency, resetDemo, userLabel],
+    [currencyPreference, displayCurrency, resetDemo, textSize, userLabel],
   );
 
   return (

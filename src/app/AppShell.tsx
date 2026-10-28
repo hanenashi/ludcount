@@ -94,9 +94,9 @@ export function AppShell() {
 
   return (
     <div
-      className={
-        runtime.mode === "demo" ? "app-shell app-shell-demo" : "app-shell"
-      }
+      className={`app-shell app-shell-text-${runtime.textSize}${
+        runtime.mode === "demo" ? " app-shell-demo" : ""
+      }`}
     >
       <SkipLink targetId="main-content" />
       <RouteAccessibility />

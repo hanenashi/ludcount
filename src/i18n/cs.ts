@@ -199,6 +199,14 @@ export const cs = {
   "settings.languageSaveError":
     "Nastavení jazyka se nepodařilo uložit k vašemu účtu.",
   "settings.savingLanguage": "Ukládání nastavení jazyka…",
+  "settings.textSize": "Velikost textu",
+  "settings.textSizeDescription":
+    "Zvětší text v celé aplikaci bez zmenšení dotykových ovládacích prvků.",
+  "settings.textSizeStandard": "Běžný",
+  "settings.textSizeLarge": "Velký",
+  "settings.textSizeExtraLarge": "Největší",
+  "settings.textSizeSaveError": "Velikost textu se nepodařilo uložit.",
+  "settings.savingTextSize": "Ukládám velikost textu.",
   "settings.signOutError": "Odhlášení se nepodařilo. Zkuste to prosím znovu.",
   "settings.account": "Účet",
   "settings.signedInAs": "Přihlášený účet",

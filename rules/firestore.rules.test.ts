@@ -288,7 +288,7 @@ describe("authentication and user profiles", () => {
     await assertFails(getDoc(doc(firestore, "users", ownerId)));
   });
 
-  it("allows locale, display-symbol, and active household preference updates", async () => {
+  it("allows locale, display-symbol, text-size, and active household preference updates", async () => {
     await testEnvironment.withSecurityRulesDisabled(async (context) => {
       await setDoc(
         doc(
@@ -325,6 +325,14 @@ describe("authentication and user profiles", () => {
         }),
       );
     }
+    for (const textSize of ["standard", "large", "extra-large"]) {
+      await assertSucceeds(
+        updateDoc(doc(firestore, "users", memberId), {
+          textSize,
+          updatedAt: serverTimestamp(),
+        }),
+      );
+    }
   });
 
   it("denies invalid preferences and active non-member households", async () => {
@@ -339,6 +347,12 @@ describe("authentication and user profiles", () => {
     await assertFails(
       updateDoc(doc(firestore, "users", memberId), {
         displayCurrency: "EUR",
+        updatedAt: serverTimestamp(),
+      }),
+    );
+    await assertFails(
+      updateDoc(doc(firestore, "users", memberId), {
+        textSize: "huge",
         updatedAt: serverTimestamp(),
       }),
     );

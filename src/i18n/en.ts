@@ -196,6 +196,14 @@ export const en = {
   "settings.languageSaveError":
     "The language preference could not be saved to your account.",
   "settings.savingLanguage": "Saving language preference…",
+  "settings.textSize": "Text size",
+  "settings.textSizeDescription":
+    "Increase text throughout the app without shrinking touch controls.",
+  "settings.textSizeStandard": "Standard",
+  "settings.textSizeLarge": "Large",
+  "settings.textSizeExtraLarge": "Extra large",
+  "settings.textSizeSaveError": "The text size could not be saved.",
+  "settings.savingTextSize": "Saving text size.",
   "settings.signOutError": "Sign-out failed. Please try again.",
   "settings.account": "Account",
   "settings.signedInAs": "Signed in as",

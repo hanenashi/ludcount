@@ -9,6 +9,7 @@ import {
 import { isValidDateKey } from "../lib/dates";
 import { asMoneyAmount, MAX_AMOUNT_MINOR } from "../lib/money";
 import type { DisplayCurrencyPreference } from "../lib/money";
+import { isTextSizePreference } from "../lib/textSize";
 import type {
   CustomCategory,
   Transaction,
@@ -102,6 +103,14 @@ function readDisplayCurrency(
   return value;
 }
 
+function readTextSize(data: DocumentData, path: string) {
+  const value = data.textSize ?? "standard";
+  if (!isTextSizePreference(value)) {
+    invalidData(path, "textSize must be standard, large, or extra-large.");
+  }
+  return value;
+}
+
 function readTransactionType(
   data: DocumentData,
   path: string,
@@ -133,6 +142,7 @@ export const userProfileConverter: FirestoreDataConverter<UserProfile> = {
       email: profile.email,
       locale: profile.locale,
       displayCurrency: profile.displayCurrency,
+      textSize: profile.textSize,
       activeHouseholdId: profile.activeHouseholdId,
       createdAt: writeTimestamp(profile.createdAt, "createdAt"),
       updatedAt: writeTimestamp(profile.updatedAt, "updatedAt"),
@@ -146,6 +156,7 @@ export const userProfileConverter: FirestoreDataConverter<UserProfile> = {
       email: readString(data, "email", path, true),
       locale: readLocale(data, path),
       displayCurrency: readDisplayCurrency(data, path),
+      textSize: readTextSize(data, path),
       activeHouseholdId: readString(data, "activeHouseholdId", path),
       createdAt: readTimestamp(data, "createdAt", path),
       updatedAt: readTimestamp(data, "updatedAt", path),

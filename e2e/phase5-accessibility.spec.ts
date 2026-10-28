@@ -121,6 +121,47 @@ test("supports keyboard navigation, dialog focus, and narrow layouts", async ({
   );
   await expectNoHorizontalOverflow(page);
 
+  const textSample = page.locator(".settings-section p").first();
+  const standardFontSize = await textSample.evaluate((element) =>
+    Number.parseFloat(getComputedStyle(element).fontSize),
+  );
+  const extraLargeText = page.getByRole("button", { name: "Největší" });
+  await extraLargeText.focus();
+  await page.keyboard.press("Enter");
+  await expect(extraLargeText).toHaveAttribute("aria-pressed", "true");
+  const extraLargeFontSize = await textSample.evaluate((element) =>
+    Number.parseFloat(getComputedStyle(element).fontSize),
+  );
+  expect(extraLargeFontSize).toBeGreaterThanOrEqual(standardFontSize + 3);
+  await expect(page.locator(".app-shell")).toHaveClass(
+    /app-shell-text-extra-large/,
+  );
+  await expectNoHorizontalOverflow(page);
+
+  await page.reload();
+  await expect(extraLargeText).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator(".app-shell")).toHaveClass(
+    /app-shell-text-extra-large/,
+  );
+  await expectNoHorizontalOverflow(page);
+
+  if ((page.viewportSize()?.width ?? 1000) <= 920) {
+    const mobileSettingsLink = await visible(
+      page.getByRole("link", { name: "Nastavení" }),
+    );
+    const iconGeometry = await mobileSettingsLink.evaluate((element) => {
+      const icon = element.querySelector("svg");
+      const iconRect = icon?.getBoundingClientRect();
+      const targetRect = element.getBoundingClientRect();
+      return {
+        iconWidth: iconRect?.width ?? 0,
+        targetHeight: targetRect.height,
+      };
+    });
+    expect(iconGeometry.iconWidth).toBeLessThanOrEqual(20);
+    expect(iconGeometry.targetHeight).toBeGreaterThanOrEqual(44);
+  }
+
   const minimumTouchTarget = await page
     .getByRole("button", { name: "Angličtina" })
     .evaluate((element) => element.getBoundingClientRect().height);

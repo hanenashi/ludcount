@@ -17,6 +17,7 @@ import type { UserWorkspace } from "../../firebase/model";
 import { useI18n, type Locale } from "../../i18n";
 import { getFirebaseServices } from "../../lib/firebase";
 import type { DisplayCurrencyPreference } from "../../lib/money";
+import type { TextSizePreference } from "../../lib/textSize";
 import { useAuth } from "../auth/AuthProvider";
 
 type HouseholdStatus = "idle" | "loading" | "ready" | "error";
@@ -28,6 +29,7 @@ interface HouseholdContextValue {
   preferenceError: DataOperationError | null;
   saveLocale: (locale: Locale) => Promise<void>;
   saveDisplayCurrency: (preference: DisplayCurrencyPreference) => Promise<void>;
+  saveTextSize: (textSize: TextSizePreference) => Promise<void>;
   saveShowBuiltInCategories: (show: boolean) => Promise<void>;
   retry: () => void;
 }
@@ -139,6 +141,32 @@ export function HouseholdProvider({ children }: { children: ReactNode }) {
     [repository, user, workspace],
   );
 
+  const saveTextSize = useCallback(
+    async (textSize: TextSizePreference) => {
+      if (!user || !workspace) return;
+      setPreferenceError(null);
+      try {
+        await repository.updateTextSize(user.uid, textSize);
+        setWorkspace((current) =>
+          current
+            ? {
+                ...current,
+                profile: {
+                  ...current.profile,
+                  textSize,
+                  updatedAt: Date.now(),
+                },
+              }
+            : current,
+        );
+      } catch (saveError) {
+        setPreferenceError(saveError as DataOperationError);
+        throw saveError;
+      }
+    },
+    [repository, user, workspace],
+  );
+
   const saveShowBuiltInCategories = useCallback(
     async (showBuiltInCategories: boolean) => {
       if (!user || !workspace) return;
@@ -176,6 +204,7 @@ export function HouseholdProvider({ children }: { children: ReactNode }) {
       preferenceError: user ? preferenceError : null,
       saveLocale,
       saveDisplayCurrency,
+      saveTextSize,
       saveShowBuiltInCategories,
       retry: () => {
         setStatus("loading");
@@ -187,6 +216,7 @@ export function HouseholdProvider({ children }: { children: ReactNode }) {
       error,
       preferenceError,
       saveDisplayCurrency,
+      saveTextSize,
       saveShowBuiltInCategories,
       saveLocale,
       status,

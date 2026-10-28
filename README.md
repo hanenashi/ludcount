@@ -166,7 +166,7 @@ bootstrap and transaction writes satisfy the strict policy.
 The production rules enforce these boundaries:
 
 - users may read only their own profile and may update only `locale`,
-  `displayCurrency`, `activeHouseholdId`, and `updatedAt`
+  `displayCurrency`, `textSize`, `activeHouseholdId`, and `updatedAt`
 - profile identity fields and creation timestamps are immutable
 - only members may read a household, its memberships, and its transactions
 - a new personal household, owner membership, and profile must be created
@@ -323,6 +323,9 @@ members can still delete only transactions they created.
 
 ## Accessibility and responsive behavior
 
+- Settings offers persistent Standard, Large, and Extra large text choices per
+  account. Mobile layouts also receive a modest baseline text increase, while
+  icon artwork is smaller without reducing its touch target.
 - A skip link, route heading focus, visible high-contrast focus indicators, and
   localized names support keyboard and screen-reader navigation.
 - Loading, offline, timeout, permission, save, validation, result, error, and
@@ -372,6 +375,7 @@ Included:
 - Firebase email/password and Google authentication, password reset, and
   sign-out
 - Czech-first UI with persistent English and Japanese selection
+- persistent per-user text sizing with narrow-screen adaptations
 - responsive overview, transaction list, and settings screens
 - transaction creation, editing, deletion, totals, built-in localized
   categories, owner-managed custom categories, and an owner-controlled
