@@ -4,6 +4,30 @@ This archive preserves verified deployment and implementation history in
 newest-first order. For the concise current project state, see
 [`../../handoff.md`](../../handoff.md).
 
+## 2026-10-29 — Mobile readability and version 0.2.2
+
+This rules-and-Hosting release was deployed from application commit
+`d1f5d4696d585a2bee49ab241b939ce4c0bff7f8`.
+
+- Added persistent per-user Standard, Large, and Extra large text choices in
+  Settings, with Czech, English, and Japanese labels and save-error states.
+- Existing profiles default safely to Standard. Demo mode supports the same
+  choices in memory and returns to Standard when demo data is reset.
+- Increased the baseline mobile text size modestly and reduced visual icon
+  sizes inside mobile controls without shrinking their 44px-or-larger touch
+  targets.
+- Added narrow-screen stacking for Extra large Settings choices and safe scroll
+  areas around the fixed mobile header and bottom navigation.
+- Extended strict profile rules so users may save only one of the three valid
+  text sizes on their own profile; arbitrary values remain denied.
+- Formatting, lint, TypeScript, 88 unit tests, 39 isolated Firestore rules
+  tests, 36 Playwright tests across four Chromium viewports, and the production
+  build passed. Computed-style tests verify the text increase, persistence,
+  icon geometry, touch targets, and absence of horizontal overflow.
+- Production rules compiled and were released before Hosting. Indexes,
+  Authentication, App Check enforcement, and other Firebase services were
+  unchanged. Both `/` and `/demo` returned HTTP 200 with the released assets.
+
 ## 2026-10-29 — Imported/custom-only category view and version 0.2.1
 
 This rules-and-Hosting release was deployed from application commit
