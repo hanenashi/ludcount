@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { DataOperationError } from "./errors";
 import {
   customCategoryConverter,
+  householdConverter,
   transactionConverter,
   userProfileConverter,
 } from "./converters";
@@ -111,6 +112,35 @@ describe("Firestore converters", () => {
     expect(userProfileConverter.fromFirestore(snapshot).displayCurrency).toBe(
       "auto",
     );
+  });
+
+  it("defaults legacy households to showing built-in categories", () => {
+    const snapshot = createSnapshot("home", "households/home", {
+      name: "Home",
+      currency: "CZK",
+      ownerId: "user-1",
+      createdAt: Timestamp.fromMillis(1000),
+      updatedAt: Timestamp.fromMillis(2000),
+    });
+
+    expect(
+      householdConverter.fromFirestore(snapshot).showBuiltInCategories,
+    ).toBe(true);
+  });
+
+  it("reads a household that hides built-in categories", () => {
+    const snapshot = createSnapshot("home", "households/home", {
+      name: "Home",
+      currency: "CZK",
+      showBuiltInCategories: false,
+      ownerId: "user-1",
+      createdAt: Timestamp.fromMillis(1000),
+      updatedAt: Timestamp.fromMillis(2000),
+    });
+
+    expect(
+      householdConverter.fromFirestore(snapshot).showBuiltInCategories,
+    ).toBe(false);
   });
 
   it("converts a valid custom category", () => {

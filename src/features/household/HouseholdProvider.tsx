@@ -28,6 +28,7 @@ interface HouseholdContextValue {
   preferenceError: DataOperationError | null;
   saveLocale: (locale: Locale) => Promise<void>;
   saveDisplayCurrency: (preference: DisplayCurrencyPreference) => Promise<void>;
+  saveShowBuiltInCategories: (show: boolean) => Promise<void>;
   retry: () => void;
 }
 
@@ -138,6 +139,35 @@ export function HouseholdProvider({ children }: { children: ReactNode }) {
     [repository, user, workspace],
   );
 
+  const saveShowBuiltInCategories = useCallback(
+    async (showBuiltInCategories: boolean) => {
+      if (!user || !workspace) return;
+      setPreferenceError(null);
+      try {
+        await repository.updateShowBuiltInCategories(
+          workspace.household.id,
+          showBuiltInCategories,
+        );
+        setWorkspace((current) =>
+          current
+            ? {
+                ...current,
+                household: {
+                  ...current.household,
+                  showBuiltInCategories,
+                  updatedAt: Date.now(),
+                },
+              }
+            : current,
+        );
+      } catch (saveError) {
+        setPreferenceError(saveError as DataOperationError);
+        throw saveError;
+      }
+    },
+    [repository, user, workspace],
+  );
+
   const value = useMemo<HouseholdContextValue>(
     () => ({
       workspace: user ? workspace : null,
@@ -146,6 +176,7 @@ export function HouseholdProvider({ children }: { children: ReactNode }) {
       preferenceError: user ? preferenceError : null,
       saveLocale,
       saveDisplayCurrency,
+      saveShowBuiltInCategories,
       retry: () => {
         setStatus("loading");
         setError(null);
@@ -156,6 +187,7 @@ export function HouseholdProvider({ children }: { children: ReactNode }) {
       error,
       preferenceError,
       saveDisplayCurrency,
+      saveShowBuiltInCategories,
       saveLocale,
       status,
       user,

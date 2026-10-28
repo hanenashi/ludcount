@@ -171,8 +171,9 @@ The production rules enforce these boundaries:
 - only members may read a household, its memberships, and its transactions
 - a new personal household, owner membership, and profile must be created
   atomically by that authenticated owner
-- only owners may update household settings or manage non-owner memberships;
-  ownership and roles cannot be escalated
+- only owners may update household settings (including built-in category
+  visibility) or manage non-owner memberships; ownership and roles cannot be
+  escalated
 - members may create transactions only as themselves
 - transaction creators may update or delete their own transactions; other
   members have read-only access to them
@@ -341,6 +342,12 @@ categories. Members can read and use active categories; custom names remain
 literal rather than translated. Archived categories stay visible in history but
 cannot be selected for new transactions.
 
+Household owners can switch Settings to **Custom/imported only**. This persists
+on the household, removes built-in choices from forms and filters for every
+member, and leaves imported/custom categories untouched. It does not delete the
+built-in catalog or rewrite old transactions, so a historical built-in category
+still resolves to its localized label.
+
 The Firestore schema, archive semantics, demo behavior, and owner/member rule
 boundaries are documented in
 [`docs/category-management.md`](./docs/category-management.md).
@@ -367,7 +374,8 @@ Included:
 - Czech-first UI with persistent English and Japanese selection
 - responsive overview, transaction list, and settings screens
 - transaction creation, editing, deletion, totals, built-in localized
-  categories, and owner-managed custom categories
+  categories, owner-managed custom categories, and an owner-controlled
+  built-in category visibility preference
 - combined transaction filters and case-insensitive note search
 - shared month, year, and custom-range selection with income/expense graphs
 - explicit-save transaction duplication with today's local date
@@ -383,7 +391,7 @@ Included:
 - validated Firebase client initialization
 - production Firestore rules for profiles, households, memberships, categories,
   and transactions
-- 38 emulator-backed allow/deny rules tests using the Firebase Rules Unit
+- 39 emulator-backed allow/deny rules tests using the Firebase Rules Unit
   Testing library
 - explicit invitation-only sign-in UX and a fully local fictional demo
 

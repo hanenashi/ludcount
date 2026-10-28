@@ -26,6 +26,10 @@ export interface HouseholdRepository {
     userId: string,
     preference: DisplayCurrencyPreference,
   ): Promise<void>;
+  updateShowBuiltInCategories(
+    householdId: string,
+    showBuiltInCategories: boolean,
+  ): Promise<void>;
 }
 
 export function createFirestoreHouseholdRepository(
@@ -98,6 +102,7 @@ export function createFirestoreHouseholdRepository(
           transaction.set(householdReference, {
             name: localizedHouseholdName,
             currency: "CZK",
+            showBuiltInCategories: true,
             ownerId: user.uid,
             createdAt: now,
             updatedAt: now,
@@ -124,6 +129,7 @@ export function createFirestoreHouseholdRepository(
               id: householdReference.id,
               name: localizedHouseholdName,
               currency: "CZK",
+              showBuiltInCategories: true,
               ownerId: user.uid,
               createdAt: timestamp,
               updatedAt: timestamp,
@@ -163,6 +169,18 @@ export function createFirestoreHouseholdRepository(
       try {
         await updateDoc(doc(firestore, "users", userId), {
           displayCurrency,
+          updatedAt: serverTimestamp(),
+        });
+      } catch (error) {
+        throw normalizeDataError(error, "write-failure");
+      }
+    },
+
+    async updateShowBuiltInCategories(householdId, showBuiltInCategories) {
+      assertOnline();
+      try {
+        await updateDoc(doc(firestore, "households", householdId), {
+          showBuiltInCategories,
           updatedAt: serverTimestamp(),
         });
       } catch (error) {

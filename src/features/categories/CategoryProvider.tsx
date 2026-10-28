@@ -44,17 +44,45 @@ function normalizeSubscriptionError(error: Error): DataOperationError {
       );
 }
 
+export function availableCategories(
+  customCategories: readonly CustomCategory[],
+  showBuiltInCategories: boolean,
+): readonly Category[] {
+  return [
+    ...(showBuiltInCategories ? builtInCategories : []),
+    ...customCategories,
+  ].sort(
+    (left, right) =>
+      left.type.localeCompare(right.type) ||
+      left.sortOrder - right.sortOrder ||
+      left.id.localeCompare(right.id),
+  );
+}
+
+export function categoryLookup(
+  customCategories: readonly CustomCategory[],
+): ReadonlyMap<string, Category> {
+  return new Map(
+    [...builtInCategories, ...customCategories].map((category) => [
+      category.id,
+      category,
+    ]),
+  );
+}
+
 export function CategoryProvider({
   repository,
   waiting = false,
   observeOnline = true,
   canManage,
+  showBuiltInCategories = true,
   children,
 }: {
   repository: CategoryRepository | null;
   waiting?: boolean;
   observeOnline?: boolean;
   canManage: boolean;
+  showBuiltInCategories?: boolean;
   children: ReactNode;
 }) {
   const { t } = useI18n();
@@ -88,18 +116,12 @@ export function CategoryProvider({
   }, [isOnline, observeOnline, repository, retryToken]);
 
   const categories = useMemo(
-    () =>
-      [...builtInCategories, ...customCategories].sort(
-        (left, right) =>
-          left.type.localeCompare(right.type) ||
-          left.sortOrder - right.sortOrder ||
-          left.id.localeCompare(right.id),
-      ),
-    [customCategories],
+    () => availableCategories(customCategories, showBuiltInCategories),
+    [customCategories, showBuiltInCategories],
   );
   const categoriesById = useMemo(
-    () => new Map(categories.map((category) => [category.id, category])),
-    [categories],
+    () => categoryLookup(customCategories),
+    [customCategories],
   );
   const requireManagement = useCallback(() => {
     if (!repository || !canManage) {

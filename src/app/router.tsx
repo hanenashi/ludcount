@@ -66,6 +66,9 @@ function ProductionDataProviders() {
       repository={categoryRepository}
       waiting={household.status === "loading"}
       canManage={canManageCategories}
+      showBuiltInCategories={
+        household.workspace?.household.showBuiltInCategories ?? true
+      }
     >
       <TransactionProvider
         repository={repository}

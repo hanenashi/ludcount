@@ -198,6 +198,14 @@ export const ja: Translations = {
   "settings.categoriesDescription":
     "世帯で共有するカテゴリを作成し、使わないものをアーカイブできます。",
   "settings.manageCategories": "カテゴリを管理",
+  "settings.builtInCategories": "標準カテゴリ",
+  "settings.showBuiltInCategories": "Ludcountの標準を表示",
+  "settings.hideBuiltInCategories": "カスタム・インポートのみ",
+  "settings.builtInCategoriesDescription":
+    "標準カテゴリを非表示にしても削除されず、既存の取引も変更されません。",
+  "settings.categoryPreferenceSaveError":
+    "カテゴリ表示設定を保存できませんでした。",
+  "settings.savingCategoryPreference": "カテゴリ設定を保存しています。",
   "settings.dataManagement": "データ管理",
   "settings.dataManagementDescription":
     "世帯のすべての取引を書き出すか、取引履歴を完全に削除します。",

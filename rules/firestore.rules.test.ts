@@ -467,6 +467,33 @@ describe("households and memberships", () => {
         },
       ),
     );
+    await assertSucceeds(
+      updateDoc(
+        doc(authenticatedFirestore(ownerId), "households", primaryHouseholdId),
+        {
+          showBuiltInCategories: false,
+          updatedAt: serverTimestamp(),
+        },
+      ),
+    );
+    await assertFails(
+      updateDoc(
+        doc(authenticatedFirestore(memberId), "households", primaryHouseholdId),
+        {
+          showBuiltInCategories: false,
+          updatedAt: serverTimestamp(),
+        },
+      ),
+    );
+    await assertFails(
+      updateDoc(
+        doc(authenticatedFirestore(ownerId), "households", primaryHouseholdId),
+        {
+          showBuiltInCategories: "no",
+          updatedAt: serverTimestamp(),
+        },
+      ),
+    );
     await assertFails(
       updateDoc(
         doc(authenticatedFirestore(ownerId), "households", primaryHouseholdId),

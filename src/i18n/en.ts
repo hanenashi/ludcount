@@ -204,6 +204,14 @@ export const en = {
   "settings.categoriesDescription":
     "Create reusable household categories and archive ones you no longer use.",
   "settings.manageCategories": "Manage categories",
+  "settings.builtInCategories": "Built-in categories",
+  "settings.showBuiltInCategories": "Show Ludcount defaults",
+  "settings.hideBuiltInCategories": "Custom/imported only",
+  "settings.builtInCategoriesDescription":
+    "Hiding defaults does not delete them or change existing transactions.",
+  "settings.categoryPreferenceSaveError":
+    "The category display preference could not be saved.",
+  "settings.savingCategoryPreference": "Saving category preference.",
   "settings.dataManagement": "Data management",
   "settings.dataManagementDescription":
     "Export every transaction in this household or permanently clear its transaction history.",

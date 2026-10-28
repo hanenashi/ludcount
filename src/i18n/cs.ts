@@ -207,6 +207,14 @@ export const cs = {
   "settings.categoriesDescription":
     "Vytvářejte vlastní kategorie domácnosti a archivujte ty, které už nepoužíváte.",
   "settings.manageCategories": "Spravovat kategorie",
+  "settings.builtInCategories": "Výchozí kategorie",
+  "settings.showBuiltInCategories": "Zobrazit výchozí Ludcount",
+  "settings.hideBuiltInCategories": "Jen vlastní/importované",
+  "settings.builtInCategoriesDescription":
+    "Skrytí výchozích kategorií je nesmaže ani nezmění existující záznamy.",
+  "settings.categoryPreferenceSaveError":
+    "Nastavení zobrazení kategorií se nepodařilo uložit.",
+  "settings.savingCategoryPreference": "Ukládám nastavení kategorií.",
   "settings.dataManagement": "Správa dat",
   "settings.dataManagementDescription":
     "Exportujte všechny transakce domácnosti nebo trvale vymažte její historii transakcí.",

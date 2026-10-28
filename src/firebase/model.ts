@@ -16,6 +16,7 @@ export interface Household {
   id: string;
   name: string;
   currency: "CZK";
+  showBuiltInCategories: boolean;
   ownerId: string;
   createdAt: number;
   updatedAt: number;

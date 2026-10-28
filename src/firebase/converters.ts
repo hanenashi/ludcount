@@ -158,6 +158,7 @@ export const householdConverter: FirestoreDataConverter<Household> = {
     return {
       name: household.name,
       currency: household.currency,
+      showBuiltInCategories: household.showBuiltInCategories,
       ownerId: household.ownerId,
       createdAt: writeTimestamp(household.createdAt, "createdAt"),
       updatedAt: writeTimestamp(household.updatedAt, "updatedAt"),
@@ -173,6 +174,10 @@ export const householdConverter: FirestoreDataConverter<Household> = {
       id: snapshot.id,
       name: readString(data, "name", path),
       currency,
+      showBuiltInCategories:
+        data.showBuiltInCategories === undefined
+          ? true
+          : readBoolean(data, "showBuiltInCategories", path),
       ownerId: readString(data, "ownerId", path),
       createdAt: readTimestamp(data, "createdAt", path),
       updatedAt: readTimestamp(data, "updatedAt", path),

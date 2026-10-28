@@ -24,7 +24,7 @@ function importCsv() {
   return `\uFEFF${row(headers)}\n${row([
     "okane-reco",
     "90001",
-    "2026-08-01",
+    "2026-10-01",
     "10:15",
     "expense",
     "45670",
@@ -37,7 +37,7 @@ function importCsv() {
   ])}\n${row([
     "okane-reco",
     "90002",
-    "2026-08-02",
+    "2026-10-02",
     "08:00",
     "income",
     "120000",
@@ -120,6 +120,25 @@ test("previews and idempotently imports a canonical Okanereco CSV", async ({
     page.getByRole("button", { name: "Importovat transakce (0)" }),
   ).toBeDisabled();
 
+  const importedOnly = page.getByRole("button", {
+    name: "Jen vlastní/importované",
+  });
+  await importedOnly.click();
+  await expect(importedOnly).toHaveAttribute("aria-pressed", "true");
+  await page.reload();
+  await expect(importedOnly).toHaveAttribute("aria-pressed", "true");
+
+  await page.goto("/app/transactions/new");
+  const categorySelect = page.getByLabel("Kategorie");
+  await expect(
+    categorySelect.locator("option", { hasText: "Rodinný nákup" }),
+  ).toHaveCount(1);
+  await expect(
+    categorySelect.locator("option", { hasText: "Potraviny" }),
+  ).toHaveCount(0);
+
+  await clickVisible(page.getByRole("link", { name: "Nastavení" }));
+
   const downloadPromise = page.waitForEvent("download");
   await page
     .getByRole("button", { name: "Exportovat všechny transakce" })
@@ -146,7 +165,7 @@ test("previews and idempotently imports a canonical Okanereco CSV", async ({
   await expect(
     page.getByText("Všechny transakce domácnosti byly smazány."),
   ).toBeVisible({ timeout: 15_000 });
-  await expect(page.getByText(/Verze 0\.2\.0/)).toBeVisible();
+  await expect(page.getByText(/Verze 0\.2\.1/)).toBeVisible();
 
   await clickVisible(page.getByRole("link", { name: "Záznamy" }));
   await expect(page.getByText("Nejsou tu žádné záznamy.")).toBeVisible();

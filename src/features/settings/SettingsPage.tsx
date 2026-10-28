@@ -20,8 +20,9 @@ export function SettingsPage() {
   const [savingLocale, setSavingLocale] = useState<Locale | null>(null);
   const [savingCurrency, setSavingCurrency] =
     useState<DisplayCurrencyPreference | null>(null);
+  const [savingBuiltInCategories, setSavingBuiltInCategories] = useState(false);
   const [preferenceFailure, setPreferenceFailure] = useState<
-    "locale" | "currency" | null
+    "locale" | "currency" | "categories" | null
   >(null);
   const [signingOut, setSigningOut] = useState(false);
   const [signOutError, setSignOutError] = useState(false);
@@ -54,6 +55,21 @@ export function SettingsPage() {
       setPreferenceFailure("currency");
     } finally {
       setSavingCurrency(null);
+    }
+  };
+
+  const changeBuiltInCategories = async (show: boolean) => {
+    if (show === runtime.showBuiltInCategories || savingBuiltInCategories) {
+      return;
+    }
+    setSavingBuiltInCategories(true);
+    setPreferenceFailure(null);
+    try {
+      await runtime.saveShowBuiltInCategories(show);
+    } catch {
+      setPreferenceFailure("categories");
+    } finally {
+      setSavingBuiltInCategories(false);
     }
   };
 
@@ -181,6 +197,45 @@ export function SettingsPage() {
           <h2>{t("settings.categories")}</h2>
           <p>{t("settings.categoriesDescription")}</p>
         </div>
+        {runtime.canManageHouseholdData ? (
+          <>
+            <div
+              className="language-options"
+              role="group"
+              aria-label={t("settings.builtInCategories")}
+            >
+              <button
+                className={
+                  runtime.showBuiltInCategories
+                    ? "language-button language-button-active"
+                    : "language-button"
+                }
+                type="button"
+                aria-pressed={runtime.showBuiltInCategories}
+                disabled={savingBuiltInCategories}
+                onClick={() => void changeBuiltInCategories(true)}
+              >
+                {t("settings.showBuiltInCategories")}
+              </button>
+              <button
+                className={
+                  runtime.showBuiltInCategories
+                    ? "language-button"
+                    : "language-button language-button-active"
+                }
+                type="button"
+                aria-pressed={!runtime.showBuiltInCategories}
+                disabled={savingBuiltInCategories}
+                onClick={() => void changeBuiltInCategories(false)}
+              >
+                {t("settings.hideBuiltInCategories")}
+              </button>
+            </div>
+            <p className="field-hint">
+              {t("settings.builtInCategoriesDescription")}
+            </p>
+          </>
+        ) : null}
         <Link
           className="button button-secondary"
           to={`${runtime.basePath}/settings/categories`}
@@ -188,6 +243,16 @@ export function SettingsPage() {
           <Tags size={18} aria-hidden="true" />
           {t("settings.manageCategories")}
         </Link>
+        {preferenceFailure === "categories" ? (
+          <p className="settings-inline-error" role="alert">
+            {t("settings.categoryPreferenceSaveError")}
+          </p>
+        ) : null}
+        {savingBuiltInCategories ? (
+          <p className="sr-only" role="status" aria-live="polite">
+            {t("settings.savingCategoryPreference")}
+          </p>
+        ) : null}
       </section>
 
       {runtime.mode === "demo" ? (

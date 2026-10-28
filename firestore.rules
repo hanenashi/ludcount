@@ -89,12 +89,17 @@ service cloud.firestore {
         && data.keys().hasOnly([
           'name',
           'currency',
+          'showBuiltInCategories',
           'ownerId',
           'createdAt',
           'updatedAt'
         ])
         && isValidRequiredString(data.name, 100)
         && data.currency == 'CZK'
+        && (
+          !data.keys().hasAny(['showBuiltInCategories'])
+          || data.showBuiltInCategories is bool
+        )
         && isValidRequiredString(data.ownerId, 128)
         && data.createdAt is timestamp
         && data.updatedAt is timestamp;
@@ -315,6 +320,7 @@ service cloud.firestore {
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
           'name',
           'currency',
+          'showBuiltInCategories',
           'updatedAt'
         ])
         && isCurrentTimestamp(request.resource.data.updatedAt);
