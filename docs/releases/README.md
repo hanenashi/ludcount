@@ -4,6 +4,24 @@ This archive preserves verified deployment and implementation history in
 newest-first order. For the concise current project state, see
 [`../../handoff.md`](../../handoff.md).
 
+## 2026-10-29 — Current Okanereco backup conversion
+
+This converter-and-documentation release was deployed from commit
+`921fcb5e25125f9485a021f32346a58579f12082`. The Hosting bundle itself was
+unchanged.
+
+- Added automatic detection for Okanereco's newer Room database schema
+  (`Category_detail` and `Category`) while retaining the legacy August schema.
+- Added normalization of newer `YYYY/MM/DD` source dates to Ludcount's local
+  `YYYY-MM-DD` import format and synthetic coverage for both schemas.
+- Inspected the native free-tier email backup read-only: a healthy ZIP with
+  `mmj.db` plus Okanereco-only settings protobuf files.
+- Converted the private backup into 3,973 import-ready rows and a 33-row review
+  report. The private backup and generated data were not committed.
+- Three converter tests, formatting, and the production build passed. Hosting
+  was redeployed per the established release workflow; Firestore rules,
+  indexes, Authentication, and other services were unchanged.
+
 ## 2026-08-02 — Large-import rules-limit correction
 
 This Hosting-only correction was deployed from application commit
