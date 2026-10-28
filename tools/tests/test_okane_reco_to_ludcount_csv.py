@@ -72,6 +72,59 @@ class OkaneRecoConverterTest(unittest.TestCase):
                 ["zero_amount", "negative_amount", "source_deleted"],
             )
 
+    def test_converts_room_schema_and_normalizes_slash_dates(self) -> None:
+        with tempfile.TemporaryDirectory() as directory_value:
+            directory = Path(directory_value)
+            database = directory / "mmj.db"
+            output = directory / "import.csv"
+            review = directory / "review.csv"
+            with sqlite3.connect(database) as connection:
+                connection.executescript(
+                    """
+                    PRAGMA user_version = 2;
+                    CREATE TABLE Category (
+                      CategoryID INTEGER PRIMARY KEY,
+                      Name TEXT,
+                      NameJa TEXT,
+                      income_flag INTEGER DEFAULT 0,
+                      delete_flag INTEGER DEFAULT 0
+                    );
+                    CREATE TABLE Category_detail (
+                      ID INTEGER PRIMARY KEY,
+                      ID_Category INTEGER NOT NULL,
+                      Date TEXT NOT NULL,
+                      Time TEXT NOT NULL,
+                      Price TEXT NOT NULL,
+                      Memo TEXT,
+                      ID_Payment INTEGER DEFAULT 1,
+                      shopID INTEGER DEFAULT 1,
+                      delete_flag INTEGER DEFAULT 0
+                    );
+                    INSERT INTO Category VALUES
+                      (-3, 'Income', '収入', 1, 0),
+                      (10, 'Food', '食費', 0, 0);
+                    INSERT INTO Category_detail VALUES
+                      (101, -3, '2026/10/28', '09:30', '1250', '', 2, 3, 0),
+                      (102, 10, '2026/10/29', '12:45:00', '45.67', '昼食', 1, 4, 0);
+                    """
+                )
+
+            summary = convert_database(database, output, review)
+
+            self.assertEqual(summary.database_version, 2)
+            self.assertEqual(summary.total_rows, 2)
+            self.assertEqual(summary.import_ready_rows, 2)
+            self.assertEqual(summary.review_rows, 0)
+            with output.open(encoding="utf-8-sig", newline="") as input_file:
+                rows = list(csv.DictReader(input_file, delimiter=";"))
+            self.assertEqual(rows[0]["date"], "2026-10-28")
+            self.assertEqual(rows[0]["categorySourceId"], "-3")
+            self.assertEqual(rows[0]["type"], "income")
+            self.assertEqual(rows[0]["amountMinor"], "125000")
+            self.assertEqual(rows[1]["date"], "2026-10-29")
+            self.assertEqual(rows[1]["amountMinor"], "4567")
+            self.assertEqual(rows[1]["category"], "食費")
+
     def test_refuses_to_overwrite_existing_output(self) -> None:
         with tempfile.TemporaryDirectory() as directory_value:
             directory = Path(directory_value)

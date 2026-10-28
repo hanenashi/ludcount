@@ -44,41 +44,154 @@ class ConversionSummary:
     review_rows: int
 
 
+@dataclass(frozen=True)
+class SourceSchema:
+    name: str
+    query: str
+
+
 def _database_uri(database: Path) -> str:
     return f"{database.resolve().as_uri()}?mode=ro"
 
 
-def _validate_schema(connection: sqlite3.Connection) -> None:
-    required_columns = {
-        "CategoryDetail": {
-            "id",
-            "categoryID",
-            "date",
-            "time",
-            "pice",
-            "memo",
-            "payment_id",
-            "shopname_id",
-            "delete_flag",
-        },
-        "Categories": {
-            "categoryID",
-            "categoryName",
-            "categoryNameJa",
-            "income_flag",
-            "delete_flag",
-        },
+LEGACY_SCHEMA = SourceSchema(
+    name="legacy",
+    query="""
+        SELECT
+          d.id AS source_id,
+          d.categoryID AS category_id,
+          d.date,
+          d.time,
+          d.pice,
+          d.memo,
+          d.payment_id,
+          d.shopname_id,
+          d.delete_flag AS source_deleted,
+          c.delete_flag AS source_category_deleted,
+          c.income_flag,
+          COALESCE(
+            NULLIF(TRIM(c.categoryNameJa), ''),
+            NULLIF(TRIM(c.categoryName), ''),
+            'Category ' || c.categoryID
+          ) AS category_name
+        FROM CategoryDetail d
+        JOIN Categories c ON c.categoryID = d.categoryID
+        ORDER BY d.date, d.time, d.id
+    """,
+)
+
+ROOM_SCHEMA = SourceSchema(
+    name="room",
+    query="""
+        SELECT
+          d.ID AS source_id,
+          d.ID_Category AS category_id,
+          d.Date AS date,
+          d.Time AS time,
+          d.Price AS pice,
+          d.Memo AS memo,
+          d.ID_Payment AS payment_id,
+          d.shopID AS shopname_id,
+          d.delete_flag AS source_deleted,
+          c.delete_flag AS source_category_deleted,
+          c.income_flag,
+          COALESCE(
+            NULLIF(TRIM(c.NameJa), ''),
+            NULLIF(TRIM(c.Name), ''),
+            'Category ' || c.CategoryID
+          ) AS category_name
+        FROM Category_detail d
+        JOIN Category c ON c.CategoryID = d.ID_Category
+        ORDER BY d.Date, d.Time, d.ID
+    """,
+)
+
+
+def _table_columns(connection: sqlite3.Connection, table: str) -> set[str]:
+    return {
+        str(row[1]).casefold()
+        for row in connection.execute(
+            f'PRAGMA table_info("{table}")'  # noqa: S608 - fixed table names
+        )
     }
-    for table, expected in required_columns.items():
-        actual = {
-            row[1]
-            for row in connection.execute(
-                f'PRAGMA table_info("{table}")'  # noqa: S608 - fixed table names
+
+
+def _detect_schema(connection: sqlite3.Connection) -> SourceSchema:
+    schemas = (
+        (
+            LEGACY_SCHEMA,
+            {
+                "categorydetail": {
+                    "id",
+                    "categoryid",
+                    "date",
+                    "time",
+                    "pice",
+                    "memo",
+                    "payment_id",
+                    "shopname_id",
+                    "delete_flag",
+                },
+                "categories": {
+                    "categoryid",
+                    "categoryname",
+                    "categorynameja",
+                    "income_flag",
+                    "delete_flag",
+                },
+            },
+        ),
+        (
+            ROOM_SCHEMA,
+            {
+                "category_detail": {
+                    "id",
+                    "id_category",
+                    "date",
+                    "time",
+                    "price",
+                    "memo",
+                    "id_payment",
+                    "shopid",
+                    "delete_flag",
+                },
+                "category": {
+                    "categoryid",
+                    "name",
+                    "nameja",
+                    "income_flag",
+                    "delete_flag",
+                },
+            },
+        ),
+    )
+    tables = {
+        str(row[0]).casefold(): str(row[0])
+        for row in connection.execute(
+            "SELECT name FROM sqlite_master WHERE type = 'table'"
+        )
+    }
+    failures: list[str] = []
+    for schema, required_tables in schemas:
+        missing_details: list[str] = []
+        for table_key, expected_columns in required_tables.items():
+            actual_table = tables.get(table_key)
+            if actual_table is None:
+                missing_details.append(f"missing table {table_key}")
+                continue
+            missing_columns = sorted(
+                expected_columns - _table_columns(connection, actual_table)
             )
-        }
-        missing = sorted(expected - actual)
-        if missing:
-            raise ValueError(f"{table} is missing required columns: {', '.join(missing)}")
+            if missing_columns:
+                missing_details.append(
+                    f"{actual_table} missing {', '.join(missing_columns)}"
+                )
+        if not missing_details:
+            return schema
+        failures.append(f"{schema.name}: {'; '.join(missing_details)}")
+    raise ValueError(
+        "Unsupported Okanereco database schema (" + " | ".join(failures) + ")"
+    )
 
 
 def _amount_minor(value: object) -> tuple[int | None, str | None]:
@@ -98,10 +211,18 @@ def _valid_date(value: str) -> bool:
         return False
 
 
+def _normalize_date(value: object) -> str:
+    text = str(value or "").strip()
+    if len(text) == 10 and text[4] == "/" and text[7] == "/":
+        return text.replace("/", "-")
+    return text
+
+
 def _convert_row(row: sqlite3.Row) -> tuple[dict[str, object], list[str]]:
     amount_minor, amount_error = _amount_minor(row["pice"])
     category = (row["category_name"] or "").strip()
     note = row["memo"] or ""
+    date_value = _normalize_date(row["date"])
     reasons: list[str] = []
 
     if row["source_deleted"] != 0:
@@ -117,7 +238,7 @@ def _convert_row(row: sqlite3.Row) -> tuple[dict[str, object], list[str]]:
             reasons.append("negative_amount")
         elif amount_minor > MAX_AMOUNT_MINOR:
             reasons.append("amount_above_ludcount_limit")
-    if not _valid_date(row["date"]):
+    if not _valid_date(date_value):
         reasons.append("invalid_date")
     if not category:
         reasons.append("missing_category")
@@ -129,7 +250,7 @@ def _convert_row(row: sqlite3.Row) -> tuple[dict[str, object], list[str]]:
     converted = {
         "sourceApp": "okane-reco",
         "sourceId": row["source_id"],
-        "date": row["date"],
+        "date": date_value,
         "sourceTime": row["time"],
         "type": "income" if row["income_flag"] == 1 else "expense",
         "amountMinor": "" if amount_minor is None else amount_minor,
@@ -192,32 +313,9 @@ def convert_database(
         integrity = connection.execute("PRAGMA integrity_check").fetchone()[0]
         if integrity != "ok":
             raise ValueError(f"SQLite integrity check failed: {integrity}")
-        _validate_schema(connection)
+        schema = _detect_schema(connection)
         database_version = connection.execute("PRAGMA user_version").fetchone()[0]
-        source_rows = connection.execute(
-            """
-            SELECT
-              d.id AS source_id,
-              d.categoryID AS category_id,
-              d.date,
-              d.time,
-              d.pice,
-              d.memo,
-              d.payment_id,
-              d.shopname_id,
-              d.delete_flag AS source_deleted,
-              c.delete_flag AS source_category_deleted,
-              c.income_flag,
-              COALESCE(
-                NULLIF(TRIM(c.categoryNameJa), ''),
-                NULLIF(TRIM(c.categoryName), ''),
-                'Category ' || c.categoryID
-              ) AS category_name
-            FROM CategoryDetail d
-            JOIN Categories c ON c.categoryID = d.categoryID
-            ORDER BY d.date, d.time, d.id
-            """
-        ).fetchall()
+        source_rows = connection.execute(schema.query).fetchall()
 
     import_rows: list[dict[str, object]] = []
     review_rows: list[dict[str, object]] = []

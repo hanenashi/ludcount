@@ -90,7 +90,7 @@ households/{householdId}/categories/{categoryId}
 Current verified full-suite counts:
 
 - unit tests: 84 passing
-- migration-tool tests: 2 passing with synthetic SQLite data
+- migration-tool tests: 3 passing with legacy and Room SQLite schemas
 - Firestore rules tests: 39 passing against isolated local Firestore
 - Playwright tests: 36 passing across desktop, 390px mobile, 320px mobile, and
   mobile landscape Chromium

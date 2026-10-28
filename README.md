@@ -261,6 +261,14 @@ integer minor units without currency conversion. The `currency` column is
 `CZK`, matching Ludcount's current storage schema; a saved `¥` display
 preference remains presentation-only.
 
+Okanereco email backups are native ZIP archives containing `mmj.db` and a
+`settings/` directory. Extract `mmj.db` and pass it to the converter; the
+settings protobuf files are needed only for restoring Okanereco itself. The
+converter detects both the legacy `CategoryDetail`/`Categories` schema and the
+newer Room `Category_detail`/`Category` schema, and normalizes the newer
+`YYYY/MM/DD` source dates to Ludcount's local `YYYY-MM-DD` format. It opens the
+database read-only and verifies SQLite integrity before conversion.
+
 Signed-in household owners can import the canonical output from Settings. The
 browser validates and previews the file locally before showing an explicit
 confirmation. Imported categories and transactions use deterministic document
