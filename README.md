@@ -326,6 +326,9 @@ members can still delete only transactions they created.
 - Settings offers persistent Standard, Large, and Extra large text choices per
   account. Mobile layouts also receive a modest baseline text increase, while
   icon artwork is smaller without reducing its touch target.
+- The compact mobile chrome uses a 60px header and 68px bottom navigation in
+  portrait, reduced to 52px and 58px in short landscape viewports. Scroll-safe
+  spacing keeps controls clear of both fixed regions.
 - A skip link, route heading focus, visible high-contrast focus indicators, and
   localized names support keyboard and screen-reader navigation.
 - Loading, offline, timeout, permission, save, validation, result, error, and

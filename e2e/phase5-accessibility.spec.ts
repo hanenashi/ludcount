@@ -160,6 +160,26 @@ test("supports keyboard navigation, dialog focus, and narrow layouts", async ({
     });
     expect(iconGeometry.iconWidth).toBeLessThanOrEqual(20);
     expect(iconGeometry.targetHeight).toBeGreaterThanOrEqual(44);
+
+    const chromeGeometry = await page.evaluate(() => ({
+      headerHeight:
+        document.querySelector(".mobile-header")?.getBoundingClientRect()
+          .height ?? 0,
+      navigationHeight:
+        document.querySelector(".mobile-navigation")?.getBoundingClientRect()
+          .height ?? 0,
+    }));
+    const viewport = page.viewportSize();
+    const landscape = Boolean(
+      viewport && viewport.width > viewport.height && viewport.height <= 600,
+    );
+    expect(chromeGeometry.headerHeight).toBeLessThanOrEqual(
+      landscape ? 52 : 60,
+    );
+    expect(chromeGeometry.navigationHeight).toBeLessThanOrEqual(
+      landscape ? 58 : 68,
+    );
+    expect(chromeGeometry.navigationHeight).toBeGreaterThanOrEqual(44);
   }
 
   const minimumTouchTarget = await page
