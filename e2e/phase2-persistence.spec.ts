@@ -56,6 +56,25 @@ test("persists an invited user's household, transactions, and locale through Fir
     page.locator(".transaction-row").getByText("Mazlíčci"),
   ).toBeVisible();
 
+  await clickVisible(page.getByRole("link", { name: "Nastavení" }));
+  const wholeAmounts = page.getByRole("button", { name: "Celé částky" });
+  await wholeAmounts.click();
+  await expect(wholeAmounts).toHaveAttribute("aria-pressed", "true");
+  await page.reload();
+  await expect(wholeAmounts).toHaveAttribute("aria-pressed", "true");
+
+  await clickVisible(page.getByRole("link", { name: "Záznamy" }));
+  await expect(page.getByText(/851\s*Kč/).first()).toBeVisible();
+  await clickVisible(page.getByRole("link", { name: "Upravit" }));
+  await expect(page.getByLabel("Částka")).toHaveValue("851");
+  await page.getByLabel("Poznámka").fill("Zachovat přesné haléře");
+  await page.getByRole("button", { name: "Uložit změny" }).click();
+
+  await clickVisible(page.getByRole("link", { name: "Nastavení" }));
+  await page.getByRole("button", { name: "Přesné částky" }).click();
+  await clickVisible(page.getByRole("link", { name: "Záznamy" }));
+  await expect(page.getByText(/850,50/).first()).toBeVisible();
+
   await clickVisible(page.getByRole("link", { name: "Upravit" }));
   await fillAmount(page, "900,00");
   await page.getByRole("button", { name: "Uložit změny" }).click();

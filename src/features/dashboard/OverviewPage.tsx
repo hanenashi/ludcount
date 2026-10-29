@@ -14,7 +14,7 @@ import { useTransactions } from "../transactions/TransactionProvider";
 
 export function OverviewPage() {
   const { locale, t } = useI18n();
-  const { basePath, displayCurrency } = useAppRuntime();
+  const { amountDisplay, basePath, displayCurrency } = useAppRuntime();
   const { transactions } = useTransactions();
   const { period, setPeriod } = usePeriod();
   const { categoryFor, labelFor } = useCategories();
@@ -49,13 +49,18 @@ export function OverviewPage() {
         <div className="summary-item">
           <span>{t("overview.income")}</span>
           <strong className="summary-value-income">
-            {formatMoney(totals.income, locale, displayCurrency)}
+            {formatMoney(totals.income, locale, displayCurrency, amountDisplay)}
           </strong>
         </div>
         <div className="summary-item">
           <span>{t("overview.expenses")}</span>
           <strong className="summary-value-expense">
-            {formatMoney(totals.expenses, locale, displayCurrency)}
+            {formatMoney(
+              totals.expenses,
+              locale,
+              displayCurrency,
+              amountDisplay,
+            )}
           </strong>
         </div>
         <div className="summary-item">
@@ -66,6 +71,7 @@ export function OverviewPage() {
               asMoneyAmount(Math.abs(totals.balanceMinor)),
               locale,
               displayCurrency,
+              amountDisplay,
             )}
           </strong>
         </div>
@@ -118,6 +124,7 @@ export function OverviewPage() {
                         asMoneyAmount(amount),
                         locale,
                         displayCurrency,
+                        amountDisplay,
                       )}
                     </strong>
                   </div>

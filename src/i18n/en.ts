@@ -190,6 +190,14 @@ export const en = {
   "settings.currencyJpy": "Japanese yen (¥)",
   "settings.currencySaveError": "The amount symbol could not be saved.",
   "settings.savingCurrency": "Saving amount symbol.",
+  "settings.amountDisplay": "Amount decimals",
+  "settings.amountDisplayDescription":
+    "Show exact minor units or rounded whole amounts. Stored data and CSV exports stay exact.",
+  "settings.amountDisplayExact": "Exact amounts",
+  "settings.amountDisplayWhole": "Whole amounts",
+  "settings.amountDisplaySaveError":
+    "The amount display preference could not be saved.",
+  "settings.savingAmountDisplay": "Saving amount display preference.",
   "settings.dataHeading": "Data for this phase",
   "settings.dataDescription":
     "Transactions and preferences are synchronized through Cloud Firestore.",

@@ -166,7 +166,8 @@ bootstrap and transaction writes satisfy the strict policy.
 The production rules enforce these boundaries:
 
 - users may read only their own profile and may update only `locale`,
-  `displayCurrency`, `textSize`, `activeHouseholdId`, and `updatedAt`
+  `displayCurrency`, `amountDisplay`, `textSize`, `activeHouseholdId`, and
+  `updatedAt`
 - profile identity fields and creation timestamps are immutable
 - only members may read a household, its memberships, and its transactions
 - a new personal household, owner membership, and profile must be created
@@ -211,11 +212,19 @@ not be run as part of ordinary local development.
 - Symbol changes are presentation-only. They do not convert or modify numeric
   values, transaction documents, or the underlying `CZK` field; CSV export
   continues to report that stored currency accurately.
+- Each user can also choose **Exact amounts** or **Whole amounts** in Settings.
+  Whole-amount mode rounds only the on-screen presentation to the nearest
+  major unit and removes decimal entry from the transaction form. Stored minor
+  units remain exact, and CSV export continues to include their exact value.
+  When an existing fractional transaction is edited in whole-amount mode, its
+  original amount is preserved unless the amount itself is changed.
 - Transaction direction is represented by `income` or `expense`; stored amounts
   are always positive.
 - On touch devices, the amount field uses a compact in-app number pad and stays
   read-only to prevent the operating-system keyboard from covering the form.
-  Desktop users retain ordinary editable and hardware-keyboard input.
+  Its decimal key is hidden in whole-amount mode. Desktop users retain ordinary
+  editable and hardware-keyboard input, limited to digits while that mode is
+  active.
 - User-selected dates use local `YYYY-MM-DD` date keys and `YYYY-MM` month keys.
 - The documented maximum transaction amount is `1,000,000,000` minor units.
 

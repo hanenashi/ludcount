@@ -16,6 +16,7 @@ import { getFirebaseServices } from "../lib/firebase";
 import {
   displayCurrencySymbol,
   resolveDisplayCurrency,
+  type AmountDisplayMode,
   type DisplayCurrency,
   type DisplayCurrencyPreference,
 } from "../lib/money";
@@ -33,6 +34,7 @@ interface AppRuntimeContextValue {
   currencyPreference: DisplayCurrencyPreference;
   displayCurrency: DisplayCurrency;
   currencySymbol: string;
+  amountDisplay: AmountDisplayMode;
   importRepository: DataImportRepository | null;
   canManageHouseholdData: boolean;
   showBuiltInCategories: boolean;
@@ -41,6 +43,7 @@ interface AppRuntimeContextValue {
   saveCurrencyPreference: (
     preference: DisplayCurrencyPreference,
   ) => Promise<void>;
+  saveAmountDisplay: (amountDisplay: AmountDisplayMode) => Promise<void>;
   saveShowBuiltInCategories: (show: boolean) => Promise<void>;
   saveTextSize: (textSize: TextSizePreference) => Promise<void>;
   exit: () => Promise<void>;
@@ -85,6 +88,7 @@ export function ProductionRuntimeProvider({
       currencyPreference,
       displayCurrency,
       currencySymbol: displayCurrencySymbol(displayCurrency),
+      amountDisplay: household.workspace?.profile.amountDisplay ?? "exact",
       importRepository,
       canManageHouseholdData: importRepository !== null,
       showBuiltInCategories:
@@ -92,6 +96,7 @@ export function ProductionRuntimeProvider({
       textSize: household.workspace?.profile.textSize ?? "standard",
       saveLocale: household.saveLocale,
       saveCurrencyPreference: household.saveDisplayCurrency,
+      saveAmountDisplay: household.saveAmountDisplay,
       saveShowBuiltInCategories: household.saveShowBuiltInCategories,
       saveTextSize: household.saveTextSize,
       exit: signOutUser,
@@ -128,10 +133,13 @@ export function DemoRuntimeProvider({
   const [currencyPreference, setCurrencyPreference] =
     useState<DisplayCurrencyPreference>("auto");
   const [textSize, setTextSize] = useState<TextSizePreference>("standard");
+  const [amountDisplay, setAmountDisplay] =
+    useState<AmountDisplayMode>("exact");
   const displayCurrency = resolveDisplayCurrency(locale, currencyPreference);
   const resetDemo = useCallback(() => {
     setCurrencyPreference("auto");
     setTextSize("standard");
+    setAmountDisplay("exact");
     onReset();
   }, [onReset]);
   const value = useMemo<AppRuntimeContextValue>(
@@ -145,6 +153,7 @@ export function DemoRuntimeProvider({
       currencyPreference,
       displayCurrency,
       currencySymbol: displayCurrencySymbol(displayCurrency),
+      amountDisplay,
       importRepository: null,
       canManageHouseholdData: false,
       showBuiltInCategories: true,
@@ -152,6 +161,9 @@ export function DemoRuntimeProvider({
       saveLocale: async () => undefined,
       saveCurrencyPreference: async (preference) => {
         setCurrencyPreference(preference);
+      },
+      saveAmountDisplay: async (nextAmountDisplay) => {
+        setAmountDisplay(nextAmountDisplay);
       },
       saveShowBuiltInCategories: async () => undefined,
       saveTextSize: async (nextTextSize) => {
@@ -161,7 +173,14 @@ export function DemoRuntimeProvider({
       retry: () => undefined,
       resetDemo,
     }),
-    [currencyPreference, displayCurrency, resetDemo, textSize, userLabel],
+    [
+      amountDisplay,
+      currencyPreference,
+      displayCurrency,
+      resetDemo,
+      textSize,
+      userLabel,
+    ],
   );
 
   return (

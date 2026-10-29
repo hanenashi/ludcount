@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { expectCombinedAmountFocus } from "./helpers";
+import { clickVisible, expectCombinedAmountFocus } from "./helpers";
 
 test("uses a compact amount number pad on touch devices", async ({
   page,
@@ -113,6 +113,30 @@ test("uses a compact amount number pad on touch devices", async ({
   await page.getByRole("button", { name: "Uložit příjem" }).click();
   await expect(page.locator(".money-input")).toHaveClass(/field-error/);
   await expectCombinedAmountFocus(page, "Částka", "rgb(180, 35, 24)");
+
+  await page.goto("/demo/settings");
+  await page.getByRole("button", { name: "Celé částky" }).click();
+  await clickVisible(page.getByRole("link", { name: "Záznamy" }));
+  await expect(page.getByText(/1.?865\s*Kč/).first()).toBeVisible();
+  await clickVisible(page.getByRole("link", { name: "Přidat záznam" }));
+  const wholeAmount = page.getByLabel("Částka", { exact: true });
+  if (touchProject) {
+    const wholePad = page.getByRole("group", {
+      name: "Číselná klávesnice pro částku",
+    });
+    await expect(
+      wholePad.getByRole("button", { name: "Desetinná čárka" }),
+    ).toHaveCount(0);
+    for (const digit of ["1", "2", "5"] as const) {
+      await wholePad.getByRole("button", { name: digit, exact: true }).click();
+    }
+  } else {
+    await expect(wholeAmount).toHaveAttribute("inputmode", "numeric");
+    await wholeAmount.fill("12.5");
+    await expect(wholeAmount).toHaveValue("");
+    await wholeAmount.fill("125");
+  }
+  await expect(wholeAmount).toHaveValue("125");
 
   for (const locale of [
     {

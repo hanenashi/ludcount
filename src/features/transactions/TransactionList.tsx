@@ -21,7 +21,7 @@ export function TransactionList({
   emptyMessage,
 }: TransactionListProps) {
   const { locale, t } = useI18n();
-  const { basePath, displayCurrency } = useAppRuntime();
+  const { amountDisplay, basePath, displayCurrency } = useAppRuntime();
   const { categoryFor, labelFor } = useCategories();
 
   if (transactions.length === 0) {
@@ -53,6 +53,7 @@ export function TransactionList({
           transaction.amountMinor,
           locale,
           displayCurrency,
+          amountDisplay,
         );
         const actionContext = `${categoryName}, ${date}, ${amount}`;
 

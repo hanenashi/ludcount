@@ -8,7 +8,7 @@ import {
 } from "../../firebase/errors";
 import { useI18n } from "../../i18n";
 import { isValidDateKey, toDateKey, toMonthKey } from "../../lib/dates";
-import { parseMoneyInput } from "../../lib/money";
+import { formatMoneyInput, parseMoneyInput } from "../../lib/money";
 import { useCategories } from "../categories/CategoryProvider";
 import { AmountNumberPad } from "./AmountNumberPad";
 import type { Transaction, TransactionDraft } from "./model";
@@ -35,7 +35,7 @@ export function TransactionForm({
   onCancel,
 }: TransactionFormProps) {
   const { locale, t } = useI18n();
-  const { currencySymbol } = useAppRuntime();
+  const { amountDisplay, currencySymbol } = useAppRuntime();
   const { categories, labelFor } = useCategories();
   const initialValues = transaction ?? initialDraft;
   const initialType = initialValues?.type ?? "expense";
@@ -51,9 +51,7 @@ export function TransactionForm({
   const [type, setType] = useState(initialType);
   const [amount, setAmount] = useState(
     initialValues
-      ? (initialValues.amountMinor / 100)
-          .toFixed(2)
-          .replace(".", locale === "cs" ? "," : ".")
+      ? formatMoneyInput(initialValues.amountMinor, locale, amountDisplay)
       : "",
   );
   const [categoryId, setCategoryId] = useState(initialCategoryId);
@@ -76,6 +74,7 @@ export function TransactionForm({
   const categoryRef = useRef<HTMLSelectElement>(null);
   const dateRef = useRef<HTMLInputElement>(null);
   const suppressNumberPadOpen = useRef(false);
+  const amountTouched = useRef(false);
 
   const visibleCategories = useMemo(
     () =>
@@ -141,7 +140,10 @@ export function TransactionForm({
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setNumberPadOpen(false);
-    const amountMinor = parseMoneyInput(amount, locale);
+    const amountMinor =
+      amountDisplay === "whole" && transaction && !amountTouched.current
+        ? transaction.amountMinor
+        : parseMoneyInput(amount, locale, amountDisplay);
     const nextErrors = {
       amount: amountMinor ? undefined : t("transaction.invalidAmount"),
       date: isValidDateKey(dateKey) ? undefined : t("transaction.invalidDate"),
@@ -235,7 +237,14 @@ export function TransactionForm({
             id="transaction-amount"
             ref={amountRef}
             required
-            inputMode={useCustomNumberPad ? "none" : "decimal"}
+            inputMode={
+              useCustomNumberPad
+                ? "none"
+                : amountDisplay === "whole"
+                  ? "numeric"
+                  : "decimal"
+            }
+            pattern={amountDisplay === "whole" ? "[0-9]*" : undefined}
             readOnly={useCustomNumberPad}
             autoComplete="off"
             value={amount}
@@ -251,7 +260,12 @@ export function TransactionForm({
               }
             }}
             onChange={(event) => {
-              setAmount(event.target.value);
+              const nextAmount = event.target.value;
+              if (amountDisplay === "whole" && !/^\d*$/.test(nextAmount)) {
+                return;
+              }
+              amountTouched.current = true;
+              setAmount(nextAmount);
               setErrors((current) => ({ ...current, amount: undefined }));
             }}
             aria-expanded={useCustomNumberPad ? numberPadOpen : undefined}
@@ -281,7 +295,9 @@ export function TransactionForm({
         {useCustomNumberPad && numberPadOpen ? (
           <AmountNumberPad
             value={amount}
+            allowDecimal={amountDisplay === "exact"}
             onChange={(nextAmount) => {
+              amountTouched.current = true;
               setAmount(nextAmount);
               setErrors((current) => ({ ...current, amount: undefined }));
             }}

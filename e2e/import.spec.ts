@@ -165,7 +165,7 @@ test("previews and idempotently imports a canonical Okanereco CSV", async ({
   await expect(
     page.getByText("Všechny transakce domácnosti byly smazány."),
   ).toBeVisible({ timeout: 15_000 });
-  await expect(page.getByText(/Verze 0\.2\.3/)).toBeVisible();
+  await expect(page.getByText(/Verze 0\.2\.4/)).toBeVisible();
 
   await clickVisible(page.getByRole("link", { name: "Záznamy" }));
   await expect(page.getByText("Nejsou tu žádné záznamy.")).toBeVisible();

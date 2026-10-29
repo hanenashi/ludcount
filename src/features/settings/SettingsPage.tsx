@@ -8,6 +8,7 @@ import { DataManagementSection } from "./DataManagementSection";
 import {
   defaultDisplayCurrency,
   displayCurrencySymbol,
+  type AmountDisplayMode,
   type DisplayCurrencyPreference,
 } from "../../lib/money";
 import type { TextSizePreference } from "../../lib/textSize";
@@ -21,11 +22,13 @@ export function SettingsPage() {
   const [savingLocale, setSavingLocale] = useState<Locale | null>(null);
   const [savingCurrency, setSavingCurrency] =
     useState<DisplayCurrencyPreference | null>(null);
+  const [savingAmountDisplay, setSavingAmountDisplay] =
+    useState<AmountDisplayMode | null>(null);
   const [savingBuiltInCategories, setSavingBuiltInCategories] = useState(false);
   const [savingTextSize, setSavingTextSize] =
     useState<TextSizePreference | null>(null);
   const [preferenceFailure, setPreferenceFailure] = useState<
-    "locale" | "currency" | "categories" | "textSize" | null
+    "locale" | "currency" | "categories" | "textSize" | "amountDisplay" | null
   >(null);
   const [signingOut, setSigningOut] = useState(false);
   const [signOutError, setSignOutError] = useState(false);
@@ -58,6 +61,19 @@ export function SettingsPage() {
       setPreferenceFailure("currency");
     } finally {
       setSavingCurrency(null);
+    }
+  };
+
+  const changeAmountDisplay = async (next: AmountDisplayMode) => {
+    if (next === runtime.amountDisplay || savingAmountDisplay) return;
+    setSavingAmountDisplay(next);
+    setPreferenceFailure(null);
+    try {
+      await runtime.saveAmountDisplay(next);
+    } catch {
+      setPreferenceFailure("amountDisplay");
+    } finally {
+      setSavingAmountDisplay(null);
     }
   };
 
@@ -245,6 +261,50 @@ export function SettingsPage() {
         {savingCurrency ? (
           <p className="sr-only" role="status" aria-live="polite">
             {t("settings.savingCurrency")}
+          </p>
+        ) : null}
+      </section>
+
+      <section className="settings-section">
+        <div>
+          <h2>{t("settings.amountDisplay")}</h2>
+          <p>{t("settings.amountDisplayDescription")}</p>
+        </div>
+        <div
+          className="language-options"
+          role="group"
+          aria-label={t("settings.amountDisplay")}
+        >
+          {(
+            [
+              ["exact", t("settings.amountDisplayExact")],
+              ["whole", t("settings.amountDisplayWhole")],
+            ] as const
+          ).map(([value, label]) => (
+            <button
+              className={
+                runtime.amountDisplay === value
+                  ? "language-button language-button-active"
+                  : "language-button"
+              }
+              type="button"
+              key={value}
+              aria-pressed={runtime.amountDisplay === value}
+              disabled={savingAmountDisplay !== null}
+              onClick={() => void changeAmountDisplay(value)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        {preferenceFailure === "amountDisplay" ? (
+          <p className="settings-inline-error" role="alert">
+            {t("settings.amountDisplaySaveError")}
+          </p>
+        ) : null}
+        {savingAmountDisplay ? (
+          <p className="sr-only" role="status" aria-live="polite">
+            {t("settings.savingAmountDisplay")}
           </p>
         ) : null}
       </section>

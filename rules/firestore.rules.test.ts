@@ -325,6 +325,14 @@ describe("authentication and user profiles", () => {
         }),
       );
     }
+    for (const amountDisplay of ["exact", "whole"]) {
+      await assertSucceeds(
+        updateDoc(doc(firestore, "users", memberId), {
+          amountDisplay,
+          updatedAt: serverTimestamp(),
+        }),
+      );
+    }
     for (const textSize of ["standard", "large", "extra-large"]) {
       await assertSucceeds(
         updateDoc(doc(firestore, "users", memberId), {
@@ -347,6 +355,12 @@ describe("authentication and user profiles", () => {
     await assertFails(
       updateDoc(doc(firestore, "users", memberId), {
         displayCurrency: "EUR",
+        updatedAt: serverTimestamp(),
+      }),
+    );
+    await assertFails(
+      updateDoc(doc(firestore, "users", memberId), {
+        amountDisplay: "rounded-ish",
         updatedAt: serverTimestamp(),
       }),
     );

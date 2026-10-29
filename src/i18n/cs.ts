@@ -193,6 +193,14 @@ export const cs = {
   "settings.currencyJpy": "Japonský jen (¥)",
   "settings.currencySaveError": "Symbol částky se nepodařilo uložit.",
   "settings.savingCurrency": "Ukládám symbol částky.",
+  "settings.amountDisplay": "Desetinná místa",
+  "settings.amountDisplayDescription":
+    "Zobrazí přesné haléře, nebo zaokrouhlené celé částky. Uložená data a export CSV zůstanou přesné.",
+  "settings.amountDisplayExact": "Přesné částky",
+  "settings.amountDisplayWhole": "Celé částky",
+  "settings.amountDisplaySaveError":
+    "Nastavení zobrazení částek se nepodařilo uložit.",
+  "settings.savingAmountDisplay": "Ukládám zobrazení částek.",
   "settings.dataHeading": "Data v této fázi",
   "settings.dataDescription":
     "Záznamy a nastavení se synchronizují přes Cloud Firestore.",

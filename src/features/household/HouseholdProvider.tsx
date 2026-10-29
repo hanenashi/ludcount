@@ -16,7 +16,10 @@ import type { DataOperationError } from "../../firebase/errors";
 import type { UserWorkspace } from "../../firebase/model";
 import { useI18n, type Locale } from "../../i18n";
 import { getFirebaseServices } from "../../lib/firebase";
-import type { DisplayCurrencyPreference } from "../../lib/money";
+import type {
+  AmountDisplayMode,
+  DisplayCurrencyPreference,
+} from "../../lib/money";
 import type { TextSizePreference } from "../../lib/textSize";
 import { useAuth } from "../auth/AuthProvider";
 
@@ -29,6 +32,7 @@ interface HouseholdContextValue {
   preferenceError: DataOperationError | null;
   saveLocale: (locale: Locale) => Promise<void>;
   saveDisplayCurrency: (preference: DisplayCurrencyPreference) => Promise<void>;
+  saveAmountDisplay: (amountDisplay: AmountDisplayMode) => Promise<void>;
   saveTextSize: (textSize: TextSizePreference) => Promise<void>;
   saveShowBuiltInCategories: (show: boolean) => Promise<void>;
   retry: () => void;
@@ -141,6 +145,32 @@ export function HouseholdProvider({ children }: { children: ReactNode }) {
     [repository, user, workspace],
   );
 
+  const saveAmountDisplay = useCallback(
+    async (amountDisplay: AmountDisplayMode) => {
+      if (!user || !workspace) return;
+      setPreferenceError(null);
+      try {
+        await repository.updateAmountDisplay(user.uid, amountDisplay);
+        setWorkspace((current) =>
+          current
+            ? {
+                ...current,
+                profile: {
+                  ...current.profile,
+                  amountDisplay,
+                  updatedAt: Date.now(),
+                },
+              }
+            : current,
+        );
+      } catch (saveError) {
+        setPreferenceError(saveError as DataOperationError);
+        throw saveError;
+      }
+    },
+    [repository, user, workspace],
+  );
+
   const saveTextSize = useCallback(
     async (textSize: TextSizePreference) => {
       if (!user || !workspace) return;
@@ -204,6 +234,7 @@ export function HouseholdProvider({ children }: { children: ReactNode }) {
       preferenceError: user ? preferenceError : null,
       saveLocale,
       saveDisplayCurrency,
+      saveAmountDisplay,
       saveTextSize,
       saveShowBuiltInCategories,
       retry: () => {
@@ -216,6 +247,7 @@ export function HouseholdProvider({ children }: { children: ReactNode }) {
       error,
       preferenceError,
       saveDisplayCurrency,
+      saveAmountDisplay,
       saveTextSize,
       saveShowBuiltInCategories,
       saveLocale,

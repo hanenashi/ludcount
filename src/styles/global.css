@@ -976,6 +976,14 @@ summary:focus-visible {
   box-shadow: 0 14px 35px rgb(7 28 54 / 22%);
 }
 
+.amount-number-pad-whole {
+  grid-template-areas:
+    "seven eight nine back"
+    "four five six done"
+    "one two three done"
+    "zero zero zero done";
+}
+
 .amount-pad-key {
   display: flex;
   min-width: 0;

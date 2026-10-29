@@ -11,7 +11,7 @@ import { createCategoryBreakdowns, createGraphBuckets } from "./graphData";
 
 export function GraphsPage() {
   const { locale, t } = useI18n();
-  const { displayCurrency } = useAppRuntime();
+  const { amountDisplay, displayCurrency } = useAppRuntime();
   const { categoryFor, labelFor } = useCategories();
   const { transactions } = useTransactions();
   const { period, setPeriod } = usePeriod();
@@ -39,7 +39,7 @@ export function GraphsPage() {
     ...buckets.flatMap((bucket) => [bucket.incomeMinor, bucket.expenseMinor]),
   );
   const money = (amount: number) =>
-    formatMoney(asMoneyAmount(amount), locale, displayCurrency);
+    formatMoney(asMoneyAmount(amount), locale, displayCurrency, amountDisplay);
   const signedMoney = (amount: number, sign: "+" | "−") =>
     amount === 0 ? money(amount) : `${sign}${money(amount)}`;
   const barHeight = (amount: number) =>

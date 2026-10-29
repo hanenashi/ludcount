@@ -6,11 +6,13 @@ const DIGIT_KEYS = ["7", "8", "9", "4", "5", "6", "1", "2", "3"] as const;
 
 export function AmountNumberPad({
   value,
+  allowDecimal,
   onChange,
   onDone,
   onDismiss,
 }: {
   value: string;
+  allowDecimal: boolean;
   onChange: (value: string) => void;
   onDone: () => void;
   onDismiss: () => void;
@@ -21,7 +23,11 @@ export function AmountNumberPad({
 
   return (
     <div
-      className="amount-number-pad"
+      className={
+        allowDecimal
+          ? "amount-number-pad"
+          : "amount-number-pad amount-number-pad-whole"
+      }
       id="transaction-amount-pad"
       role="group"
       aria-label={t("transaction.numberPad")}
@@ -42,14 +48,16 @@ export function AmountNumberPad({
           {digit}
         </button>
       ))}
-      <button
-        className="amount-pad-key amount-pad-decimal"
-        type="button"
-        aria-label={t("transaction.numberPadDecimal")}
-        onClick={() => press("decimal")}
-      >
-        {locale === "cs" ? "," : "."}
-      </button>
+      {allowDecimal ? (
+        <button
+          className="amount-pad-key amount-pad-decimal"
+          type="button"
+          aria-label={t("transaction.numberPadDecimal")}
+          onClick={() => press("decimal")}
+        >
+          {locale === "cs" ? "," : "."}
+        </button>
+      ) : null}
       <button
         className="amount-pad-key amount-pad-0"
         type="button"

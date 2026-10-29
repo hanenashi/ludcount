@@ -5,6 +5,7 @@ import {
   defaultDisplayCurrency,
   displayCurrencySymbol,
   formatMoney,
+  formatMoneyInput,
   parseMoneyInput,
   resolveDisplayCurrency,
   sumMoney,
@@ -26,6 +27,12 @@ describe("money helpers", () => {
     ).toBeNull();
   });
 
+  it("parses whole-only input without accepting decimals", () => {
+    expect(parseMoneyInput("1 235", "cs", "whole")).toBe(123500);
+    expect(parseMoneyInput("1235.5", "en", "whole")).toBeNull();
+    expect(parseMoneyInput("1235,5", "cs", "whole")).toBeNull();
+  });
+
   it("aggregates integer minor units without currency floats", () => {
     expect(sumMoney([asMoneyAmount(12550), asMoneyAmount(250)])).toBe(12800);
   });
@@ -36,6 +43,17 @@ describe("money helpers", () => {
     expect(formatMoney(asMoneyAmount(12550), "en")).toBe("$125.50");
     expect(formatMoney(asMoneyAmount(12550), "ja")).toBe("¥125.50");
     expect(formatMoney(asMoneyAmount(12550), "cs", "USD")).toBe("$125,50");
+    expect(formatMoney(asMoneyAmount(12550), "cs", "CZK", "whole")).toBe(
+      "126 Kč",
+    );
+    expect(formatMoney(asMoneyAmount(12549), "en", "USD", "whole")).toBe(
+      "$125",
+    );
+  });
+
+  it("formats exact or rounded values for the amount input", () => {
+    expect(formatMoneyInput(asMoneyAmount(12550), "cs")).toBe("125,50");
+    expect(formatMoneyInput(asMoneyAmount(12550), "en", "whole")).toBe("126");
   });
 
   it("resolves locale defaults and persistent manual symbol overrides", () => {

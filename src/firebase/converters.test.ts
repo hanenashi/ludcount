@@ -86,6 +86,7 @@ describe("Firestore converters", () => {
       email: "ludva@example.test",
       locale: "ja",
       displayCurrency: "USD",
+      amountDisplay: "whole",
       textSize: "extra-large",
       activeHouseholdId: "home-1",
       createdAt: Timestamp.fromMillis(1000),
@@ -96,6 +97,7 @@ describe("Firestore converters", () => {
       id: "user-1",
       locale: "ja",
       displayCurrency: "USD",
+      amountDisplay: "whole",
       textSize: "extra-large",
       activeHouseholdId: "home-1",
     });
@@ -116,6 +118,9 @@ describe("Firestore converters", () => {
     );
     expect(userProfileConverter.fromFirestore(snapshot).textSize).toBe(
       "standard",
+    );
+    expect(userProfileConverter.fromFirestore(snapshot).amountDisplay).toBe(
+      "exact",
     );
   });
 

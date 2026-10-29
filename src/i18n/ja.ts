@@ -185,6 +185,13 @@ export const ja: Translations = {
   "settings.currencyJpy": "日本円 (¥)",
   "settings.currencySaveError": "金額の記号を保存できませんでした。",
   "settings.savingCurrency": "金額の記号を保存しています。",
+  "settings.amountDisplay": "小数表示",
+  "settings.amountDisplayDescription":
+    "端数を正確に表示するか、整数に丸めて表示します。保存データとCSVは正確なままです。",
+  "settings.amountDisplayExact": "正確な金額",
+  "settings.amountDisplayWhole": "整数のみ",
+  "settings.amountDisplaySaveError": "金額表示設定を保存できませんでした。",
+  "settings.savingAmountDisplay": "金額表示設定を保存しています。",
   "settings.dataHeading": "データ",
   "settings.dataDescription": "取引と設定はCloud Firestoreで同期されます。",
   "settings.languageSaveError": "言語設定をアカウントに保存できませんでした。",

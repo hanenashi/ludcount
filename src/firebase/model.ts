@@ -1,5 +1,8 @@
 import type { Locale } from "../i18n";
-import type { DisplayCurrencyPreference } from "../lib/money";
+import type {
+  AmountDisplayMode,
+  DisplayCurrencyPreference,
+} from "../lib/money";
 import type { TextSizePreference } from "../lib/textSize";
 
 export interface UserProfile {
@@ -8,6 +11,7 @@ export interface UserProfile {
   email: string;
   locale: Locale;
   displayCurrency: DisplayCurrencyPreference;
+  amountDisplay: AmountDisplayMode;
   textSize: TextSizePreference;
   activeHouseholdId: string;
   createdAt: number;

@@ -16,6 +16,11 @@ service cloud.firestore {
         || data.displayCurrency in ['auto', 'CZK', 'USD', 'JPY'];
     }
 
+    function hasValidAmountDisplay(data) {
+      return !data.keys().hasAny(['amountDisplay'])
+        || data.amountDisplay in ['exact', 'whole'];
+    }
+
     function hasValidTextSize(data) {
       return !data.keys().hasAny(['textSize'])
         || data.textSize in ['standard', 'large', 'extra-large'];
@@ -70,6 +75,7 @@ service cloud.firestore {
           'email',
           'locale',
           'displayCurrency',
+          'amountDisplay',
           'textSize',
           'activeHouseholdId',
           'createdAt',
@@ -79,6 +85,7 @@ service cloud.firestore {
         && isValidOptionalString(data.email, 320)
         && isValidLocale(data.locale)
         && hasValidDisplayCurrency(data)
+        && hasValidAmountDisplay(data)
         && hasValidTextSize(data)
         && isValidRequiredString(data.activeHouseholdId, 128)
         && data.createdAt is timestamp
@@ -299,6 +306,7 @@ service cloud.firestore {
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
           'locale',
           'displayCurrency',
+          'amountDisplay',
           'textSize',
           'activeHouseholdId',
           'updatedAt'

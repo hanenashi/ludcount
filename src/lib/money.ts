@@ -4,6 +4,7 @@ export type MoneyAmount = number & {
 
 export type DisplayCurrency = "CZK" | "USD" | "JPY";
 export type DisplayCurrencyPreference = "auto" | DisplayCurrency;
+export type AmountDisplayMode = "exact" | "whole";
 
 export const MAX_AMOUNT_MINOR = 1_000_000_000;
 
@@ -19,8 +20,16 @@ export function asMoneyAmount(value: number): MoneyAmount {
 export function parseMoneyInput(
   input: string,
   locale: "cs" | "en" | "ja",
+  displayMode: AmountDisplayMode = "exact",
 ): MoneyAmount | null {
   const normalized = input.trim().replace(/[\s\u00a0\u202f]/g, "");
+  if (displayMode === "whole") {
+    if (!/^\d+$/.test(normalized)) return null;
+    const minor = Number.parseInt(normalized, 10) * 100;
+    return Number.isSafeInteger(minor) && minor > 0 && minor <= MAX_AMOUNT_MINOR
+      ? (minor as MoneyAmount)
+      : null;
+  }
   const pattern =
     locale === "cs" ? /^(?:\d+)(?:,(\d{1,2}))?$/ : /^(?:\d+)(?:\.(\d{1,2}))?$/;
   const match = normalized.match(pattern);
@@ -46,16 +55,30 @@ export function formatMoney(
   amountMinor: MoneyAmount,
   locale: "cs" | "en" | "ja",
   currency: DisplayCurrency = defaultDisplayCurrency(locale),
+  displayMode: AmountDisplayMode = "exact",
 ): string {
   const numberLocale =
     locale === "cs" ? "cs-CZ" : locale === "ja" ? "ja-JP" : "en-GB";
   const amount = new Intl.NumberFormat(numberLocale, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(amountMinor / 100);
+    minimumFractionDigits: displayMode === "whole" ? 0 : 2,
+    maximumFractionDigits: displayMode === "whole" ? 0 : 2,
+  }).format(
+    displayMode === "whole" ? Math.round(amountMinor / 100) : amountMinor / 100,
+  );
   return currency === "CZK"
     ? `${amount}\u00a0Kč`
     : `${currency === "USD" ? "$" : "¥"}${amount}`;
+}
+
+export function formatMoneyInput(
+  amountMinor: MoneyAmount,
+  locale: "cs" | "en" | "ja",
+  displayMode: AmountDisplayMode = "exact",
+): string {
+  if (displayMode === "whole") return String(Math.round(amountMinor / 100));
+  return (amountMinor / 100)
+    .toFixed(2)
+    .replace(".", locale === "cs" ? "," : ".");
 }
 
 export function defaultDisplayCurrency(

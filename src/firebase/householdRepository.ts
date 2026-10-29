@@ -8,7 +8,10 @@ import {
   type Firestore,
 } from "firebase/firestore";
 import type { Locale } from "../i18n";
-import type { DisplayCurrencyPreference } from "../lib/money";
+import type {
+  AmountDisplayMode,
+  DisplayCurrencyPreference,
+} from "../lib/money";
 import type { TextSizePreference } from "../lib/textSize";
 import { householdConverter, userProfileConverter } from "./converters";
 import { assertOnline, DataOperationError, normalizeDataError } from "./errors";
@@ -26,6 +29,10 @@ export interface HouseholdRepository {
   updateDisplayCurrency(
     userId: string,
     preference: DisplayCurrencyPreference,
+  ): Promise<void>;
+  updateAmountDisplay(
+    userId: string,
+    amountDisplay: AmountDisplayMode,
   ): Promise<void>;
   updateTextSize(userId: string, textSize: TextSizePreference): Promise<void>;
   updateShowBuiltInCategories(
@@ -97,6 +104,7 @@ export function createFirestoreHouseholdRepository(
             email,
             locale: fallbackLocale,
             displayCurrency: "auto",
+            amountDisplay: "exact",
             textSize: "standard",
             activeHouseholdId: householdReference.id,
             createdAt: now,
@@ -124,6 +132,7 @@ export function createFirestoreHouseholdRepository(
               email,
               locale: fallbackLocale,
               displayCurrency: "auto",
+              amountDisplay: "exact",
               textSize: "standard",
               activeHouseholdId: householdReference.id,
               createdAt: timestamp,
@@ -173,6 +182,18 @@ export function createFirestoreHouseholdRepository(
       try {
         await updateDoc(doc(firestore, "users", userId), {
           displayCurrency,
+          updatedAt: serverTimestamp(),
+        });
+      } catch (error) {
+        throw normalizeDataError(error, "write-failure");
+      }
+    },
+
+    async updateAmountDisplay(userId, amountDisplay) {
+      assertOnline();
+      try {
+        await updateDoc(doc(firestore, "users", userId), {
+          amountDisplay,
           updatedAt: serverTimestamp(),
         });
       } catch (error) {
