@@ -6,14 +6,14 @@ Ludcount is a live, invitation-only household income and expense journal built
 with React, TypeScript, Vite, Firebase Authentication, Cloud Firestore, and
 Firebase Hosting. The UI defaults to Czech and also supports English and
 Japanese. Production is operational; development continues through focused,
-tested releases. The current application version is `0.2.3`.
+tested releases. The current application version is `0.2.4`.
 
 ## Production
 
 - Primary URL: <https://ludcount-hanenashi.web.app/>
 - Alternate URL: <https://ludcount-hanenashi.firebaseapp.com/>
 - Firebase project: `ludcount-hanenashi`
-- Current deployed application commit: `d37bc48d360e95ef614985fbe201f8f8a4c1a6be`
+- Current deployed application commit: `8f567252298e03518206cfa18b8f37c7caa5f3f1`
 - Current repository HEAD: [`main`](https://github.com/hanenashi/ludcount/commits/main)
 
 The live `main` link is the source of truth for repository HEAD because a Git
@@ -74,6 +74,8 @@ households/{householdId}/categories/{categoryId}
 - built-in plus owner-managed custom and archived categories, with an
   owner-controlled household preference to show only custom/imported choices
 - display-symbol preference (`Kč`, `$`, or `¥`) without currency conversion
+- per-user exact or rounded whole-amount display; whole mode suppresses decimal
+  entry while preserving exact stored minor units and CSV values
 - persistent per-user Standard, Large, and Extra large text sizing, with a
   modest mobile baseline increase and smaller mobile icon artwork
 - compact mobile header and bottom navigation with scroll-safe fixed chrome
@@ -93,7 +95,7 @@ households/{householdId}/categories/{categoryId}
 
 Current verified full-suite counts:
 
-- unit tests: 88 passing
+- unit tests: 90 passing
 - migration-tool tests: 3 passing with legacy and Room SQLite schemas
 - Firestore rules tests: 39 passing against isolated local Firestore
 - Playwright tests: 36 passing across desktop, 390px mobile, 320px mobile, and

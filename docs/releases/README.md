@@ -4,6 +4,28 @@ This archive preserves verified deployment and implementation history in
 newest-first order. For the concise current project state, see
 [`../../handoff.md`](../../handoff.md).
 
+## 2026-10-29 — Optional whole amounts and version 0.2.4
+
+This rules-and-Hosting release was deployed from application commit
+`8f567252298e03518206cfa18b8f37c7caa5f3f1`.
+
+- Added a persistent per-user choice between exact amounts and rounded whole
+  amounts, defaulting legacy profiles to exact display.
+- Whole-amount mode rounds only presentation, hides the compact keypad decimal
+  key, and restricts desktop entry to digits. Firestore minor units and CSV
+  exports remain exact; editing a fractional transaction without touching its
+  amount preserves the original stored value.
+- Extended the strict user-profile rules with an optional `amountDisplay`
+  preference limited to `exact` or `whole`. No household, category, membership,
+  or transaction rule boundary changed.
+- Formatting, lint, TypeScript, 90 unit tests, 39 isolated Firestore rules
+  tests, 36 Playwright tests across four Chromium viewports, and the production
+  build passed.
+- The tested rules were released before Hosting. Both `/` and `/demo` returned
+  the released SPA shell with the expected hashed JavaScript and CSS assets.
+  Firestore indexes, Authentication settings, App Check enforcement, and other
+  Firebase services were unchanged.
+
 ## 2026-10-29 — Compact mobile chrome and version 0.2.3
 
 This Hosting-only release was deployed from application commit
