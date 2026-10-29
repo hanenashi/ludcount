@@ -13,6 +13,30 @@ import {
 } from "../../lib/money";
 import type { TextSizePreference } from "../../lib/textSize";
 
+const MINIMUM_SAVE_CUE_MS = 400;
+
+function preferenceButtonClass(active: boolean, saving: boolean) {
+  return [
+    "language-button",
+    active ? "language-button-active" : "",
+    saving ? "language-button-saving" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
+async function saveWithMinimumCue(save: () => Promise<void>) {
+  const startedAt = Date.now();
+  try {
+    await save();
+  } finally {
+    const remaining = MINIMUM_SAVE_CUE_MS - (Date.now() - startedAt);
+    if (remaining > 0) {
+      await new Promise((resolve) => window.setTimeout(resolve, remaining));
+    }
+  }
+}
+
 export function SettingsPage() {
   const { locale, setLocale, t } = useI18n();
   const runtime = useAppRuntime();
@@ -24,7 +48,9 @@ export function SettingsPage() {
     useState<DisplayCurrencyPreference | null>(null);
   const [savingAmountDisplay, setSavingAmountDisplay] =
     useState<AmountDisplayMode | null>(null);
-  const [savingBuiltInCategories, setSavingBuiltInCategories] = useState(false);
+  const [savingBuiltInCategories, setSavingBuiltInCategories] = useState<
+    boolean | null
+  >(null);
   const [savingTextSize, setSavingTextSize] =
     useState<TextSizePreference | null>(null);
   const [preferenceFailure, setPreferenceFailure] = useState<
@@ -42,7 +68,7 @@ export function SettingsPage() {
     setSavingLocale(nextLocale);
     setPreferenceFailure(null);
     try {
-      await runtime.saveLocale(nextLocale);
+      await saveWithMinimumCue(() => runtime.saveLocale(nextLocale));
       setLocale(nextLocale);
     } catch {
       setPreferenceFailure("locale");
@@ -56,7 +82,7 @@ export function SettingsPage() {
     setSavingCurrency(next);
     setPreferenceFailure(null);
     try {
-      await runtime.saveCurrencyPreference(next);
+      await saveWithMinimumCue(() => runtime.saveCurrencyPreference(next));
     } catch {
       setPreferenceFailure("currency");
     } finally {
@@ -69,7 +95,7 @@ export function SettingsPage() {
     setSavingAmountDisplay(next);
     setPreferenceFailure(null);
     try {
-      await runtime.saveAmountDisplay(next);
+      await saveWithMinimumCue(() => runtime.saveAmountDisplay(next));
     } catch {
       setPreferenceFailure("amountDisplay");
     } finally {
@@ -78,17 +104,20 @@ export function SettingsPage() {
   };
 
   const changeBuiltInCategories = async (show: boolean) => {
-    if (show === runtime.showBuiltInCategories || savingBuiltInCategories) {
+    if (
+      show === runtime.showBuiltInCategories ||
+      savingBuiltInCategories !== null
+    ) {
       return;
     }
-    setSavingBuiltInCategories(true);
+    setSavingBuiltInCategories(show);
     setPreferenceFailure(null);
     try {
-      await runtime.saveShowBuiltInCategories(show);
+      await saveWithMinimumCue(() => runtime.saveShowBuiltInCategories(show));
     } catch {
       setPreferenceFailure("categories");
     } finally {
-      setSavingBuiltInCategories(false);
+      setSavingBuiltInCategories(null);
     }
   };
 
@@ -97,7 +126,7 @@ export function SettingsPage() {
     setSavingTextSize(textSize);
     setPreferenceFailure(null);
     try {
-      await runtime.saveTextSize(textSize);
+      await saveWithMinimumCue(() => runtime.saveTextSize(textSize));
     } catch {
       setPreferenceFailure("textSize");
     } finally {
@@ -120,39 +149,39 @@ export function SettingsPage() {
           aria-label={t("settings.language")}
         >
           <button
-            className={
-              locale === "cs"
-                ? "language-button language-button-active"
-                : "language-button"
-            }
+            className={preferenceButtonClass(
+              locale === "cs",
+              savingLocale === "cs",
+            )}
             type="button"
             aria-pressed={locale === "cs"}
+            aria-busy={savingLocale === "cs"}
             disabled={savingLocale !== null}
             onClick={() => void changeLocale("cs")}
           >
             {t("settings.czech")}
           </button>
           <button
-            className={
-              locale === "en"
-                ? "language-button language-button-active"
-                : "language-button"
-            }
+            className={preferenceButtonClass(
+              locale === "en",
+              savingLocale === "en",
+            )}
             type="button"
             aria-pressed={locale === "en"}
+            aria-busy={savingLocale === "en"}
             disabled={savingLocale !== null}
             onClick={() => void changeLocale("en")}
           >
             {t("settings.english")}
           </button>
           <button
-            className={
-              locale === "ja"
-                ? "language-button language-button-active"
-                : "language-button"
-            }
+            className={preferenceButtonClass(
+              locale === "ja",
+              savingLocale === "ja",
+            )}
             type="button"
             aria-pressed={locale === "ja"}
+            aria-busy={savingLocale === "ja"}
             disabled={savingLocale !== null}
             onClick={() => void changeLocale("ja")}
           >
@@ -189,14 +218,14 @@ export function SettingsPage() {
             ] as const
           ).map(([value, label]) => (
             <button
-              className={
-                runtime.textSize === value
-                  ? "language-button language-button-active"
-                  : "language-button"
-              }
+              className={preferenceButtonClass(
+                runtime.textSize === value,
+                savingTextSize === value,
+              )}
               type="button"
               key={value}
               aria-pressed={runtime.textSize === value}
+              aria-busy={savingTextSize === value}
               disabled={savingTextSize !== null}
               onClick={() => void changeTextSize(value)}
             >
@@ -238,14 +267,14 @@ export function SettingsPage() {
             ] as const
           ).map(([value, label]) => (
             <button
-              className={
-                runtime.currencyPreference === value
-                  ? "language-button language-button-active"
-                  : "language-button"
-              }
+              className={preferenceButtonClass(
+                runtime.currencyPreference === value,
+                savingCurrency === value,
+              )}
               type="button"
               key={value}
               aria-pressed={runtime.currencyPreference === value}
+              aria-busy={savingCurrency === value}
               disabled={savingCurrency !== null}
               onClick={() => void changeCurrency(value)}
             >
@@ -282,14 +311,14 @@ export function SettingsPage() {
             ] as const
           ).map(([value, label]) => (
             <button
-              className={
-                runtime.amountDisplay === value
-                  ? "language-button language-button-active"
-                  : "language-button"
-              }
+              className={preferenceButtonClass(
+                runtime.amountDisplay === value,
+                savingAmountDisplay === value,
+              )}
               type="button"
               key={value}
               aria-pressed={runtime.amountDisplay === value}
+              aria-busy={savingAmountDisplay === value}
               disabled={savingAmountDisplay !== null}
               onClick={() => void changeAmountDisplay(value)}
             >
@@ -326,27 +355,27 @@ export function SettingsPage() {
               aria-label={t("settings.builtInCategories")}
             >
               <button
-                className={
-                  runtime.showBuiltInCategories
-                    ? "language-button language-button-active"
-                    : "language-button"
-                }
+                className={preferenceButtonClass(
+                  runtime.showBuiltInCategories,
+                  savingBuiltInCategories === true,
+                )}
                 type="button"
                 aria-pressed={runtime.showBuiltInCategories}
-                disabled={savingBuiltInCategories}
+                aria-busy={savingBuiltInCategories === true}
+                disabled={savingBuiltInCategories !== null}
                 onClick={() => void changeBuiltInCategories(true)}
               >
                 {t("settings.showBuiltInCategories")}
               </button>
               <button
-                className={
-                  runtime.showBuiltInCategories
-                    ? "language-button"
-                    : "language-button language-button-active"
-                }
+                className={preferenceButtonClass(
+                  !runtime.showBuiltInCategories,
+                  savingBuiltInCategories === false,
+                )}
                 type="button"
                 aria-pressed={!runtime.showBuiltInCategories}
-                disabled={savingBuiltInCategories}
+                aria-busy={savingBuiltInCategories === false}
+                disabled={savingBuiltInCategories !== null}
                 onClick={() => void changeBuiltInCategories(false)}
               >
                 {t("settings.hideBuiltInCategories")}
@@ -369,7 +398,7 @@ export function SettingsPage() {
             {t("settings.categoryPreferenceSaveError")}
           </p>
         ) : null}
-        {savingBuiltInCategories ? (
+        {savingBuiltInCategories !== null ? (
           <p className="sr-only" role="status" aria-live="polite">
             {t("settings.savingCategoryPreference")}
           </p>

@@ -59,8 +59,21 @@ test("persists an invited user's household, transactions, and locale through Fir
   await clickVisible(page.getByRole("link", { name: "Nastavení" }));
   const wholeAmounts = page.getByRole("button", { name: "Celé částky" });
   await wholeAmounts.click();
+  await expect(wholeAmounts).toHaveAttribute("aria-busy", "true");
+  await expect(wholeAmounts).toHaveClass(/language-button-saving/);
+  expect(
+    await wholeAmounts.evaluate(
+      (element) => getComputedStyle(element, "::after").animationName,
+    ),
+  ).toBe("settings-save-progress");
+  await page.screenshot({
+    path: `/tmp/ludcount-settings-saving-${testInfo.project.name}.png`,
+    fullPage: false,
+  });
   await expect(wholeAmounts).toHaveAttribute("aria-pressed", "true");
+  await expect(wholeAmounts).toHaveAttribute("aria-busy", "false");
   await page.reload();
+  await expect(wholeAmounts).toBeAttached({ timeout: 15_000 });
   await expect(wholeAmounts).toHaveAttribute("aria-pressed", "true");
 
   await clickVisible(page.getByRole("link", { name: "Záznamy" }));

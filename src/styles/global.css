@@ -1451,6 +1451,8 @@ summary:focus-visible {
 }
 
 .language-button {
+  position: relative;
+  overflow: hidden;
   min-height: 44px;
   padding: 0 15px;
   color: var(--muted);
@@ -1468,6 +1470,40 @@ summary:focus-visible {
   color: var(--ink);
   background: var(--white);
   box-shadow: 0 2px 7px rgb(7 28 54 / 9%);
+}
+
+.language-button-saving,
+.language-button-saving:disabled {
+  color: var(--ink);
+  background: var(--white);
+  box-shadow: inset 0 0 0 2px var(--sage);
+  cursor: progress;
+  opacity: 1;
+}
+
+.language-button-saving::after {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 42%;
+  height: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--sage);
+  content: "";
+  animation: settings-save-progress 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes settings-save-progress {
+  to {
+    left: 58%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .language-button-saving::after {
+    width: 100%;
+    animation: none;
+  }
 }
 
 .text-size-options .language-button {
