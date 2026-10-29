@@ -4,6 +4,26 @@ This archive preserves verified deployment and implementation history in
 newest-first order. For the concise current project state, see
 [`../../handoff.md`](../../handoff.md).
 
+## 2026-10-29 — Settings save feedback and version 0.2.5
+
+This Hosting-only release was deployed from application commit
+`2f4e6525a42b4b40c2d6453016457e5b6aef2444`.
+
+- Added immediate pending feedback to language, text-size, display-symbol,
+  amount-display, and built-in-category preference buttons while their saves
+  complete.
+- The pressed option receives a green pending outline and animated progress
+  strip for at least 400 ms, exposes `aria-busy`, retains localized live-region
+  announcements, and shows a static strip when reduced motion is requested.
+- Formatting, lint, TypeScript, 90 unit tests, 39 isolated Firestore rules
+  tests, 36 Playwright tests across four Chromium viewports, and the production
+  build passed. Browser checks assert the pending class, accessibility state,
+  rendered animation, completed selection, and persistence after reload.
+- Hosting was released and the live hashed bundle and stylesheet were verified
+  for version `0.2.5` and the progress-cue assets. Firestore rules, indexes,
+  Authentication settings, App Check enforcement, and other Firebase services
+  were unchanged.
+
 ## 2026-10-29 — Optional whole amounts and version 0.2.4
 
 This rules-and-Hosting release was deployed from application commit
